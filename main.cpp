@@ -8,6 +8,7 @@ class Cell {
     int p;
 public:
     Cell() :r{Result::unknown}, p{-1} {};
+    ~Cell() {}
 
     Result res() const { return r; }
     void res(Result result) { r = result; }
@@ -17,7 +18,21 @@ public:
 
 std::ostream& operator<<(std::ostream& os, const Cell& c)
 {
-    return os << "{\"" << "\"," << c.pos() << "}";
+    os << "{\"";
+    switch (c.res()) {
+        case Result::unknown:
+            os << "UNKNOWN";
+            break;
+        case Result::fail:
+            os << "FAIL";
+            break;
+        case Result::success:
+            os << "SUCCESS";
+            break;
+        default:
+            os << "Something's wrong";
+    }
+    os << "\"," << c.pos() << "} \n";
 }
 
 int main()

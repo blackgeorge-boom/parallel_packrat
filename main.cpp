@@ -7,7 +7,6 @@ int NonTerminal::num = 0;
 
 int main()
 {
-    std::cout << "Hello, World!" << std::endl;
     Cell c;
     std::cout << c << '\n';
     NonTerminal nt;
@@ -17,11 +16,18 @@ int main()
     Terminal t;
     std::cout << t << '\n';
 
-    Expression* list[] = { new NonTerminal(), new Terminal() };
+    Expression* list[] = { new NonTerminal("A"), new Terminal(std::string("B")) };
 
     SerialVisitor sv;
     list[0]->accept(sv);
     list[1]->accept(sv);
+
+    std::string y = std::string("yo");
+    CompositeExpression ce(y, 'c');
+    ce.push_expr(list[0]);
+    ce.push_expr(list[1]);
+    std::cout << ce;
+
 
     return 0;
 }

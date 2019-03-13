@@ -6,21 +6,26 @@
 
 #include "peg_elements.h"
 
-std::ostream& operator<<(std::ostream& os, const NonTerminal& nt)
-{
-    return os << "{\"" << nt.name() << "\"," << nt.index() << "}";
+std::ostream &operator<<(std::ostream &os, const Expression &e) {
+    return os << "\"" << e.name() << "\"";
 }
 
-std::ostream& operator<<(std::ostream& os, const Terminal& t)
-{
-    return os << "{\'" << t.name()  << "\'}";
+std::ostream &operator<<(std::ostream &os, const CompositeExpression &ce) {
+    os << "\"" << ce.op_name() << "\" \n";
+    for (auto x : ce.expr_list()) {
+        os << x->name() << " ";
+    }
+    os << "\n";
 }
 
-std::ostream& operator<<(std::ostream& os, const CompositeExpression& ce)
+NonTerminal::NonTerminal() : Expression()
 {
-    os << "{\'" << ce.op_name()  << "\'}";
-    for (auto& i : ce.expr_list())
-        os << i << "\n";
+    idx = num++;
+}
+
+NonTerminal::NonTerminal(std::string &name) : Expression(name)
+{
+    idx = num++;
 }
 
 void NonTerminal::accept(PegVisitor &pegv)
@@ -31,6 +36,16 @@ void NonTerminal::accept(PegVisitor &pegv)
 void Terminal::accept(PegVisitor &pegv)
 {
     pegv.visit(*this);
+}
+
+CompositeExpression::CompositeExpression() : Expression()
+{
+    op = '0';
+}
+
+CompositeExpression::CompositeExpression(std::string &name, char c) : Expression(name)
+{
+    op = c;
 }
 
 void CompositeExpression::accept(PegVisitor &pegv)

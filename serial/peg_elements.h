@@ -10,46 +10,52 @@
 #include <vector>
 
 class Expression {
+    std::string n;
 public:
-    virtual void operator<<(std::ostream& os) = 0;
+    Expression() :n{} {};
+    explicit Expression(std::string& name) :n{name} {};
+    virtual ~Expression() = default;
+
+    std::string name() const { return n; }
+
     virtual void accept(class PegVisitor& pegv) = 0;
 };
 
+std::ostream& operator<<(std::ostream& os, const Expression& e);
+
 class NonTerminal: public Expression{
-    std::string n;
     static int num;
     int idx;
 public:
-    NonTerminal() :n{}, idx{num++} {};
-    ~NonTerminal() = default;
-    std::string name() const { return n; }
+    NonTerminal();
+    explicit NonTerminal(std::string& name);
+    ~NonTerminal() override = default;
+
     int index() const { return idx; }
 
     void accept(PegVisitor& pegv) override;
 };
 
-std::ostream& operator<<(std::ostream& os, const NonTerminal& nt);
-
 class Terminal: public Expression {
-    char c;
 public:
-    Terminal() :c{'0'} {};
-    ~Terminal() = default;
-    char name() const { return c; }
+    Terminal() : Expression() {};
+    explicit Terminal(std::string& name) : Expression(name) {};
+    ~Terminal() override = default;
 
     void accept(PegVisitor& pegv) override;
 };
 
-std::ostream& operator<<(std::ostream& os, const Terminal& t);
-
 class CompositeExpression: public Expression {
     char op;
-    std::vector<Expression> expr;
+    std::vector<Expression*> expr;
 public:
-    CompositeExpression() :op{'*'}, expr{} {};
-    ~CompositeExpression() = default;
+    CompositeExpression();
+    CompositeExpression(std::string& name, char c);
+    ~CompositeExpression() override = default;
+
     char op_name() const { return op; }
-    std::vector<Expression> expr_list() const { return expr; };
+    void push_expr(Expression* e) { expr.push_back(e); }
+    std::vector<Expression*> expr_list() const { return expr; };
 
     void accept(PegVisitor& pegv) override;
 };

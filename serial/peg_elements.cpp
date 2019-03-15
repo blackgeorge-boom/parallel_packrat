@@ -6,16 +6,29 @@
 
 #include "peg_elements.h"
 
-std::ostream &operator<<(std::ostream &os, const Expression &e) {
+std::ostream &operator<<(std::ostream &os, const Expression &e)
+{
     return os << "\"" << e.name() << "\"";
 }
 
-std::ostream &operator<<(std::ostream &os, const CompositeExpression &ce) {
-    os << "\"" << ce.op_name() << "\" \n";
-    for (auto x : ce.expr_list()) {
-        os << x->name() << " ";
+std::ostream &operator<<(std::ostream &os, const CompositeExpression &ce)
+{
+    std::vector<Expression*> expressions = ce.expr_list();
+    char op = ce.op_name();
+
+    if (expressions.size() == 1) {
+        if (op == '*')
+            os << "(" << expressions[0]->name() << ")*";
+        else
+            os << op << "(" << expressions[0]->name() << ")";
     }
-    os << "\n";
+    else {
+        for (auto x : expressions) {
+            os << x->name() << " \'" << op << "\' ";
+        }
+        os << "\b\b\b\b";
+    }
+    return os;
 }
 
 NonTerminal::NonTerminal() : Expression()
@@ -23,7 +36,7 @@ NonTerminal::NonTerminal() : Expression()
     idx = num++;
 }
 
-NonTerminal::NonTerminal(std::string &name) : Expression(name)
+NonTerminal::NonTerminal(const char* name) : Expression(name)
 {
     idx = num++;
 }
@@ -43,7 +56,7 @@ CompositeExpression::CompositeExpression() : Expression()
     op = '0';
 }
 
-CompositeExpression::CompositeExpression(std::string &name, char c) : Expression(name)
+CompositeExpression::CompositeExpression(const char* name, char c) : Expression(name)
 {
     op = c;
 }

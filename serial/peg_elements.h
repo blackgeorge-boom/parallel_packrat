@@ -13,7 +13,7 @@ class Expression {
     std::string n;
 public:
     Expression() :n{} {};
-    explicit Expression(std::string& name) :n{name} {};
+    explicit Expression(const char* name) :n{name} {};
     virtual ~Expression() = default;
 
     std::string name() const { return n; }
@@ -28,20 +28,24 @@ class NonTerminal: public Expression{
     int idx;
 public:
     NonTerminal();
-    explicit NonTerminal(std::string& name);
+    explicit NonTerminal(const char* name);
+    explicit NonTerminal(const NonTerminal& nt);
     ~NonTerminal() override = default;
 
     int index() const { return idx; }
 
+    const NonTerminal& operator=(const NonTerminal& nt);
     void accept(PegVisitor& pegv) override;
 };
 
 class Terminal: public Expression {
 public:
     Terminal() : Expression() {};
-    explicit Terminal(std::string& name) : Expression(name) {};
+    explicit Terminal(const char* name) : Expression(name) {};
+    explicit Terminal(const Terminal& t);
     ~Terminal() override = default;
 
+    const Terminal& operator=(const Terminal& nt);
     void accept(PegVisitor& pegv) override;
 };
 
@@ -50,13 +54,15 @@ class CompositeExpression: public Expression {
     std::vector<Expression*> expr;
 public:
     CompositeExpression();
-    CompositeExpression(std::string& name, char c);
+    CompositeExpression(const char* name, char c);
+    explicit CompositeExpression(const CompositeExpression& ce);
     ~CompositeExpression() override = default;
 
     char op_name() const { return op; }
     void push_expr(Expression* e) { expr.push_back(e); }
     std::vector<Expression*> expr_list() const { return expr; };
 
+    const CompositeExpression& operator=(const CompositeExpression& ce);
     void accept(PegVisitor& pegv) override;
 };
 

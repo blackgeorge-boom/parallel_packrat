@@ -29,7 +29,6 @@ class NonTerminal: public Expression{
 public:
     NonTerminal();
     explicit NonTerminal(const char* name);
-    explicit NonTerminal(const NonTerminal& nt);
     ~NonTerminal() override = default;
 
     int index() const { return idx; }
@@ -42,10 +41,25 @@ class Terminal: public Expression {
 public:
     Terminal() : Expression() {};
     explicit Terminal(const char* name) : Expression(name) {};
-    explicit Terminal(const Terminal& t);
     ~Terminal() override = default;
 
     const Terminal& operator=(const Terminal& nt);
+    void accept(PegVisitor& pegv) override;
+};
+
+class Empty: public Expression {
+public:
+    Empty() : Expression("epsilon") {};
+    ~Empty() override = default;
+
+    void accept(PegVisitor& pegv) override;
+};
+
+class AnyChar: public Expression {
+public:
+    AnyChar() : Expression(".") {};
+    ~AnyChar() override = default;
+
     void accept(PegVisitor& pegv) override;
 };
 
@@ -54,8 +68,8 @@ class CompositeExpression: public Expression {
     std::vector<Expression*> expr;
 public:
     CompositeExpression();
-    CompositeExpression(const char* name, char c);
-    explicit CompositeExpression(const CompositeExpression& ce);
+    explicit CompositeExpression(char c);
+    explicit CompositeExpression(char c, std::vector<Expression*>&& v);
     ~CompositeExpression() override = default;
 
     char op_name() const { return op; }
@@ -72,6 +86,8 @@ class PegVisitor {
 public:
     virtual void visit(NonTerminal& nt) = 0;
     virtual void visit(Terminal& t) = 0;
+    virtual void visit(Empty& e) = 0;
+    virtual void visit(AnyChar& ac) = 0;
     virtual void visit(CompositeExpression& ce) = 0;
 };
 
@@ -85,6 +101,12 @@ public:
     }
     void visit(CompositeExpression& ce) override {
         std::cout << "Do up on " << ce << std::endl;
+    }
+    void visit(Empty& e) override {
+        std::cout << "Do up on " << e << std::endl;
+    }
+    void visit(AnyChar& ac) override {
+        std::cout << "Do up on " << ac << std::endl;
     }
 };
 

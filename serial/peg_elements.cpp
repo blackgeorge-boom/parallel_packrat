@@ -24,9 +24,9 @@ std::ostream &operator<<(std::ostream &os, const CompositeExpression &ce)
     }
     else {
         for (auto x : expressions) {
-            os << x->name() << " \'" << op << "\' ";
+            os << x->name() << ' ' << op << ' ';
         }
-        os << "\b\b\b\b";
+        os << "\b\b";
     }
     return os;
 }
@@ -56,12 +56,28 @@ CompositeExpression::CompositeExpression() : Expression()
     op = '0';
 }
 
-CompositeExpression::CompositeExpression(const char* name, char c) : Expression(name)
+CompositeExpression::CompositeExpression(char c) : Expression()
 {
     op = c;
 }
 
+CompositeExpression::CompositeExpression(char c, std::vector<Expression*>&& v) : Expression()
+{
+    op = c;
+    expr = v;
+}
+
 void CompositeExpression::accept(PegVisitor &pegv)
+{
+    pegv.visit(*this);
+}
+
+void Empty::accept(PegVisitor &pegv)
+{
+    pegv.visit(*this);
+}
+
+void AnyChar::accept(PegVisitor &pegv)
 {
     pegv.visit(*this);
 }

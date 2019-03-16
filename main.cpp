@@ -21,7 +21,7 @@ int main()
     std::cout << ac << '\n';
 
 
-    Expression* list[4] = { &nt, &t, &e, &ac};
+    Expression* list[4] = { &nt, &t, &e, &ac };
 
     SerialVisitor sv;
     list[0]->accept(sv);

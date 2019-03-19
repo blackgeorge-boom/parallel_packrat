@@ -26,7 +26,7 @@ std::ostream &operator<<(std::ostream &os, const CompositeExpression &ce)
         for (auto x : expressions) {
             os << x->name() << ' ' << op << ' ';
         }
-        os << "\b\b";
+        if(op != '\b') os << "\b\b";
     }
     return os;
 }

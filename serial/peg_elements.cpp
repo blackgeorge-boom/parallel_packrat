@@ -8,7 +8,7 @@
 
 std::ostream &operator<<(std::ostream &os, const Expression &e)
 {
-    return os << "\"" << e.name() << "\"";
+    return os << e.name();
 }
 
 std::ostream &operator<<(std::ostream &os, const CompositeExpression &ce)
@@ -81,3 +81,20 @@ void AnyChar::accept(PegVisitor &pegv)
 {
     pegv.visit(*this);
 }
+
+void PEG::push_rule(NonTerminal *nt, CompositeExpression *ce)
+{
+    r.insert(std::pair<NonTerminal*, CompositeExpression*>(nt, ce));
+}
+
+void PEG::accept(class PegVisitor &pegv)
+{
+    pegv.visit(*this);
+}
+
+std::ostream &operator<<(std::ostream &os, const PEG &peg) {
+    for (auto const& x : peg.get_rules()) {
+        std::cout << *x.first << " -> " << *x.second << "\n";
+    }
+}
+

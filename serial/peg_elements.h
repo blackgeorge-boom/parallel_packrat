@@ -8,6 +8,8 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <map>
+
 
 class Expression {
     std::string n;
@@ -17,8 +19,7 @@ public:
     virtual ~Expression() = default;
 
     std::string name() const { return n; }
-
-    virtual void accept(class PegVisitor& pegv) = 0;
+virtual void accept(class PegVisitor& pegv) = 0;
 };
 
 std::ostream& operator<<(std::ostream& os, const Expression& e);
@@ -82,6 +83,23 @@ public:
 
 std::ostream& operator<<(std::ostream& os, const CompositeExpression& ce);
 
+class PEG {
+    std::map<NonTerminal*, CompositeExpression*> r;
+    NonTerminal* s;
+public:
+    PEG() = default;
+    virtual ~PEG() = default;
+
+    void push_rule(NonTerminal* nt, CompositeExpression* ce);
+    void set_start(NonTerminal* nt) { s = nt; }
+    std::map<NonTerminal*, CompositeExpression*> get_rules() const { return r; };
+    NonTerminal* get_start() const { return s; }
+
+    void accept(class PegVisitor& pegv);
+};
+
+std::ostream& operator<<(std::ostream& os, const PEG& peg);
+
 class PegVisitor {
 public:
     virtual void visit(NonTerminal& nt) = 0;
@@ -89,6 +107,7 @@ public:
     virtual void visit(Empty& e) = 0;
     virtual void visit(AnyChar& ac) = 0;
     virtual void visit(CompositeExpression& ce) = 0;
+    virtual void visit(PEG& peg) = 0;
 };
 
 class SerialVisitor: public PegVisitor {
@@ -108,10 +127,12 @@ public:
     void visit(AnyChar& ac) override {
         std::cout << "Do up on " << ac << std::endl;
     }
+    void visit(PEG& peg) override {
+        std::cout << "Do up on " << peg << std::endl;
+    }
 };
 
 // TODO: rules are map<Nonterminal, expression>
 // TODO: grammar has the map and the first rule as attributes
-// TODO: expressions
 
 #endif //PARALLEL_PACKRAT_PEG_ELEMENTS_H

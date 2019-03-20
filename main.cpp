@@ -37,5 +37,15 @@ int main()
     std::cout << ce << "\n";
     std::cout << ce2 << "\n";
 
+    PEG g;
+    g.set_start(&nt2);
+    g.push_rule(&nt, &ce);
+    g.push_rule(&nt2, &ce2);
+    std::cout << "Grammar: \n";
+    std::cout << g << "\n";
+    std::cout << ce << "\n";
+    NonTerminal* x = g.get_start();
+
+
     return 0;
 }

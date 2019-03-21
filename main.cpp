@@ -42,10 +42,14 @@ int main()
     g.push_rule(&nt, &ce);
     g.push_rule(&nt2, &ce2);
     std::cout << "Grammar: \n";
-    std::cout << g << "\n";
+    std::cout << g;
     std::cout << ce << "\n";
     NonTerminal* x = g.get_start();
+    std::cout << *x << "\n";
+    std::cout << *g.get_expr(&nt) << "\n";
 
+    PEG g2(g);
+    std::cout << g;
 
     return 0;
 }

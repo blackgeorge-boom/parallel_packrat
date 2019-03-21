@@ -82,9 +82,20 @@ void AnyChar::accept(PegVisitor &pegv)
     pegv.visit(*this);
 }
 
+PEG::PEG(const PEG &peg)
+{
+    r = peg.get_rules();
+    s = peg.get_start();
+}
+
 void PEG::push_rule(NonTerminal *nt, CompositeExpression *ce)
 {
     r.insert(std::pair<NonTerminal*, CompositeExpression*>(nt, ce));
+}
+
+CompositeExpression* PEG::get_expr(NonTerminal* nt)
+{
+    return r.find(nt)->second;
 }
 
 void PEG::accept(class PegVisitor &pegv)
@@ -94,7 +105,8 @@ void PEG::accept(class PegVisitor &pegv)
 
 std::ostream &operator<<(std::ostream &os, const PEG &peg) {
     for (auto const& x : peg.get_rules()) {
-        std::cout << *x.first << " -> " << *x.second << "\n";
+        os << *x.first << " -> " << *x.second << "\n";
     }
+    return os;
 }
 

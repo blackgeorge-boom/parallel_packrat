@@ -88,13 +88,15 @@ class PEG {
     NonTerminal* s;
 public:
     PEG() = default;
+    PEG(const PEG& peg);
     virtual ~PEG() = default;
 
     void push_rule(NonTerminal* nt, CompositeExpression* ce);
     void set_start(NonTerminal* nt) { s = nt; }
-    std::map<NonTerminal*, CompositeExpression*> get_rules() const { return r; };
+    std::map<NonTerminal*, CompositeExpression*> get_rules() const { return r; }
     NonTerminal* get_start() const { return s; }
 
+    CompositeExpression* get_expr(NonTerminal* nt);
     void accept(class PegVisitor& pegv);
 };
 

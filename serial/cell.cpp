@@ -8,21 +8,21 @@
 
 std::ostream& operator<<(std::ostream& os, const Cell& c)
 {
-    os << "{\"";
+    os << "{";
     switch (c.res()) {
         case Result::unknown:
-            os << "UNKNOWN";
+            os << "U";
             break;
         case Result::fail:
-            os << "FAIL";
+            os << "F";
             break;
         case Result::success:
-            os << "SUCCESS";
+            os << "S";
             break;
         default:
             os << "Something's wrong";
     }
-    return os << "\"," << c.pos() << "}";
+    return os << "," << c.pos() << "}";
 }
 
 

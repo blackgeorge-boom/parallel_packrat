@@ -2,6 +2,7 @@
 
 #include "serial/cell.h"
 #include "serial/peg_elements.h"
+#include "serial/serial_packrat.h"
 
 int NonTerminal::num = 0;
 
@@ -49,7 +50,11 @@ int main()
     std::cout << *g.get_expr(&nt) << "\n";
 
     PEG g2(g);
-    std::cout << g;
+    std::cout << g2;
+
+    SerialPackrat p("hi friend", g2);
+    p.print_cells();
+    p.visit(nt);
 
     return 0;
 }

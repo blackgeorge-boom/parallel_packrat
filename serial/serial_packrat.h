@@ -12,9 +12,11 @@ class SerialPackrat: public PegVisitor {
     std::string in;
     int pos;
     PEG peg;
-    Cell** cell;
+    Cell** cells;
 public:
     SerialPackrat(const char* input, PEG g);
+
+    void print_cells() const;
 
     void visit(NonTerminal& nt) override;
     void visit(Terminal& t) override;

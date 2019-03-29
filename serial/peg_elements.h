@@ -19,7 +19,7 @@ public:
     virtual ~Expression() = default;
 
     std::string name() const { return n; }
-virtual void accept(class PegVisitor& pegv) = 0;
+    virtual void accept(class PegVisitor& pegv) = 0;
 };
 
 std::ostream& operator<<(std::ostream& os, const Expression& e);
@@ -87,7 +87,7 @@ class PEG {
     std::map<NonTerminal*, CompositeExpression*> r;
     NonTerminal* s;
 public:
-    PEG() = default;
+    PEG(): r{}, s{} {};
     PEG(const PEG& peg);
     virtual ~PEG() = default;
 
@@ -134,7 +134,6 @@ public:
     }
 };
 
-// TODO: rules are map<Nonterminal, expression>
 // TODO: grammar has the map and the first rule as attributes
 
 #endif //PARALLEL_PACKRAT_PEG_ELEMENTS_H

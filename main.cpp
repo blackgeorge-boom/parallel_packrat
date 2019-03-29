@@ -8,53 +8,86 @@ int NonTerminal::num = 0;
 
 int main()
 {
-    Cell c;
-    std::cout << c << '\n';
-    NonTerminal nt("A");
-    std::cout << nt << '\n';
-    NonTerminal nt2("B");
-    std::cout << nt2 << '\n';
-    Terminal t("identifier");
-    std::cout << t << '\n';
-    Empty e;
-    std::cout << e << '\n';
-    AnyChar ac;
-    std::cout << ac << '\n';
-
-
-    Expression* list[4] = { &nt, &t, &e, &ac };
-
-    SerialVisitor sv;
-    list[0]->accept(sv);
-    list[1]->accept(sv);
-    list[2]->accept(sv);
-    list[3]->accept(sv);
-
-    std::vector<Expression*> v = { &nt, &nt2, &t, &e, &ac };
-    CompositeExpression ce('/');
-    CompositeExpression ce2('\b', std::move(v));
-    ce.push_expr(list[0]);
-    ce.push_expr(list[1]);
-    std::cout << ce << "\n";
-    std::cout << ce2 << "\n";
-
+    // Grammar
     PEG g;
-    g.set_start(&nt2);
-    g.push_rule(&nt, &ce);
-    g.push_rule(&nt2, &ce2);
+
+    // Terminals
+    Terminal t0("0");
+    Terminal t1("1");
+    Terminal lp("(");
+    Terminal rp(")");
+    Terminal times("*");
+    Terminal plus("+");
+    AnyChar ac;
+
+    // Non Terminals
+    NonTerminal dec("Decimal");
+    NonTerminal prim("Primary");
+    NonTerminal mult("Multitive");
+    NonTerminal add("Additive");
+    NonTerminal ae("ArithmeticExpression");
+
+    // Rules
+
+    // Decimal <- '0' / '1'
+    CompositeExpression decExp('/');
+    decExp.push_expr(&t0);
+    decExp.push_expr(&t1);
+
+    g.push_rule(&dec, &decExp);
+
+    // Primary <- '(' Additive ')' / Decimal
+    CompositeExpression primSub1('\b');
+    primSub1.push_expr(&lp);
+    primSub1.push_expr(&add);
+    primSub1.push_expr(&rp);
+
+    CompositeExpression primExp('/');
+    primExp.push_expr(&primSub1);
+    primExp.push_expr(&decExp);
+
+    g.push_rule(&dec, &decExp);
+
+    // Multitive <- Primary '*' Multitive / Primary
+    CompositeExpression multSub1('\b');
+    multSub1.push_expr(&prim);
+    multSub1.push_expr(&times);
+    multSub1.push_expr(&mult);
+
+    CompositeExpression multExp('/');
+    multExp.push_expr(&multSub1);
+    multExp.push_expr(&prim);
+
+    g.push_rule(&mult, &multExp);
+
+    // Additive <- Multitive '+' Additive / Multitive
+    CompositeExpression addSub1('\b');
+    addSub1.push_expr(&mult);
+    addSub1.push_expr(&plus);
+    addSub1.push_expr(&add);
+
+    CompositeExpression addExp('/');
+    addExp.push_expr(&addSub1);
+    addExp.push_expr(&mult);
+
+    g.push_rule(&add, &addExp);
+
+    // ArithmeticExpression <- Additive !.
+    CompositeExpression aeSub2('!');
+    aeSub2.push_expr(&ac);
+
+    CompositeExpression aeExp('/');
+    aeExp.push_expr(&add);
+    aeExp.push_expr(&aeSub2);
+
+    g.push_rule(&ae, &aeExp);
+
     std::cout << "Grammar: \n";
-    std::cout << g;
-    std::cout << ce << "\n";
-    NonTerminal* x = g.get_start();
-    std::cout << *x << "\n";
-    std::cout << *g.get_expr(&nt) << "\n";
+    std::cout << g << "\n";
 
-    PEG g2(g);
-    std::cout << g2;
-
-    SerialPackrat p("hi friend", g2);
-    p.print_cells();
-    p.visit(nt);
+    std::cout << addSub1 << "\n";
+    std::cout << mult << "\n";
+    std::cout << addExp << "\n";
 
     return 0;
 }

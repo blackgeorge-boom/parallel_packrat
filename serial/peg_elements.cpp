@@ -6,11 +6,11 @@
 
 #include "peg_elements.h"
 
-std::ostream &operator<<(std::ostream &os, const Expression &e)
-{
-    return os << e.name();
-}
-
+//std::ostream &operator<<(std::ostream &os, const Expression &e)
+//{
+//    return os << e.name();
+//}
+// TODO: add virtual output functions
 std::ostream &operator<<(std::ostream &os, const CompositeExpression &ce)
 {
     std::vector<Expression*> expressions = ce.expr_list();
@@ -18,15 +18,15 @@ std::ostream &operator<<(std::ostream &os, const CompositeExpression &ce)
 
     if (expressions.size() == 1) {
         if (op == '*')
-            os << "(" << expressions[0]->name() << ")*";
+            os << *expressions[0] << "*";
         else
-            os << op << "(" << expressions[0]->name() << ")";
+            os << op << *expressions[0];
     }
     else {
         for (auto x : expressions) {
-            os << x->name() << ' ' << op << ' ';
+            os << *x << ' ' << op << ' ';
         }
-        if(op != '\b') os << "\b\b";
+        if (op != '\b') os << "\b\b";
     }
     return os;
 }

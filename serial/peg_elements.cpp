@@ -11,26 +11,6 @@ std::ostream &operator<<(std::ostream &os, const Expression &e)
     return e.put(os);
 }
 
-std::ostream &CompositeExpression::put(std::ostream &os) const
-{
-    std::vector<Expression*> expressions = ce.expr_list();
-    char op = ce.op_name();
-
-    if (expressions.size() == 1) {
-        if (op == '*')
-            os << *expressions[0] << "*";
-        else
-            os << op << *expressions[0];
-    }
-    else {
-        for (auto x : expressions) {
-            os << *x << ' ' << op << ' ';
-        }
-        if (op != '\b') os << "\b\b";
-    }
-    return os;
-}
-
 NonTerminal::NonTerminal() : Expression()
 {
     idx = num++;
@@ -87,16 +67,30 @@ CompositeExpression::CompositeExpression(char c, std::vector<Expression*>&& v) :
     expr = v;
 }
 
+std::ostream &CompositeExpression::put(std::ostream &os) const
+{
+    std::vector<Expression*> expressions = this->expr_list();
+    char op = this->op_name();
+
+    if (expressions.size() == 1) {
+        if (op == '*')
+            os << *expressions[0] << "*";
+        else
+            os << op << *expressions[0];
+    }
+    else {
+        for (auto x : expressions) {
+            os << *x << ' ' << op << ' ';
+        }
+        os << "\b";
+        if (op != '\b') os << "\b";
+    }
+    return os;
+}
+
 void CompositeExpression::accept(PegVisitor &pegv)
 {
     pegv.visit(*this);
-}
-
-std::ostream &CompositeExpression::put(std::ostream &os) const
-{
-    for (auto x : this->expr_list())
-        os << x->name();
-    return os;
 }
 
 void Empty::accept(PegVisitor &pegv)

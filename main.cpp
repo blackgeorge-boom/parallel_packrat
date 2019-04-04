@@ -85,9 +85,8 @@ int main()
     std::cout << "Grammar: \n";
     std::cout << g << "\n";
 
-    std::cout << addSub1 << "\n";
-    std::cout << mult << "\n";
-    std::cout << addExp << "\n";
+    SerialPackrat sp("0 + 1", g);
+    sp.visit(g);
 
     return 0;
 }

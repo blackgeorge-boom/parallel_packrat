@@ -32,6 +32,7 @@ void SerialPackrat::print_cells() const
 
 void SerialPackrat::visit(NonTerminal &nt)
 {
+    std::cout << "Visiting nonterminal \n";
     CompositeExpression* ce = peg.get_expr(&nt);
     std::cout << "Visited " << *ce << "\n";
     ce->accept(*this);
@@ -39,6 +40,7 @@ void SerialPackrat::visit(NonTerminal &nt)
 
 void SerialPackrat::visit(Terminal &t)
 {
+    std::cout << "Visiting terminal \n";
     std::cout << "Visited " << t;
 }
 
@@ -53,16 +55,19 @@ void SerialPackrat::visit(CompositeExpression &ce)
 
 void SerialPackrat::visit(Empty &e)
 {
+    std::cout << "Visiting empty \n";
     std::cout << "Visited " << e;
 }
 
 void SerialPackrat::visit(AnyChar &ac)
 {
+    std::cout << "Visiting any char \n";
     std::cout << "Visited " << ac;
 }
 
 void SerialPackrat::visit(PEG &peg)
 {
+    std::cout << "Visiting peg \n";
     NonTerminal* nt = peg.get_start();
     std::cout << "Visited " << *nt;
     nt->accept(*this);

@@ -88,8 +88,6 @@ public:
     void accept(PegVisitor& pegv) override;
 };
 
-std::ostream& operator<<(std::ostream& os, const CompositeExpression& ce);
-
 class PEG {
     std::map<NonTerminal*, CompositeExpression*> r;
     NonTerminal* s;
@@ -140,7 +138,5 @@ public:
         std::cout << "Do up on " << peg << std::endl;
     }
 };
-
-// TODO: grammar has the map and the first rule as attributes
 
 #endif //PARALLEL_PACKRAT_PEG_ELEMENTS_H

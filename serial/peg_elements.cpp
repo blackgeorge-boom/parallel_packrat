@@ -6,11 +6,13 @@
 
 #include "peg_elements.h"
 
-//std::ostream &operator<<(std::ostream &os, const Expression &e)
-//{
-//    return os << e.name();
-//}
+std::ostream &operator<<(std::ostream &os, const Expression &e)
+{
+    return e.put(os);
+}
+
 // TODO: add virtual output functions
+
 std::ostream &operator<<(std::ostream &os, const CompositeExpression &ce)
 {
     std::vector<Expression*> expressions = ce.expr_list();
@@ -46,9 +48,29 @@ void NonTerminal::accept(PegVisitor &pegv)
     pegv.visit(*this);
 }
 
+std::ostream &NonTerminal::put(std::ostream &os) const
+{
+    return os << *this;
+}
+
 void Terminal::accept(PegVisitor &pegv)
 {
     pegv.visit(*this);
+}
+
+std::ostream &Terminal::put(std::ostream &os) const
+{
+    return os << *this;
+}
+
+std::ostream &Empty::put(std::ostream &os) const
+{
+    return os << *this;
+}
+
+std::ostream &AnyChar::put(std::ostream &os) const
+{
+    return os << *this;
 }
 
 CompositeExpression::CompositeExpression() : Expression()
@@ -70,6 +92,11 @@ CompositeExpression::CompositeExpression(char c, std::vector<Expression*>&& v) :
 void CompositeExpression::accept(PegVisitor &pegv)
 {
     pegv.visit(*this);
+}
+
+std::ostream &CompositeExpression::put(std::ostream &os) const
+{
+    return os << *this;
 }
 
 void Empty::accept(PegVisitor &pegv)

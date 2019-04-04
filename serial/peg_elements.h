@@ -19,6 +19,8 @@ public:
     virtual ~Expression() = default;
 
     std::string name() const { return n; }
+
+    virtual std::ostream& put(std::ostream& os) const = 0;
     virtual void accept(class PegVisitor& pegv) = 0;
 };
 
@@ -35,6 +37,7 @@ public:
     int index() const { return idx; }
 
     const NonTerminal& operator=(const NonTerminal& nt);
+    std::ostream& put(std::ostream& os) const override;
     void accept(PegVisitor& pegv) override;
 };
 
@@ -45,6 +48,7 @@ public:
     ~Terminal() override = default;
 
     const Terminal& operator=(const Terminal& nt);
+    std::ostream& put(std::ostream& os) const override;
     void accept(PegVisitor& pegv) override;
 };
 
@@ -53,6 +57,7 @@ public:
     Empty() : Expression("epsilon") {};
     ~Empty() override = default;
 
+    std::ostream& put(std::ostream& os) const override;
     void accept(PegVisitor& pegv) override;
 };
 
@@ -61,6 +66,7 @@ public:
     AnyChar() : Expression(".") {};
     ~AnyChar() override = default;
 
+    std::ostream& put(std::ostream& os) const override;
     void accept(PegVisitor& pegv) override;
 };
 
@@ -78,6 +84,7 @@ public:
     std::vector<Expression*> expr_list() const { return expr; };
 
     const CompositeExpression& operator=(const CompositeExpression& ce);
+    std::ostream& put(std::ostream& os) const override;
     void accept(PegVisitor& pegv) override;
 };
 

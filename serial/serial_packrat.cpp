@@ -30,42 +30,61 @@ void SerialPackrat::print_cells() const
     }
 }
 
-void SerialPackrat::visit(NonTerminal &nt)
+bool SerialPackrat::visit(NonTerminal &nt)
 {
-    std::cout << "Visiting nonterminal \n";
-    CompositeExpression* ce = peg.get_expr(&nt);
-    std::cout << "Visited " << *ce << "\n";
-    ce->accept(*this);
+    std::cout << "Visiting " << nt;
+    int row = nt.index();
+    Result cur_res = cells[row][pos].res();
+
+    switch (cur_res) {
+
+        case Result::success :
+            pos = cells[row][pos].pos();
+            return true;
+
+        case Result::fail :
+            return false;
+
+        case Result::unknown:
+            CompositeExpression* ce = peg.get_expr(&nt);
+            auto res = ce->accept(*this);
+
+            if (res) {
+                cells
+            }
+    }
 }
 
-void SerialPackrat::visit(Terminal &t)
+bool SerialPackrat::visit(Terminal &t)
 {
-    std::cout << "Visiting terminal \n";
-    std::cout << "Visited " << t;
+    std::cout << "Visiting " << t;
+    if (t.name()[0] == this->cur_tok()) {
+        std::cout << "Parsed " << t;
+        this->next_tok();
+        return true;
+    }
+    return false;
 }
 
-void SerialPackrat::visit(CompositeExpression &ce)
+bool SerialPackrat::visit(CompositeExpression &ce)
 {
-    std::cout << "Hello niggers \n";
     for (auto x : ce.expr_list()) {
         std::cout << "x is : " << *x << "\n";
         x->accept(*this);
     }
 }
 
-void SerialPackrat::visit(Empty &e)
+bool SerialPackrat::visit(Empty &e)
 {
-    std::cout << "Visiting empty \n";
     std::cout << "Visited " << e;
 }
 
-void SerialPackrat::visit(AnyChar &ac)
+bool SerialPackrat::visit(AnyChar &ac)
 {
-    std::cout << "Visiting any char \n";
     std::cout << "Visited " << ac;
 }
 
-void SerialPackrat::visit(PEG &peg)
+bool SerialPackrat::visit(PEG &peg)
 {
     std::cout << "Visiting peg \n";
     NonTerminal* nt = peg.get_start();
@@ -73,3 +92,4 @@ void SerialPackrat::visit(PEG &peg)
     nt->accept(*this);
 }
 
+// TODO: when there is a syntax error?

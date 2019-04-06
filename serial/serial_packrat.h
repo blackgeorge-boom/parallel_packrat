@@ -18,12 +18,15 @@ public:
 
     void print_cells() const;
 
-    void visit(NonTerminal& nt) override;
-    void visit(Terminal& t) override;
-    void visit(CompositeExpression& ce) override;
-    void visit(Empty& e) override;
-    void visit(AnyChar& ac) override;
-    void visit(PEG& peg) override;
+    char cur_tok() { return in[pos]; }
+    void next_tok() { pos++; }
+
+    bool visit(NonTerminal& nt) override;
+    bool visit(Terminal& t) override;
+    bool visit(CompositeExpression& ce) override;
+    bool visit(Empty& e) override;
+    bool visit(AnyChar& ac) override;
+    bool visit(PEG& peg) override;
 };
 
 #endif //PARALLEL_PACKRAT_SERIAL_PACKRAT_H

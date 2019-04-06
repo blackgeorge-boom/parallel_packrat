@@ -82,6 +82,9 @@ int main()
 
     g.push_rule(&ae, &aeExp);
 
+    // Set starting rule
+    g.set_start(&add);
+
     std::cout << "Grammar: \n";
     std::cout << g << "\n";
 

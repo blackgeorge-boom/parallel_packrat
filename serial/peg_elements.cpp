@@ -21,9 +21,9 @@ NonTerminal::NonTerminal(const char* name) : Expression(name)
     idx = num++;
 }
 
-void NonTerminal::accept(PegVisitor &pegv)
+bool NonTerminal::accept(PegVisitor &pegv)
 {
-    pegv.visit(*this);
+    return pegv.visit(*this);
 }
 
 std::ostream &NonTerminal::put(std::ostream &os) const
@@ -31,9 +31,9 @@ std::ostream &NonTerminal::put(std::ostream &os) const
     return os << this->name();
 }
 
-void Terminal::accept(PegVisitor &pegv)
+bool Terminal::accept(PegVisitor &pegv)
 {
-    pegv.visit(*this);
+    return pegv.visit(*this);
 }
 
 std::ostream &Terminal::put(std::ostream &os) const
@@ -88,19 +88,19 @@ std::ostream &CompositeExpression::put(std::ostream &os) const
     return os;
 }
 
-void CompositeExpression::accept(PegVisitor &pegv)
+bool CompositeExpression::accept(PegVisitor &pegv)
 {
-    pegv.visit(*this);
+    return pegv.visit(*this);
 }
 
-void Empty::accept(PegVisitor &pegv)
+bool Empty::accept(PegVisitor &pegv)
 {
-    pegv.visit(*this);
+    return pegv.visit(*this);
 }
 
-void AnyChar::accept(PegVisitor &pegv)
+bool AnyChar::accept(PegVisitor &pegv)
 {
-    pegv.visit(*this);
+    return pegv.visit(*this);
 }
 
 PEG::PEG(const PEG &peg)
@@ -119,9 +119,9 @@ CompositeExpression* PEG::get_expr(NonTerminal* nt)
     return r.find(nt)->second;
 }
 
-void PEG::accept(class PegVisitor &pegv)
+bool PEG::accept(class PegVisitor &pegv)
 {
-    pegv.visit(*this);
+    return pegv.visit(*this);
 }
 
 std::ostream &operator<<(std::ostream &os, const PEG &peg) {

@@ -11,7 +11,7 @@ SerialPackrat::SerialPackrat(const char* input, PEG g)
     peg = PEG(g);
 
     auto N = peg.get_rules().size();
-    auto M = in.size();
+    auto M = in.size() + 1;
 
     cells = new Cell*[N];
     for(int i = 0; i < N; ++i)
@@ -21,13 +21,15 @@ SerialPackrat::SerialPackrat(const char* input, PEG g)
 void SerialPackrat::print_cells() const
 {
     auto N = peg.get_rules().size();
-    auto M = in.size();
+    auto M = in.size() + 1;
 
+    std::cout << "\n";
     for(int i = 0; i < N; ++i) {
         for(int j = 0; j < M; ++j)
             std::cout << cells[i][j] << " ";
         std::cout << "\n";
     }
+    std::cout << "\n";
 }
 
 bool SerialPackrat::visit(NonTerminal &nt)
@@ -129,7 +131,7 @@ bool SerialPackrat::visit(AnyChar &ac)
 
 bool SerialPackrat::visit(PEG &peg)
 {
-    std::cout << "Visiting peg \n";
+    std::cout << "Parsing... \n";
     NonTerminal* nt = peg.get_start();
     auto res = nt->accept(*this);
     return res;

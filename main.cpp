@@ -86,9 +86,9 @@ int main()
     g.set_start(&ae);
 
     std::cout << "Grammar: \n";
-    std::cout << g << "\n";
+    std::cout << g;
 
-    SerialPackrat sp("1*(0+1)", g);
+    SerialPackrat sp("(0+1)*0+1", g);
     sp.print_cells();
     auto res = sp.visit(g);
 

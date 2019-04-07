@@ -32,17 +32,17 @@ void SerialPackrat::print_cells() const
 
 bool SerialPackrat::visit(NonTerminal &nt)
 {
-    std::cout << "Visiting " << nt;
     int row = nt.index();
-    Result cur_res = cells[row][pos].res();
+    Cell* cur_cell = &cells[row][pos];
+    Result cur_res = cur_cell->res();
 
     switch (cur_res) {
 
-        case Result::success :
-            pos = cells[row][pos].pos();
+        case Result::success:
+            pos = cur_cell->pos();
             return true;
 
-        case Result::fail :
+        case Result::fail:
             return false;
 
         case Result::unknown:
@@ -50,17 +50,22 @@ bool SerialPackrat::visit(NonTerminal &nt)
             auto res = ce->accept(*this);
 
             if (res) {
-                cells
+                cur_cell->set_res(Result::success);
+                cur_cell->set_pos(pos); // pos has changed
+                return true;
+            }
+            else {
+                cur_cell->set_res(Result::fail);
+                return false;
             }
     }
 }
 
 bool SerialPackrat::visit(Terminal &t)
 {
-    std::cout << "Visiting " << t;
-    if (t.name()[0] == this->cur_tok()) {
-        std::cout << "Parsed " << t;
-        this->next_tok();
+    if (pos < in.size() && t.name()[0] == this->cur_tok()) {
+        pos++;
+//        std::cout << "Parsed " << t << "\n";
         return true;
     }
     return false;
@@ -68,28 +73,66 @@ bool SerialPackrat::visit(Terminal &t)
 
 bool SerialPackrat::visit(CompositeExpression &ce)
 {
-    for (auto x : ce.expr_list()) {
-        std::cout << "x is : " << *x << "\n";
-        x->accept(*this);
+//    std::cout << "Visiting " << ce << "\n";
+    char op = ce.op_name();
+    std::vector<Expression*> exprs = ce.expr_list();
+    int orig_pos = pos;
+
+    switch (op) {
+
+        case '\b':  // sequence
+        {
+            for (auto expr : exprs)
+                if (!expr->accept(*this)) {
+                    pos = orig_pos;
+                    return false;
+                }
+            return true;
+        }
+        case '/':   // ordered choice
+        {
+            for (auto expr : exprs) {
+                pos = orig_pos;
+                if (expr->accept(*this))
+                    return true;
+            }
+            pos = orig_pos;
+            return false;
+        }
+        case '!':   // not followed by
+        {
+            auto res = exprs[0]->accept(*this);
+            pos = orig_pos;
+            return !res;
+        }
+        default:
+        {
+            std::cout << "Something's wrong!";
+            return false;
+        }
     }
 }
 
 bool SerialPackrat::visit(Empty &e)
 {
-    std::cout << "Visited " << e;
+    return true;
 }
 
 bool SerialPackrat::visit(AnyChar &ac)
 {
-    std::cout << "Visited " << ac;
+    if (pos < in.size()) {
+        pos++;
+        return true;
+    }
+    return false;
 }
 
 bool SerialPackrat::visit(PEG &peg)
 {
     std::cout << "Visiting peg \n";
     NonTerminal* nt = peg.get_start();
-    std::cout << "Visited " << *nt;
-    nt->accept(*this);
+    auto res = nt->accept(*this);
+    return res;
 }
 
 // TODO: when there is a syntax error?

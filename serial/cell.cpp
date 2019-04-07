@@ -22,7 +22,10 @@ std::ostream& operator<<(std::ostream& os, const Cell& c)
         default:
             os << "Something's wrong";
     }
-    return os << "," << c.pos() << "}";
+    os << "," << c.pos() << "}";
+    if (c.pos() != -1)  // just for formatted printing
+        os << " ";
+    return os;
 }
 
 

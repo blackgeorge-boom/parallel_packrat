@@ -21,11 +21,11 @@ int main()
     AnyChar ac;
 
     // Non Terminals
-    NonTerminal dec("Decimal");
-    NonTerminal prim("Primary");
-    NonTerminal mult("Multitive");
-    NonTerminal add("Additive");
     NonTerminal ae("ArithmeticExpression");
+    NonTerminal add("Additive");
+    NonTerminal mult("Multitive");
+    NonTerminal prim("Primary");
+    NonTerminal dec("Decimal");
 
     // Rules
 
@@ -44,9 +44,9 @@ int main()
 
     CompositeExpression primExp('/');
     primExp.push_expr(&primSub1);
-    primExp.push_expr(&decExp);
+    primExp.push_expr(&dec);
 
-    g.push_rule(&dec, &decExp);
+    g.push_rule(&prim, &primExp);
 
     // Multitive <- Primary '*' Multitive / Primary
     CompositeExpression multSub1('\b');
@@ -76,20 +76,28 @@ int main()
     CompositeExpression aeSub2('!');
     aeSub2.push_expr(&ac);
 
-    CompositeExpression aeExp('/');
+    CompositeExpression aeExp('\b');
     aeExp.push_expr(&add);
     aeExp.push_expr(&aeSub2);
 
     g.push_rule(&ae, &aeExp);
 
     // Set starting rule
-    g.set_start(&add);
+    g.set_start(&ae);
 
     std::cout << "Grammar: \n";
     std::cout << g << "\n";
 
-    SerialPackrat sp("0 + 1", g);
-    sp.visit(g);
+    SerialPackrat sp("1*(0+1)", g);
+    sp.print_cells();
+    auto res = sp.visit(g);
+
+    if (res)
+        std::cout << "Parse successful! \n";
+    else
+        std::cout << "Syntax Error... \n";
+
+    sp.print_cells();
 
     return 0;
 }

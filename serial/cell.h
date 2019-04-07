@@ -18,9 +18,9 @@ public:
     ~Cell() = default;
 
     Result res() const { return r; }
-    void res(Result result) { r = result; }
+    void set_res(Result result) { r = result; }
     int pos() const { return p; }
-    void pos(int position) { p = position; }
+    void set_pos(int position) { p = position; }
 };
 
 std::ostream& operator<<(std::ostream& os, const Cell& c);

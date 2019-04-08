@@ -112,11 +112,16 @@ PEG::PEG(const PEG &peg)
 void PEG::push_rule(NonTerminal *nt, CompositeExpression *ce)
 {
     r.insert(std::pair<NonTerminal*, CompositeExpression*>(nt, ce));
+    idx.insert(std::pair<int, NonTerminal*>(nt->index(), nt));
 }
 
 CompositeExpression* PEG::get_expr(NonTerminal* nt)
 {
     return r.find(nt)->second;
+}
+
+NonTerminal* PEG::get_non_term(int i) {
+    return idx.find(i)->second;
 }
 
 bool PEG::accept(class PegVisitor &pegv)
@@ -126,7 +131,9 @@ bool PEG::accept(class PegVisitor &pegv)
 
 std::ostream &operator<<(std::ostream &os, const PEG &peg) {
     for (auto const& x : peg.get_rules()) {
-        os << *x.first << " -> " << *x.second << "\n";
+        auto key = x.first;     // pointer to non terminal
+        auto value = x.second;   // pointer to composite expression
+        os << key->index() << ": " << *key << " -> " << *value << "\n";
     }
     return os;
 }

@@ -90,6 +90,7 @@ public:
 
 class PEG {
     std::map<NonTerminal*, CompositeExpression*> r;
+    std::map<int, NonTerminal*> idx;
     NonTerminal* s;
 public:
     PEG(): r{}, s{} {};
@@ -102,6 +103,7 @@ public:
     NonTerminal* get_start() const { return s; }
 
     CompositeExpression* get_expr(NonTerminal* nt);
+    NonTerminal* get_non_term(int i);
     bool accept(class PegVisitor& pegv);
 };
 

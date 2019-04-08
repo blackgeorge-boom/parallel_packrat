@@ -134,6 +134,19 @@ bool SerialPackrat::visit(PEG &peg)
     std::cout << "Parsing... \n";
     NonTerminal* nt = peg.get_start();
     auto res = nt->accept(*this);
+
+    int N = peg.get_rules().size();
+    int M = in.size() + 1;
+
+    for (auto j = M; j > 0; --j) {
+        pos = j;
+        for (auto i = N; i >= 0; --i) {
+            nt = peg.get_non_term(i);
+            nt->accept(*this);
+        }
+    }
+
+    res = cells[0][0].res() == Result::success;
     return res;
 }
 

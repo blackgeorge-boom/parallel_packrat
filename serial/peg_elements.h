@@ -33,6 +33,7 @@ public:
     explicit NonTerminal(const char* name);
     ~NonTerminal() override = default;
 
+    static void reset_idx() { num = 0; }
     int index() const { return idx; }
 
     const NonTerminal& operator=(const NonTerminal& nt);
@@ -77,6 +78,7 @@ public:
     CompositeExpression();
     explicit CompositeExpression(char c);
     CompositeExpression(char c, std::string&& v);
+    CompositeExpression(char c, std::initializer_list<Expression*> a_args);
     ~CompositeExpression() override = default;
 
     char op_name() const { return op; }

@@ -100,5 +100,17 @@ int main()
 
     sp.print_cells();
 
+    NonTerminal::reset_idx();
+
+    PEG meta;
+
+    std::cout << "Meta Grammar Before: \n";
+    std::cout << meta;
+
+    PEG::get_meta(meta);
+
+    std::cout << "Meta Grammar: \n";
+    std::cout << meta;
+
     return 0;
 }

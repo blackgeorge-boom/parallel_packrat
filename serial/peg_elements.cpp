@@ -62,6 +62,9 @@ CompositeExpression::CompositeExpression(char c, std::string&& s)
     }
 }
 
+CompositeExpression::CompositeExpression(char c, std::initializer_list<Expression*> a_args)
+        : op(c), expr(a_args) {}
+
 std::ostream &CompositeExpression::put(std::ostream &os) const
 {
     std::vector<Expression*> expressions = this->expr_list();

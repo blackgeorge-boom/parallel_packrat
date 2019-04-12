@@ -23,7 +23,7 @@ public:
 
     CompositeExpression* get_expr(NonTerminal* nt);
     NonTerminal* get_non_term(int i);
-    PEG get_meta();
+    static void get_meta(PEG& peg);
 
     bool accept(class PegVisitor& pegv);
 };

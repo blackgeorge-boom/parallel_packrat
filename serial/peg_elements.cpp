@@ -21,19 +21,9 @@ NonTerminal::NonTerminal(const char* name) : Expression(name)
     idx = num++;
 }
 
-bool NonTerminal::accept(PegVisitor &pegv)
-{
-    return pegv.visit(*this);
-}
-
 std::ostream &NonTerminal::put(std::ostream &os) const
 {
     return os << this->name();
-}
-
-bool Terminal::accept(PegVisitor &pegv)
-{
-    return pegv.visit(*this);
 }
 
 std::ostream &Terminal::put(std::ostream &os) const
@@ -61,10 +51,15 @@ CompositeExpression::CompositeExpression(char c) : Expression()
     op = c;
 }
 
-CompositeExpression::CompositeExpression(char c, std::vector<Expression*>&& v) : Expression()
+
+CompositeExpression::CompositeExpression(char c, std::string&& s)
 {
     op = c;
-    expr = v;
+    char aux[2];
+    for (char x : s) {
+        aux[0] = x;
+        expr.push_back(new Terminal(aux));
+    }
 }
 
 std::ostream &CompositeExpression::put(std::ostream &os) const
@@ -88,53 +83,6 @@ std::ostream &CompositeExpression::put(std::ostream &os) const
     return os;
 }
 
-bool CompositeExpression::accept(PegVisitor &pegv)
-{
-    return pegv.visit(*this);
-}
 
-bool Empty::accept(PegVisitor &pegv)
-{
-    return pegv.visit(*this);
-}
 
-bool AnyChar::accept(PegVisitor &pegv)
-{
-    return pegv.visit(*this);
-}
-
-PEG::PEG(const PEG &peg)
-{
-    r = peg.get_rules();
-    s = peg.get_start();
-}
-
-void PEG::push_rule(NonTerminal *nt, CompositeExpression *ce)
-{
-    r.insert(std::pair<NonTerminal*, CompositeExpression*>(nt, ce));
-    idx.insert(std::pair<int, NonTerminal*>(nt->index(), nt));
-}
-
-CompositeExpression* PEG::get_expr(NonTerminal* nt)
-{
-    return r.find(nt)->second;
-}
-
-NonTerminal* PEG::get_non_term(int i) {
-    return idx.find(i)->second;
-}
-
-bool PEG::accept(class PegVisitor &pegv)
-{
-    return pegv.visit(*this);
-}
-
-std::ostream &operator<<(std::ostream &os, const PEG &peg) {
-    for (auto const& x : peg.get_rules()) {
-        auto key = x.first;     // pointer to non terminal
-        auto value = x.second;   // pointer to composite expression
-        os << key->index() << ": " << *key << " -> " << *value << "\n";
-    }
-    return os;
-}
 

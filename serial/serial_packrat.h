@@ -6,7 +6,7 @@
 #define PARALLEL_PACKRAT_SERIAL_PACKRAT_H
 
 #include "cell.h"
-#include "peg_elements.h"
+#include "peg_visitor.h"
 
 class SerialPackrat: public PegVisitor {
     std::string in;

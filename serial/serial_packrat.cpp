@@ -133,7 +133,9 @@ bool SerialPackrat::visit(PEG &peg)
 {
     std::cout << "Parsing... \n";
     NonTerminal* nt = peg.get_start();
-    auto res = nt->accept(*this);
+    nt->accept(*this);
+
+    this->print_cells();
 
     int N = peg.get_rules().size();
     int M = in.size() + 1;
@@ -146,8 +148,7 @@ bool SerialPackrat::visit(PEG &peg)
         }
     }
 
-    res = cells[0][0].res() == Result::success;
+    auto res = cells[0][0].res() == Result::success;
     return res;
 }
 
-// TODO: when there is a syntax error?

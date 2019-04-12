@@ -2,6 +2,7 @@
 
 #include "serial/cell.h"
 #include "serial/peg_elements.h"
+#include "serial/peg.h"
 #include "serial/serial_packrat.h"
 
 int NonTerminal::num = 0;

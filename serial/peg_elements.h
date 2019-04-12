@@ -10,7 +10,6 @@
 #include <vector>
 #include <map>
 
-
 class Expression {
     std::string n;
 public:
@@ -44,6 +43,7 @@ public:
 class Terminal: public Expression {
 public:
     Terminal() : Expression() {};
+    explicit Terminal(char c) : Expression(&c) {};
     explicit Terminal(const char* name) : Expression(name) {};
     ~Terminal() override = default;
 
@@ -76,7 +76,7 @@ class CompositeExpression: public Expression {
 public:
     CompositeExpression();
     explicit CompositeExpression(char c);
-    explicit CompositeExpression(char c, std::vector<Expression*>&& v);
+    CompositeExpression(char c, std::string&& v);
     ~CompositeExpression() override = default;
 
     char op_name() const { return op; }
@@ -86,37 +86,6 @@ public:
     const CompositeExpression& operator=(const CompositeExpression& ce);
     std::ostream& put(std::ostream& os) const override;
     bool accept(PegVisitor& pegv) override;
-};
-
-class PEG {
-    std::map<NonTerminal*, CompositeExpression*> r;
-    std::map<int, NonTerminal*> idx;
-    NonTerminal* s;
-public:
-    PEG(): r{}, s{} {};
-    PEG(const PEG& peg);
-    virtual ~PEG() = default;
-
-    void push_rule(NonTerminal* nt, CompositeExpression* ce);
-    void set_start(NonTerminal* nt) { s = nt; }
-    std::map<NonTerminal*, CompositeExpression*> get_rules() const { return r; }
-    NonTerminal* get_start() const { return s; }
-
-    CompositeExpression* get_expr(NonTerminal* nt);
-    NonTerminal* get_non_term(int i);
-    bool accept(class PegVisitor& pegv);
-};
-
-std::ostream& operator<<(std::ostream& os, const PEG& peg);
-
-class PegVisitor {
-public:
-    virtual bool visit(NonTerminal& nt) = 0;
-    virtual bool visit(Terminal& t) = 0;
-    virtual bool visit(Empty& e) = 0;
-    virtual bool visit(AnyChar& ac) = 0;
-    virtual bool visit(CompositeExpression& ce) = 0;
-    virtual bool visit(PEG& peg) = 0;
 };
 
 #endif //PARALLEL_PACKRAT_PEG_ELEMENTS_H

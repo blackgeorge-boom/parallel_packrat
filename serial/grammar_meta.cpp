@@ -130,27 +130,25 @@ Meta::Meta() : PEG()
     literalFirstOption.push_expr(&singleQuote);
     static CompositeExpression literalRepetition('*');
     static CompositeExpression literalSequenceInRepetition('\b');
-    literalSequenceInRepetition.push_expr(new CompositeExpression('!', &singleQuote));
-    literalSequenceInRepetition.push_expr(character);
-    literalRepetition.push_expr(literalSequenceInRepetition);
-    literalFirstOption.push_expr(literalRepetition);
-    literalFirstOption.push_expr(singleQuote);
-    literalFirstOption.push_expr(spacing);
-    literalExp.push_expr(literalFirstOption);
+    literalSequenceInRepetition.push_expr(new CompositeExpression('!', {&singleQuote}));
+    literalSequenceInRepetition.push_expr(&character);
+    literalRepetition.push_expr(&literalSequenceInRepetition);
+    literalFirstOption.push_expr(&literalRepetition);
+    literalFirstOption.push_expr(&singleQuote);
+    literalFirstOption.push_expr(&spacing);
+    literalExp.push_expr(&literalFirstOption);
     static CompositeExpression literalSecondOption('\b');
-    literalSecondOption.push_expr(doubleQuote);
+    literalSecondOption.push_expr(&doubleQuote);
     static CompositeExpression literalRepetition2('*');
-    static CompositeExpression literalSequenceinRepetition2('\b');
-    literalSequenceinRepetition2.push_expr(new static CompositeExpression('!', doubleQuote));
-    literalSequenceinRepetition2.push_expr(character);
-    literalRepetition2.push_expr(literalSequenceinRepetition2);
-    literalSecondOption.push_expr(literalRepetition2);
-    literalSecondOption.push_expr(doubleQuote);
-    literalSecondOption.push_expr(spacing);
-    literalExp.push_expr(literalSecondOption);
-    Rule literalRule = new Rule(literal, literalExp);
-    this->push_rule(&suffix, &suffixExp);
-/*
+    static CompositeExpression literalSequenceInRepetition2('\b');
+    literalSequenceInRepetition2.push_expr(new CompositeExpression('!', {&doubleQuote}));
+    literalSequenceInRepetition2.push_expr(&character);
+    literalRepetition2.push_expr(&literalSequenceInRepetition2);
+    literalSecondOption.push_expr(&literalRepetition2);
+    literalSecondOption.push_expr(&doubleQuote);
+    literalSecondOption.push_expr(&spacing);
+    literalExp.push_expr(&literalSecondOption);
+    this->push_rule(&literal, &literalExp);
 
     // Char       <- '\\[nrt\'"\+\-\*\.\?\^\$\{\}\(\)\[\]\\]'          # Type 9
     //             / '\\[0-2][0-7][0-7]'
@@ -158,101 +156,86 @@ Meta::Meta() : PEG()
     //             / !'\\' .
     static CompositeExpression characterExp('/');
     static CompositeExpression characterSubExp('\b');
-    characterSubExp.push_expr(backSlash);
-    characterSubExp.push_expr(new static CompositeExpression('/', escapableCharacters));
-    characterExp.push_expr(characterSubExp);
+    characterSubExp.push_expr(&backSlash);
+    characterSubExp.push_expr(new CompositeExpression('/', "nrt\\'\""));
+    characterExp.push_expr(&characterSubExp);
     static CompositeExpression characterSubExp2('\b');
-    characterSubExp2.push_expr(new static CompositeExpression('!', backSlash));
-    characterSubExp2.push_expr(anyCharacter);
-    characterExp.push_expr(characterSubExp2);
-    Rule characterRule = new Rule(character, characterExp);
-    this->push_rule(&suffix, &suffixExp);
+    characterSubExp2.push_expr(new CompositeExpression('!', {&backSlash}));
+    characterSubExp2.push_expr(&anyChar);
+    characterExp.push_expr(&characterSubExp2);
+    this->push_rule(&character, &characterExp);
 
     // LEFTARROW  <- '<-' Spacing                                      # Type 10
-    static CompositeExpression leftArrowExp('\b', lessThan, minus, spacing);
-    Rule leftArrowRule = new Rule(leftArrow, leftArrowExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression leftArrowExp('\b', {&lessThan, &minus, &spacing});
+    this->push_rule(&leftArrow, &leftArrowExp);
 
     // SLASH      <- '/' Spacing                                       # Type 11
-    static CompositeExpression slashExp('\b', forwardSlash, spacing);
-    Rule slashRule = new Rule(slash, slashExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression slashExp('\b', {&forwardSlash, &spacing});
+    this->push_rule(&slash, &slashExp);
 
     // AND        <- '&' Spacing                                       # Type 12
-    static CompositeExpression andExp('\b', andTerm, spacing);
-    Rule andRule = new Rule(and, andExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression and_Exp('\b', {&andTerm, &spacing});
+    this->push_rule(&and_, &and_Exp);
 
     // NOT        <- '!' Spacing                                       # Type 13
-    static CompositeExpression notExp('\b', notTerm, spacing);
-    Rule notRule = new Rule(not, notExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression not_Exp('\b', {&notTerm, &spacing});
+    this->push_rule(&not_, &not_Exp);
 
     // QUESTION   <- '\\?' Spacing                                     # Type 14
-    static CompositeExpression questionMarkExp('\b', questionMarkTerm, spacing);
-    Rule questionMarkRule = new Rule(questionMark, questionMarkExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression questionMarkExp('\b', {&questionMarkTerm, &spacing});
+    this->push_rule(&questionMark, &questionMarkExp);
 
     // STAR       <- '\\*' Spacing                                     # Type 15
-    static CompositeExpression starExp('\b', starTerm, spacing);
-    Rule starRule = new Rule(star, starExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression starExp('\b', {&starTerm, &spacing});
+    this->push_rule(&star, &starExp);
 
     // PLUS       <- '\\+' Spacing                                     # Type 16
-    static CompositeExpression plusExp('\b', plusTerm, spacing);
-    Rule plusRule = new Rule(plus, plusExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression plusExp('\b', {&plusTerm, &spacing});
+    this->push_rule(&plus, &plusExp);
 
     // OPEN       <- '\\(' Spacing                                     # Type 17
-    static CompositeExpression openParenExp('\b', openParenTerm, spacing);
-    Rule openParenRule = new Rule(openParen, openParenExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression openParenExp('\b', {&openParenTerm, &spacing});
+    this->push_rule(&openParen, &openParenExp);
 
     // CLOSE      <- '\\)' Spacing                                     # Type 18
-    static CompositeExpression closeParenExp('\b', closeParenTerm, spacing);
-    Rule closeParenRule = new Rule(closeParen, closeParenExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression closeParenExp('\b', {&closeParenTerm, &spacing});
+    this->push_rule(&closeParen, &closeParenExp);
 
     // DOT        <- '\\.' Spacing                                     # Type 19
-    static CompositeExpression dotExp('\b', period, spacing);
-    Rule dotRule = new Rule(dot, dotExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression dotExp('\b', {&period, &spacing});
+    this->push_rule(&dot, &dotExp);
 
     // Spacing    <- (Space / Comment)*                                # Type 20
     static CompositeExpression spacingExp('*');
-    spacingExp.push_expr(new static CompositeExpression('/', space, comment));
-    Rule spacingRule = new Rule(spacing, spacingExp);
-    this->push_rule(&suffix, &suffixExp);
+    spacingExp.push_expr(new CompositeExpression('/', {&space, &comment}));
+    this->push_rule(&spacing, &spacingExp);
 
     // Comment    <- '#' (!EndOfLine .)* EndOfLine                     # Type 21
     static CompositeExpression commentExp('\b');
-    commentExp.push_expr(hash);
+    commentExp.push_expr(&hash);
     static CompositeExpression commentSubExp('\b');
-    commentSubExp.push_expr(new static CompositeExpression('!', endOfLine));
-    commentSubExp.push_expr(anyCharacter);
-    commentExp.push_expr(new static CompositeExpression('*', commentSubExp));
-    commentExp.push_expr(endOfLine);
-    Rule commentRule = new Rule(comment, commentExp);
-    this->push_rule(&suffix, &suffixExp);
+    commentSubExp.push_expr(new CompositeExpression('!', {&endOfLine}));
+    commentSubExp.push_expr(&anyChar);
+    commentExp.push_expr(new CompositeExpression('*', {&commentSubExp}));
+    commentExp.push_expr(&endOfLine);
+    this->push_rule(&comment, &commentExp);
 
     // Space      <- ' ' / '\t' / EndOfLine                            # Type 22
-    static CompositeExpression spaceExp('/', spaceTerm, tab, endOfLine);
-    Rule spaceRule = new Rule(space, spaceExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression spaceExp('/', {&spaceTerm, &tab, &endOfLine});
+    this->push_rule(&space, &spaceExp);
 
     // EndOfLine  <- '\r\n' / '\n' / '\r'                              # Type 23
     static CompositeExpression endOfLineExp('/');
-    endOfLineExp.push_expr(new static CompositeExpression('\b', cr, lf));
-    endOfLineExp.push_expr(lf);
-    endOfLineExp.push_expr(cr);
-    Rule endOfLineRule = new Rule(endOfLine, endOfLineExp);
-    this->push_rule(&suffix, &suffixExp);
+    endOfLineExp.push_expr(new CompositeExpression('\b', {&cr, &lf}));
+    endOfLineExp.push_expr(&lf);
+    endOfLineExp.push_expr(&cr);
+    this->push_rule(&endOfLine, &endOfLineExp);
 
     // EndOfFile  <- !.                                                # Type 24
-    static CompositeExpression endOfFileExp('!', anyCharacter);
-    Rule endOfFileRule = new Rule(endOfFile, endOfFileExp);
-    this->push_rule(&suffix, &suffixExp);
+    static CompositeExpression endOfFileExp('!', {&anyChar});
+    this->push_rule(&endOfFile, &endOfFileExp);
 
+/*
     // Add the rules to the PEG.
     peg.addRule(grammarRule);
     peg.addRule(definitionRule);

@@ -12,7 +12,7 @@ class PEG {
     std::map<int, NonTerminal*> idx;
     NonTerminal* s;
 public:
-    PEG(): r{}, s{} {};
+    PEG(): r{}, idx{}, s{} {};
     PEG(const PEG& peg);
     virtual ~PEG() = default;
 
@@ -23,7 +23,6 @@ public:
 
     CompositeExpression* get_expr(NonTerminal* nt);
     NonTerminal* get_non_term(int i);
-    static void get_meta(PEG& peg);
 
     bool accept(class PegVisitor& pegv);
 };

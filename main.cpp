@@ -3,6 +3,7 @@
 #include "serial/cell.h"
 #include "serial/peg_elements.h"
 #include "serial/peg.h"
+#include "serial/grammar_meta.h"
 #include "serial/serial_packrat.h"
 
 int NonTerminal::num = 0;
@@ -102,14 +103,8 @@ int main()
 
     NonTerminal::reset_idx();
 
-    PEG meta;
+    Meta meta;
 
-    std::cout << "Meta Grammar Before: \n";
-    std::cout << meta;
-
-    PEG::get_meta(meta);
-
-    std::cout << "Meta Grammar: \n";
     std::cout << meta;
 
     return 0;

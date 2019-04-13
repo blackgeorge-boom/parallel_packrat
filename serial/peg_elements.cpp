@@ -71,17 +71,17 @@ std::ostream &CompositeExpression::put(std::ostream &os) const
     char op = this->op_name();
 
     if (expressions.size() == 1) {
-        if (op == '*')
-            os << *expressions[0] << "*";
+        if (op == '*' or op == '+' or op == '?')
+            os << "(" << *expressions[0] << ")" << op;
         else
-            os << op << *expressions[0];
+            os << op << "(" << *expressions[0] << ")";
     }
     else {
         for (auto x : expressions) {
             os << *x << ' ' << op << ' ';
         }
-        os << "\b";
-        if (op != '\b') os << "\b";
+        os << "\b";     // eats last ' '
+        if (op != '\b') os << "\b\b";   // eats last op and the ' ' before it
     }
     return os;
 }

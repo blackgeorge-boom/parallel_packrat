@@ -2,243 +2,256 @@
 // Created by blackgeorge on 4/12/19.
 //
 
-#include "peg.h"
+#include "grammar_meta.h"
 
-void PEG::get_meta(PEG& meta)
+Meta::Meta() : PEG()
 {
-    // Create a PEG.
-
     // Create terminals.
-    Terminal singleQuote("\'");
-    Terminal doubleQuote("\"");
-    Terminal backSlash("\\");
-    Terminal lessThan("<");
-    Terminal minus("-");
-    Terminal forwardSlash("/");
-    Terminal andTerm("&");
-    Terminal notTerm("!");
-    Terminal questionMarkTerm("?");
-    Terminal starTerm("*");
-    Terminal plusTerm("+");
-    Terminal openParenTerm("(");
-    Terminal closeParenTerm(")");
-    Terminal period(".");
-    Terminal hash("#");
-    Terminal spaceTerm(" ");
-    Terminal tab("\t");
-    Terminal cr("\r");
-    Terminal lf("\n");
-    AnyChar anyChar;
+    static Terminal singleQuote("\'");
+    static Terminal doubleQuote("\"");
+    static Terminal backSlash("\\");
+    static Terminal lessThan("<");
+    static Terminal minus("-");
+    static Terminal forwardSlash("/");
+    static Terminal andTerm("&");
+    static Terminal notTerm("!");
+    static Terminal questionMarkTerm("?");
+    static Terminal starTerm("*");
+    static Terminal plusTerm("+");
+    static Terminal openParenTerm("(");
+    static Terminal closeParenTerm(")");
+    static Terminal period(".");
+    static Terminal hash("#");
+    static Terminal spaceTerm(" ");
+    static Terminal tab("\t");
+    static Terminal cr("\r");
+    static Terminal lf("\n");
+    static AnyChar anyChar;
 
     // Create non terminals.
-    NonTerminal grammar("Grammar");
-    NonTerminal definition("Definition");
-    NonTerminal expression("Expression");
-    NonTerminal sequence("Sequence");
-    NonTerminal prefix("Prefix");
-    NonTerminal suffix("Suffix");
-    NonTerminal primary("Primary");
-    NonTerminal identifier("Identifier");
-    NonTerminal identifierStart("IdentifierStart");
-    NonTerminal identifierRest("IdentifierRest");
-    NonTerminal literal("Literal");
-    NonTerminal character("Character");
-    NonTerminal leftArrow("LeftArrow");
-    NonTerminal slash("Slash");
-    NonTerminal and_("And");
-    NonTerminal not_("Not");
-    NonTerminal questionMark("QuestionMark");
-    NonTerminal star("Star");
-    NonTerminal plus("Plus");
-    NonTerminal openParen("OpenParen");
-    NonTerminal closeParen("CloseParen");
-    NonTerminal dot("Dot");
-    NonTerminal spacing("Spacing");
-    NonTerminal comment("Comment");
-    NonTerminal space("Space");
-    NonTerminal endOfLine("EndOfLine");
-    NonTerminal endOfFile("EndOfFile");
+    static NonTerminal grammar("Grammar");
+    static NonTerminal definition("Definition");
+    static NonTerminal expression("Expression");
+    static NonTerminal sequence("Sequence");
+    static NonTerminal prefix("Prefix");
+    static NonTerminal suffix("Suffix");
+    static NonTerminal primary("Primary");
+    static NonTerminal identifier("Identifier");
+    static NonTerminal identifierStart("IdentifierStart");
+    static NonTerminal identifierRest("IdentifierRest");
+    static NonTerminal literal("Literal");
+    static NonTerminal character("Character");
+    static NonTerminal leftArrow("LeftArrow");
+    static NonTerminal slash("Slash");
+    static NonTerminal and_("And");
+    static NonTerminal not_("Not");
+    static NonTerminal questionMark("QuestionMark");
+    static NonTerminal star("Star");
+    static NonTerminal plus("Plus");
+    static NonTerminal openParen("OpenParen");
+    static NonTerminal closeParen("CloseParen");
+    static NonTerminal dot("Dot");
+    static NonTerminal spacing("Spacing");
+    static NonTerminal comment("Comment");
+    static NonTerminal space("Space");
+    static NonTerminal endOfLine("EndOfLine");
+    static NonTerminal endOfFile("EndOfFile");
+
     // Create rules.
 
-    // Grammar    <- Spacing Definition+ EndOfFile                     # Type 0
-    CompositeExpression grammarExp('\b');
+    // Grammar <- Spacing Definition+ EndOfFile                     # Type 0
+    static CompositeExpression grammarExp('\b');
     grammarExp.push_expr(&spacing);
-//    grammarExp.push_expr(new CompositeExpression('+', {&definition}));
+    grammarExp.push_expr(new CompositeExpression('+', {&definition}));
     grammarExp.push_expr(&endOfFile);
-    std::cout << "Check " << meta << "\n";
-    meta.push_rule(&grammar, &grammarExp);
-    std::cout << "Check2 " << meta << "\n";
-/*
+    this->push_rule(&grammar, &grammarExp);
 
     // Definition <- Identifier LEFTARROW Expression                   # Type 1
-    CompositeExpression definitionExp = new CompositeExpression(Sequence.get(), identifier, leftArrow, expression);
-    Rule definitionRule = new Rule(definition, definitionExp);
+    static CompositeExpression definitionExp('\b', {&identifier, &leftArrow, &expression});
+    this->push_rule(&definition, &definitionExp);
 
     // Expression <- Sequence (SLASH Sequence)*                        # Type 2
-    CompositeExpression expressionExp = new CompositeExpression(Sequence.get());
-    expressionExp.addSubexpression(sequence);
-    CompositeExpression expressionSubExp = new CompositeExpression(Sequence.get(), slash, sequence);
-    expressionExp.addSubexpression(new CompositeExpression(Repetition.get(), expressionSubExp));
-    Rule expressionRule = new Rule(expression, expressionExp);
+    static CompositeExpression expressionExp('\b');
+    expressionExp.push_expr(&sequence);
+    static CompositeExpression expressionSubExp('\b', {&slash, &sequence});
+    expressionExp.push_expr(new CompositeExpression('*', {&expressionSubExp}));
+    this->push_rule(&expression, &expressionExp);
 
-    // Sequence   <- Prefix*                                           # Type 3
-    CompositeExpression sequenceExp = new CompositeExpression(Repetition.get(), prefix);
-    Rule sequenceRule = new Rule(sequence, sequenceExp);
+    // Sequence <- Prefix*                                           # Type 3
+    static CompositeExpression sequenceExp('*', {&prefix});
+    this->push_rule(&sequence, &sequenceExp);
 
-    // Prefix     <- (AND / NOT)? Suffix                               # Type 4
-    CompositeExpression prefixExp = new CompositeExpression(Sequence.get());
-    CompositeExpression prefixSubExp = new CompositeExpression(Optional.get());
-    prefixSubExp.addSubexpression(new CompositeExpression(OrderedChoice.get(), and, not));
-    prefixExp.addSubexpression(prefixSubExp);
-    prefixExp.addSubexpression(suffix);
-    Rule prefixRule = new Rule(prefix, prefixExp);
+    // Prefix <- (AND / NOT)? Suffix                               # Type 4
+    static CompositeExpression prefixExp('\b');
+    static CompositeExpression prefixSubExp('?');
+    prefixSubExp.push_expr(new CompositeExpression('/', {&and_, &not_}));
+    prefixExp.push_expr(&prefixSubExp);
+    prefixExp.push_expr(&suffix);
+    this->push_rule(&prefix, &prefixExp);
 
-    // Suffix     <- Primary (QUESTION / STAR / PLUS)?                 # Type 5
-    CompositeExpression suffixExp = new CompositeExpression(Sequence.get());
-    suffixExp.addSubexpression(primary);
-    CompositeExpression suffixSubExp = new CompositeExpression(Optional.get());
-    suffixSubExp.addSubexpression(new CompositeExpression(OrderedChoice.get(), questionMark, star, plus));
-    suffixExp.addSubexpression(suffixSubExp);
-    Rule suffixRule = new Rule(suffix, suffixExp);
+    // Suffix <- Primary (QUESTION / STAR / PLUS)?                 # Type 5
+    static CompositeExpression suffixExp('\b');
+    suffixExp.push_expr(&primary);
+    static CompositeExpression suffixSubExp('?');
+    suffixSubExp.push_expr(new CompositeExpression('/', {&questionMark, &star, &plus}));
+    suffixExp.push_expr(&suffixSubExp);
+    this->push_rule(&suffix, &suffixExp);
 
-    // Primary    <- Identifier !LEFTARROW                             # Type 6
-    //		            / OPEN Expression CLOSE
-    //		            / Literal / DOT
-    CompositeExpression primaryExp = new CompositeExpression(OrderedChoice.get());
-    CompositeExpression primarySubExp = new CompositeExpression(Sequence.get());
-    primarySubExp.addSubexpression(identifier);
-    primarySubExp.addSubexpression(new CompositeExpression(NotFollowedBy.get(), leftArrow));
-    primaryExp.addSubexpression(primarySubExp);
-    primaryExp.addSubexpression(new CompositeExpression(Sequence.get(), openParen, expression, closeParen));
-    primaryExp.addSubexpression(literal);
-    primaryExp.addSubexpression(dot);
-    Rule primaryRule = new Rule(primary, primaryExp);
+    // Primary <- Identifier !LEFTARROW                             # Type 6
+    //		    / OPEN Expression CLOSE
+    //		    / Literal / DOT
+    static CompositeExpression primaryExp('/');
+    static CompositeExpression primarySubExp('\b');
+    primarySubExp.push_expr(&identifier);
+    primarySubExp.push_expr(new CompositeExpression('!', {&leftArrow}));
+    primaryExp.push_expr(&primarySubExp);
+    primaryExp.push_expr(new CompositeExpression('\b', {&openParen, &expression, &closeParen}));
+    primaryExp.push_expr(&literal);
+    primaryExp.push_expr(&dot);
+    this->push_rule(&primary, &primaryExp);
 
     // Identifier <- '[a-zA-Z_][a-zA-Z_0-9]*' Spacing                  # Type 7
-    CompositeExpression identifierExp = new CompositeExpression(Sequence.get());
-    identifierExp.addSubexpression(identifierStart);
-    identifierExp.addSubexpression(new CompositeExpression(Repetition.get(), identifierRest));
-    identifierExp.addSubexpression(spacing);
-    Rule identifierRule = new Rule(identifier, identifierExp);
+    static CompositeExpression identifierExp('\b');
+    identifierExp.push_expr(&identifierStart);
+    identifierExp.push_expr(new CompositeExpression('*', {&identifierRest}));
+    identifierExp.push_expr(&spacing);
+    this->push_rule(&identifier, &identifierExp);
 
-    CompositeExpression identifierStartExp = new CompositeExpression(OrderedChoice.get(), identifierCharacters);
-    Rule identifierStartRule = new Rule(identifierStart, identifierStartExp);
+    static CompositeExpression identifierStartExp('/', "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_");
+    this->push_rule(&identifierStart, &identifierStartExp);
 
-    CompositeExpression identifierRestExp = new CompositeExpression(OrderedChoice.get(), identifierCharacters);
-    identifierRestExp.addSubexpressions(digits);
-    Rule identifierRestRule = new Rule(identifierRest, identifierRestExp);
+    static CompositeExpression identifierRestExp('/', "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789");
+    this->push_rule(&identifierRest, &identifierRestExp);
 
     // Literal    <- "'" (!"'" Char)* "'" Spacing                      # Type 8
     //             / '"' (!'"' Char)* '"' Spacing
-    CompositeExpression literalExp = new CompositeExpression(OrderedChoice.get());
-    CompositeExpression literalFirstOption = new CompositeExpression(Sequence.get());
-    literalFirstOption.addSubexpression(singleQuote);
-    CompositeExpression literalRepetition = new CompositeExpression(Repetition.get());
-    CompositeExpression literalSequenceinRepetition = new CompositeExpression(Sequence.get());
-    literalSequenceinRepetition.addSubexpression(new CompositeExpression(NotFollowedBy.get(), singleQuote));
-    literalSequenceinRepetition.addSubexpression(character);
-    literalRepetition.addSubexpression(literalSequenceinRepetition);
-    literalFirstOption.addSubexpression(literalRepetition);
-    literalFirstOption.addSubexpression(singleQuote);
-    literalFirstOption.addSubexpression(spacing);
-    literalExp.addSubexpression(literalFirstOption);
-    CompositeExpression literalSecondOption = new CompositeExpression(Sequence.get());
-    literalSecondOption.addSubexpression(doubleQuote);
-    CompositeExpression literalRepetition2 = new CompositeExpression(Repetition.get());
-    CompositeExpression literalSequenceinRepetition2 = new CompositeExpression(Sequence.get());
-    literalSequenceinRepetition2.addSubexpression(new CompositeExpression(NotFollowedBy.get(), doubleQuote));
-    literalSequenceinRepetition2.addSubexpression(character);
-    literalRepetition2.addSubexpression(literalSequenceinRepetition2);
-    literalSecondOption.addSubexpression(literalRepetition2);
-    literalSecondOption.addSubexpression(doubleQuote);
-    literalSecondOption.addSubexpression(spacing);
-    literalExp.addSubexpression(literalSecondOption);
+    static CompositeExpression literalExp('/');
+    static CompositeExpression literalFirstOption('\b');
+    literalFirstOption.push_expr(&singleQuote);
+    static CompositeExpression literalRepetition('*');
+    static CompositeExpression literalSequenceInRepetition('\b');
+    literalSequenceInRepetition.push_expr(new CompositeExpression('!', &singleQuote));
+    literalSequenceInRepetition.push_expr(character);
+    literalRepetition.push_expr(literalSequenceInRepetition);
+    literalFirstOption.push_expr(literalRepetition);
+    literalFirstOption.push_expr(singleQuote);
+    literalFirstOption.push_expr(spacing);
+    literalExp.push_expr(literalFirstOption);
+    static CompositeExpression literalSecondOption('\b');
+    literalSecondOption.push_expr(doubleQuote);
+    static CompositeExpression literalRepetition2('*');
+    static CompositeExpression literalSequenceinRepetition2('\b');
+    literalSequenceinRepetition2.push_expr(new static CompositeExpression('!', doubleQuote));
+    literalSequenceinRepetition2.push_expr(character);
+    literalRepetition2.push_expr(literalSequenceinRepetition2);
+    literalSecondOption.push_expr(literalRepetition2);
+    literalSecondOption.push_expr(doubleQuote);
+    literalSecondOption.push_expr(spacing);
+    literalExp.push_expr(literalSecondOption);
     Rule literalRule = new Rule(literal, literalExp);
+    this->push_rule(&suffix, &suffixExp);
+/*
 
     // Char       <- '\\[nrt\'"\+\-\*\.\?\^\$\{\}\(\)\[\]\\]'          # Type 9
     //             / '\\[0-2][0-7][0-7]'
     //             / '\\[0-7][0-7]?'
     //             / !'\\' .
-    CompositeExpression characterExp = new CompositeExpression(OrderedChoice.get());
-    CompositeExpression characterSubExp = new CompositeExpression(Sequence.get());
-    characterSubExp.addSubexpression(backSlash);
-    characterSubExp.addSubexpression(new CompositeExpression(OrderedChoice.get(), escapableCharacters));
-    characterExp.addSubexpression(characterSubExp);
-    CompositeExpression characterSubExp2 = new CompositeExpression(Sequence.get());
-    characterSubExp2.addSubexpression(new CompositeExpression(NotFollowedBy.get(), backSlash));
-    characterSubExp2.addSubexpression(anyCharacter);
-    characterExp.addSubexpression(characterSubExp2);
+    static CompositeExpression characterExp('/');
+    static CompositeExpression characterSubExp('\b');
+    characterSubExp.push_expr(backSlash);
+    characterSubExp.push_expr(new static CompositeExpression('/', escapableCharacters));
+    characterExp.push_expr(characterSubExp);
+    static CompositeExpression characterSubExp2('\b');
+    characterSubExp2.push_expr(new static CompositeExpression('!', backSlash));
+    characterSubExp2.push_expr(anyCharacter);
+    characterExp.push_expr(characterSubExp2);
     Rule characterRule = new Rule(character, characterExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // LEFTARROW  <- '<-' Spacing                                      # Type 10
-    CompositeExpression leftArrowExp = new CompositeExpression(Sequence.get(), lessThan, minus, spacing);
+    static CompositeExpression leftArrowExp('\b', lessThan, minus, spacing);
     Rule leftArrowRule = new Rule(leftArrow, leftArrowExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // SLASH      <- '/' Spacing                                       # Type 11
-    CompositeExpression slashExp = new CompositeExpression(Sequence.get(), forwardSlash, spacing);
+    static CompositeExpression slashExp('\b', forwardSlash, spacing);
     Rule slashRule = new Rule(slash, slashExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // AND        <- '&' Spacing                                       # Type 12
-    CompositeExpression andExp = new CompositeExpression(Sequence.get(), andTerm, spacing);
+    static CompositeExpression andExp('\b', andTerm, spacing);
     Rule andRule = new Rule(and, andExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // NOT        <- '!' Spacing                                       # Type 13
-    CompositeExpression notExp = new CompositeExpression(Sequence.get(), notTerm, spacing);
+    static CompositeExpression notExp('\b', notTerm, spacing);
     Rule notRule = new Rule(not, notExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // QUESTION   <- '\\?' Spacing                                     # Type 14
-    CompositeExpression questionMarkExp = new CompositeExpression(Sequence.get(), questionMarkTerm, spacing);
+    static CompositeExpression questionMarkExp('\b', questionMarkTerm, spacing);
     Rule questionMarkRule = new Rule(questionMark, questionMarkExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // STAR       <- '\\*' Spacing                                     # Type 15
-    CompositeExpression starExp = new CompositeExpression(Sequence.get(), starTerm, spacing);
+    static CompositeExpression starExp('\b', starTerm, spacing);
     Rule starRule = new Rule(star, starExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // PLUS       <- '\\+' Spacing                                     # Type 16
-    CompositeExpression plusExp = new CompositeExpression(Sequence.get(), plusTerm, spacing);
+    static CompositeExpression plusExp('\b', plusTerm, spacing);
     Rule plusRule = new Rule(plus, plusExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // OPEN       <- '\\(' Spacing                                     # Type 17
-    CompositeExpression openParenExp = new CompositeExpression(Sequence.get(), openParenTerm, spacing);
+    static CompositeExpression openParenExp('\b', openParenTerm, spacing);
     Rule openParenRule = new Rule(openParen, openParenExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // CLOSE      <- '\\)' Spacing                                     # Type 18
-    CompositeExpression closeParenExp = new CompositeExpression(Sequence.get(), closeParenTerm, spacing);
+    static CompositeExpression closeParenExp('\b', closeParenTerm, spacing);
     Rule closeParenRule = new Rule(closeParen, closeParenExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // DOT        <- '\\.' Spacing                                     # Type 19
-    CompositeExpression dotExp = new CompositeExpression(Sequence.get(), period, spacing);
+    static CompositeExpression dotExp('\b', period, spacing);
     Rule dotRule = new Rule(dot, dotExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // Spacing    <- (Space / Comment)*                                # Type 20
-    CompositeExpression spacingExp = new CompositeExpression(Repetition.get());
-    spacingExp.addSubexpression(new CompositeExpression(OrderedChoice.get(), space, comment));
+    static CompositeExpression spacingExp('*');
+    spacingExp.push_expr(new static CompositeExpression('/', space, comment));
     Rule spacingRule = new Rule(spacing, spacingExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // Comment    <- '#' (!EndOfLine .)* EndOfLine                     # Type 21
-    CompositeExpression commentExp = new CompositeExpression(Sequence.get());
-    commentExp.addSubexpression(hash);
-    CompositeExpression commentSubExp = new CompositeExpression(Sequence.get());
-    commentSubExp.addSubexpression(new CompositeExpression(NotFollowedBy.get(), endOfLine));
-    commentSubExp.addSubexpression(anyCharacter);
-    commentExp.addSubexpression(new CompositeExpression(Repetition.get(), commentSubExp));
-    commentExp.addSubexpression(endOfLine);
+    static CompositeExpression commentExp('\b');
+    commentExp.push_expr(hash);
+    static CompositeExpression commentSubExp('\b');
+    commentSubExp.push_expr(new static CompositeExpression('!', endOfLine));
+    commentSubExp.push_expr(anyCharacter);
+    commentExp.push_expr(new static CompositeExpression('*', commentSubExp));
+    commentExp.push_expr(endOfLine);
     Rule commentRule = new Rule(comment, commentExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // Space      <- ' ' / '\t' / EndOfLine                            # Type 22
-    CompositeExpression spaceExp = new CompositeExpression(OrderedChoice.get(), spaceTerm, tab, endOfLine);
+    static CompositeExpression spaceExp('/', spaceTerm, tab, endOfLine);
     Rule spaceRule = new Rule(space, spaceExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // EndOfLine  <- '\r\n' / '\n' / '\r'                              # Type 23
-    CompositeExpression endOfLineExp = new CompositeExpression(OrderedChoice.get());
-    endOfLineExp.addSubexpression(new CompositeExpression(Sequence.get(), cr, lf));
-    endOfLineExp.addSubexpression(lf);
-    endOfLineExp.addSubexpression(cr);
+    static CompositeExpression endOfLineExp('/');
+    endOfLineExp.push_expr(new static CompositeExpression('\b', cr, lf));
+    endOfLineExp.push_expr(lf);
+    endOfLineExp.push_expr(cr);
     Rule endOfLineRule = new Rule(endOfLine, endOfLineExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // EndOfFile  <- !.                                                # Type 24
-    CompositeExpression endOfFileExp = new CompositeExpression(NotFollowedBy.get(), anyCharacter);
+    static CompositeExpression endOfFileExp('!', anyCharacter);
     Rule endOfFileRule = new Rule(endOfFile, endOfFileExp);
+    this->push_rule(&suffix, &suffixExp);
 
     // Add the rules to the PEG.
     peg.addRule(grammarRule);
@@ -271,6 +284,6 @@ void PEG::get_meta(PEG& meta)
 
 */
     // Set the start symbol.
-    meta.set_start(&grammar);
+    this->set_start(&grammar);
 }
 

@@ -1,0 +1,16 @@
+# The below grammar is taken from the example files included with LGI
+# (Language Generator by Instil). LGI is distributed under the GPL.
+# http://sourceforge.net/projects/instil-lang
+
+Calculation    <- Addition EndOfFile
+Addition       <- Multiplication ( PLUS Multiplication )*
+Multiplication <- Operand ( MULT Operand )*
+Operand        <- Number / OPEN Addition CLOSE
+Number         <- '0' / NumberFirst NumberRest*
+NumberFirst    <- '1' / '2' / '3' / '4' / '5' / '6' / '7' / '8' / '9'
+NumberRest     <- '0' / NumberFirst
+OPEN           <- '('
+CLOSE          <- ')'
+PLUS           <- '+'
+MULT           <- '*'
+EndOfFile      <- !.

@@ -51,7 +51,6 @@ CompositeExpression::CompositeExpression(char c) : Expression()
     op = c;
 }
 
-
 CompositeExpression::CompositeExpression(char c, std::string&& s)
 {
     op = c;

@@ -66,22 +66,22 @@ Meta::Meta() : PEG()
     grammarExp.push_expr(&endOfFile);
     this->push_rule(&grammar, &grammarExp);
 
-    // Definition <- Identifier LEFTARROW Expression                   # Type 1
+    // Definition <- Identifier LEFTARROW Expression                # Type 1
     static CompositeExpression definitionExp('\b', {&identifier, &leftArrow, &expression});
     this->push_rule(&definition, &definitionExp);
 
-    // Expression <- Sequence (SLASH Sequence)*                        # Type 2
+    // Expression <- Sequence (SLASH Sequence)*                     # Type 2
     static CompositeExpression expressionExp('\b');
     expressionExp.push_expr(&sequence);
     static CompositeExpression expressionSubExp('\b', {&slash, &sequence});
     expressionExp.push_expr(new CompositeExpression('*', {&expressionSubExp}));
     this->push_rule(&expression, &expressionExp);
 
-    // Sequence <- Prefix*                                           # Type 3
+    // Sequence <- Prefix*                                          # Type 3
     static CompositeExpression sequenceExp('*', {&prefix});
     this->push_rule(&sequence, &sequenceExp);
 
-    // Prefix <- (AND / NOT)? Suffix                               # Type 4
+    // Prefix <- (AND / NOT)? Suffix                                # Type 4
     static CompositeExpression prefixExp('\b');
     static CompositeExpression prefixSubExp('?');
     prefixSubExp.push_expr(new CompositeExpression('/', {&and_, &not_}));
@@ -89,7 +89,7 @@ Meta::Meta() : PEG()
     prefixExp.push_expr(&suffix);
     this->push_rule(&prefix, &prefixExp);
 
-    // Suffix <- Primary (QUESTION / STAR / PLUS)?                 # Type 5
+    // Suffix <- Primary (QUESTION / STAR / PLUS)?                  # Type 5
     static CompositeExpression suffixExp('\b');
     suffixExp.push_expr(&primary);
     static CompositeExpression suffixSubExp('?');
@@ -110,7 +110,7 @@ Meta::Meta() : PEG()
     primaryExp.push_expr(&dot);
     this->push_rule(&primary, &primaryExp);
 
-    // Identifier <- '[a-zA-Z_][a-zA-Z_0-9]*' Spacing                  # Type 7
+    // Identifier <- '[a-zA-Z_][a-zA-Z_0-9]*' Spacing               # Type 7
     static CompositeExpression identifierExp('\b');
     identifierExp.push_expr(&identifierStart);
     identifierExp.push_expr(new CompositeExpression('*', {&identifierRest}));
@@ -123,7 +123,7 @@ Meta::Meta() : PEG()
     static CompositeExpression identifierRestExp('/', "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789");
     this->push_rule(&identifierRest, &identifierRestExp);
 
-    // Literal    <- "'" (!"'" Char)* "'" Spacing                      # Type 8
+    // Literal    <- "'" (!"'" Char)* "'" Spacing                   # Type 8
     //             / '"' (!'"' Char)* '"' Spacing
     static CompositeExpression literalExp('/');
     static CompositeExpression literalFirstOption('\b');
@@ -150,7 +150,7 @@ Meta::Meta() : PEG()
     literalExp.push_expr(&literalSecondOption);
     this->push_rule(&literal, &literalExp);
 
-    // Char       <- '\\[nrt\'"\+\-\*\.\?\^\$\{\}\(\)\[\]\\]'          # Type 9
+    // Char       <- '\\[nrt\'"\+\-\*\.\?\^\$\{\}\(\)\[\]\\]'       # Type 9
     //             / '\\[0-2][0-7][0-7]'
     //             / '\\[0-7][0-7]?'
     //             / !'\\' .
@@ -165,52 +165,52 @@ Meta::Meta() : PEG()
     characterExp.push_expr(&characterSubExp2);
     this->push_rule(&character, &characterExp);
 
-    // LEFTARROW  <- '<-' Spacing                                      # Type 10
+    // LEFTARROW  <- '<-' Spacing                                   # Type 10
     static CompositeExpression leftArrowExp('\b', {&lessThan, &minus, &spacing});
     this->push_rule(&leftArrow, &leftArrowExp);
 
-    // SLASH      <- '/' Spacing                                       # Type 11
+    // SLASH      <- '/' Spacing                                    # Type 11
     static CompositeExpression slashExp('\b', {&forwardSlash, &spacing});
     this->push_rule(&slash, &slashExp);
 
-    // AND        <- '&' Spacing                                       # Type 12
+    // AND        <- '&' Spacing                                    # Type 12
     static CompositeExpression and_Exp('\b', {&andTerm, &spacing});
     this->push_rule(&and_, &and_Exp);
 
-    // NOT        <- '!' Spacing                                       # Type 13
+    // NOT        <- '!' Spacing                                    # Type 13
     static CompositeExpression not_Exp('\b', {&notTerm, &spacing});
     this->push_rule(&not_, &not_Exp);
 
-    // QUESTION   <- '\\?' Spacing                                     # Type 14
+    // QUESTION   <- '\\?' Spacing                                  # Type 14
     static CompositeExpression questionMarkExp('\b', {&questionMarkTerm, &spacing});
     this->push_rule(&questionMark, &questionMarkExp);
 
-    // STAR       <- '\\*' Spacing                                     # Type 15
+    // STAR       <- '\\*' Spacing                                  # Type 15
     static CompositeExpression starExp('\b', {&starTerm, &spacing});
     this->push_rule(&star, &starExp);
 
-    // PLUS       <- '\\+' Spacing                                     # Type 16
+    // PLUS       <- '\\+' Spacing                                  # Type 16
     static CompositeExpression plusExp('\b', {&plusTerm, &spacing});
     this->push_rule(&plus, &plusExp);
 
-    // OPEN       <- '\\(' Spacing                                     # Type 17
+    // OPEN       <- '\\(' Spacing                                  # Type 17
     static CompositeExpression openParenExp('\b', {&openParenTerm, &spacing});
     this->push_rule(&openParen, &openParenExp);
 
-    // CLOSE      <- '\\)' Spacing                                     # Type 18
+    // CLOSE      <- '\\)' Spacing                                  # Type 18
     static CompositeExpression closeParenExp('\b', {&closeParenTerm, &spacing});
     this->push_rule(&closeParen, &closeParenExp);
 
-    // DOT        <- '\\.' Spacing                                     # Type 19
+    // DOT        <- '\\.' Spacing                                  # Type 19
     static CompositeExpression dotExp('\b', {&period, &spacing});
     this->push_rule(&dot, &dotExp);
 
-    // Spacing    <- (Space / Comment)*                                # Type 20
+    // Spacing    <- (Space / Comment)*                             # Type 20
     static CompositeExpression spacingExp('*');
     spacingExp.push_expr(new CompositeExpression('/', {&space, &comment}));
     this->push_rule(&spacing, &spacingExp);
 
-    // Comment    <- '#' (!EndOfLine .)* EndOfLine                     # Type 21
+    // Comment    <- '#' (!EndOfLine .)* EndOfLine                  # Type 21
     static CompositeExpression commentExp('\b');
     commentExp.push_expr(&hash);
     static CompositeExpression commentSubExp('\b');
@@ -220,53 +220,22 @@ Meta::Meta() : PEG()
     commentExp.push_expr(&endOfLine);
     this->push_rule(&comment, &commentExp);
 
-    // Space      <- ' ' / '\t' / EndOfLine                            # Type 22
+    // Space      <- ' ' / '\t' / EndOfLine                         # Type 22
     static CompositeExpression spaceExp('/', {&spaceTerm, &tab, &endOfLine});
     this->push_rule(&space, &spaceExp);
 
-    // EndOfLine  <- '\r\n' / '\n' / '\r'                              # Type 23
+    // EndOfLine  <- '\r\n' / '\n' / '\r'                           # Type 23
     static CompositeExpression endOfLineExp('/');
     endOfLineExp.push_expr(new CompositeExpression('\b', {&cr, &lf}));
     endOfLineExp.push_expr(&lf);
     endOfLineExp.push_expr(&cr);
     this->push_rule(&endOfLine, &endOfLineExp);
 
-    // EndOfFile  <- !.                                                # Type 24
+    // EndOfFile  <- !.                                             # Type 24
     static CompositeExpression endOfFileExp('!', {&anyChar});
     this->push_rule(&endOfFile, &endOfFileExp);
 
-/*
-    // Add the rules to the PEG.
-    peg.addRule(grammarRule);
-    peg.addRule(definitionRule);
-    peg.addRule(expressionRule);
-    peg.addRule(sequenceRule);
-    peg.addRule(prefixRule);
-    peg.addRule(suffixRule);
-    peg.addRule(primaryRule);
-    peg.addRule(identifierRule);
-    peg.addRule(identifierStartRule);
-    peg.addRule(identifierRestRule);
-    peg.addRule(literalRule);
-    peg.addRule(characterRule);
-    peg.addRule(leftArrowRule);
-    peg.addRule(slashRule);
-    peg.addRule(andRule);
-    peg.addRule(notRule);
-    peg.addRule(questionMarkRule);
-    peg.addRule(starRule);
-    peg.addRule(plusRule);
-    peg.addRule(openParenRule);
-    peg.addRule(closeParenRule);
-    peg.addRule(dotRule);
-    peg.addRule(spacingRule);
-    peg.addRule(commentRule);
-    peg.addRule(spaceRule);
-    peg.addRule(endOfLineRule);
-    peg.addRule(endOfFileRule);
-
-*/
-    // Set the start symbol.
+   // Set the start symbol.
     this->set_start(&grammar);
 }
 

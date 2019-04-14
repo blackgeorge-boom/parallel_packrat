@@ -15,6 +15,7 @@ class SerialPackrat: public PegVisitor {
     Cell** cells;
 public:
     SerialPackrat(const char* input, PEG g);
+    SerialPackrat(std::string input, PEG g);
 
     void print_cells() const;
 

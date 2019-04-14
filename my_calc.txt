@@ -1,0 +1,10 @@
+Calculation    <- Addition EndOfFile
+Addition       <- Multiplication ( PLUS Multiplication )*
+Multiplication <- Operand ( MULT Operand )*
+Operand        <- Number / OPEN Addition CLOSE
+Number         <- '00' / '1'
+OPEN           <- '('
+CLOSE          <- ')'
+PLUS           <- '+'
+MULT           <- '*'
+EndOfFile      <- !.

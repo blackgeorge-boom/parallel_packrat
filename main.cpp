@@ -15,8 +15,6 @@ int main()
     PEG g;
 
     // Terminals
-    Terminal t0("0");
-    Terminal t1("1");
     Terminal lp("(");
     Terminal rp(")");
     Terminal times("*");
@@ -33,9 +31,7 @@ int main()
     // Rules
 
     // Decimal <- '0' / '1'
-    CompositeExpression decExp('/', "01");
-//    decExp.push_expr(&t0);
-//    decExp.push_expr(&t1);
+    CompositeExpression decExp('/', "0123456789");
 
     g.push_rule(&dec, &decExp);
 
@@ -84,18 +80,18 @@ int main()
     // Set starting rule
     g.set_start(&ae);
 
-    std::cout << "Grammar: \n";
+    std::cout << "\nGrammar: \n";
     std::cout << g;
 
-    SerialPackrat sp("1", g);
+    SerialPackrat sp("(3+2)*7+1", g);
 
     auto res = sp.visit(g);
-    sp.print_cells();
 
     if (res)
         std::cout << "Parse successful! \n";
     else
         std::cout << "Syntax Error... \n";
+    sp.print_cells();
 
     NonTerminal::reset_idx();
 

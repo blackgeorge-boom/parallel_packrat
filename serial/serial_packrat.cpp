@@ -48,7 +48,6 @@ void SerialPackrat::print_cells() const
 
 bool SerialPackrat::visit(NonTerminal &nt)
 {
-    std::cout << "Parsing " << nt << "\n";
     int row = nt.index();
     Cell* cur_cell = &cells[row][pos];
     Result cur_res = cur_cell->res();
@@ -57,13 +56,11 @@ bool SerialPackrat::visit(NonTerminal &nt)
 
         case Result::success:
         {
-            std::cout << "yes\n";
             pos = cur_cell->pos();
             return true;
         }
         case Result::fail:
         {
-            std::cout << "no\n";
             return false;
         }
         case Result::unknown:
@@ -74,7 +71,6 @@ bool SerialPackrat::visit(NonTerminal &nt)
             if (res) {
                 cur_cell->set_res(Result::success);
                 cur_cell->set_pos(pos); // pos has changed
-                std::cout << "Parsed " << nt << "\n";
                 return true;
             } else {
                 cur_cell->set_res(Result::fail);
@@ -174,19 +170,20 @@ bool SerialPackrat::visit(AnyChar &ac)
 
 bool SerialPackrat::visit(PEG &peg)
 {
-    std::cout << "Parsing... \n";
-    NonTerminal* nt = peg.get_start();
+    std::cout << "\nParsing... \n";
+    NonTerminal *nt;
     bool res;
-//    res = nt->accept(*this);
-//    if (res) std::cout << "Inner parsing worked!\n";
+
+    // nt = peg.get_start();
+    // res = nt->accept(*this);
+    // if (res) std::cout << "Inner parsing worked!\n";
 
     int N = peg.get_rules().size();
     int M = in.size() + 1;
 
     for (auto j = M - 1; j >= 0; --j) {
-        pos = j;
         for (auto i = N - 1; i >= 0; --i) {
-            std::cout << "(" << i << ", " << j << ")\n";
+            pos = j;
             nt = peg.get_non_term(i);
             nt->accept(*this);
         }

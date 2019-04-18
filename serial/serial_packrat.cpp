@@ -91,7 +91,6 @@ bool SerialPackrat::visit(Terminal &t)
 
 bool SerialPackrat::visit(CompositeExpression &ce)
 {
-//    std::cout << "Visiting " << ce << "\n";
     char op = ce.op_name();
     std::vector<Expression*> exprs = ce.expr_list();
     int orig_pos = pos;

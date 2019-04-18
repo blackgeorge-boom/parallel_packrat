@@ -103,15 +103,15 @@ int main()
     std::string content( (std::istreambuf_iterator<char>(ifs) ),
                          (std::istreambuf_iterator<char>()    ) );
 
-//    std::cout << "\nInput: \n" << content << "\n";
+    std::cout << "\nInput: \n" << content << "\n";
 
     SerialPackrat sp2(content, meta);
 
-//    res = sp2.visit(meta);
-//
-//    if (res)
-//        std::cout << "Parse successful! \n";
-//    else
-//        std::cout << "Syntax Error... \n";
+    res = sp2.visit(meta);
+
+    if (res)
+        std::cout << "Parse successful! \n";
+    else
+        std::cout << "Syntax Error... \n";
     return 0;
 }

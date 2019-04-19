@@ -6,6 +6,7 @@
 #include "serial/peg.h"
 #include "serial/grammar_meta.h"
 #include "serial/serial_packrat.h"
+#include "serial/tree_node.h"
 
 int NonTerminal::num = 0;
 
@@ -113,5 +114,17 @@ int main()
         std::cout << "Parse successful! \n";
     else
         std::cout << "Syntax Error... \n";
+
+    TreeNode t(&multSub1);
+    TreeNode t1(&prim);
+    TreeNode t2(&times);
+    TreeNode t3(&mult);
+
+    t.push_child(&t1);
+    t.push_child(&t2);
+    t.push_child(&t3);
+
+    printTree("", &t, true);
+
     return 0;
 }

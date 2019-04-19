@@ -25,4 +25,7 @@ public:
 
 std::ostream& operator<<(std::ostream& os, const TreeNode& t);
 
+void printTree(const std::string& prefix, const TreeNode* node, bool isLast);
+
+
 #endif //PARALLEL_PACKRAT_TREE_NODE_H

@@ -6,6 +6,7 @@
 #include "serial/peg.h"
 #include "serial/grammar_meta.h"
 #include "serial/serial_packrat.h"
+#include "serial/serial_tree_packrat.h"
 #include "serial/tree_node.h"
 
 int NonTerminal::num = 0;
@@ -84,7 +85,7 @@ int main()
     std::cout << "\nGrammar: \n";
     std::cout << g;
 
-    SerialPackrat sp("(3+2)*7+1", g);
+    SerialTreePackrat sp("(3+2)*7+1", g);
 
     auto res = sp.visit(g);
 
@@ -93,18 +94,19 @@ int main()
     else
         std::cout << "Syntax Error... \n";
     sp.print_cells();
+    printTree("", sp.get_root(), true);
 
     NonTerminal::reset_idx();
 
     Meta meta;
-//    std::cout << "\n Meta: \n" << meta << "\n";
+    // std::cout << "\n Meta: \n" << meta << "\n";
 
     std::ifstream ifs("peg_examples/Calc.txt", std::ifstream::in);
     if (!ifs) std::cout << "Error opening file";
     std::string content( (std::istreambuf_iterator<char>(ifs) ),
                          (std::istreambuf_iterator<char>()    ) );
 
-    std::cout << "\nInput: \n" << content << "\n";
+    // std::cout << "\nInput: \n" << content << "\n";
 
     SerialPackrat sp2(content, meta);
 
@@ -126,5 +128,15 @@ int main()
 
     printTree("", &t, true);
 
+    SerialTreePackrat sp3("(3+2)*7+1", g);
+    res = sp.visit(g);
+
+    if (res)
+        std::cout << "Parse successful! \n";
+    else
+        std::cout << "Syntax Error... \n";
+
+    sp3.print_cells();
+    printTree("", sp3.get_root(), true);
     return 0;
 }

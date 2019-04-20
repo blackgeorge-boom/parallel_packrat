@@ -9,6 +9,7 @@
 #include "peg_visitor.h"
 
 class SerialPackrat: public PegVisitor {
+protected:
     std::string in;
     int pos;
     PEG peg;

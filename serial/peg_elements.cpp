@@ -21,6 +21,11 @@ NonTerminal::NonTerminal(const char* name) : Expression(name)
     idx = num++;
 }
 
+NonTerminal::NonTerminal(std::string name) : Expression(name)
+{
+    idx = num++;
+}
+
 std::ostream &NonTerminal::put(std::ostream &os) const
 {
     return os << this->name();

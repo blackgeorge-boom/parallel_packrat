@@ -8,6 +8,7 @@
 #include "serial/serial_packrat.h"
 #include "serial/serial_tree_packrat.h"
 #include "serial/tree_node.h"
+#include "serial/peg_factory.h"
 
 int NonTerminal::num = 0;
 
@@ -85,7 +86,7 @@ int main()
     std::cout << "\nGrammar: \n";
     std::cout << g;
 
-    SerialTreePackrat sp("(3+2)*7+1", g);
+    SerialPackrat sp("(3+2)*7+1", g);
 
     auto res = sp.visit(g);
 
@@ -94,7 +95,6 @@ int main()
     else
         std::cout << "Syntax Error... \n";
     sp.print_cells();
-    printTree("", sp.get_root(), true);
 
     NonTerminal::reset_idx();
 
@@ -108,7 +108,7 @@ int main()
 
     // std::cout << "\nInput: \n" << content << "\n";
 
-    SerialPackrat sp2(content, meta);
+    SerialTreePackrat sp2(content, meta);
 
     res = sp2.visit(meta);
 
@@ -116,20 +116,10 @@ int main()
         std::cout << "Parse successful! \n";
     else
         std::cout << "Syntax Error... \n";
+    printTree("", sp2.get_root(), true);
 
-    TreeNode t(&multSub1);
-    TreeNode t1(&prim);
-    TreeNode t2(&times);
-    TreeNode t3(&mult);
-
-    t.push_child(&t1);
-    t.push_child(&t2);
-    t.push_child(&t3);
-
-    printTree("", &t, true);
-
-    SerialTreePackrat sp3("(3+2)*7+1", g);
-    res = sp.visit(g);
+    SerialTreePackrat sp3("7+1", g);
+    res = sp3.visit(g);
 
     if (res)
         std::cout << "Parse successful! \n";
@@ -138,5 +128,10 @@ int main()
 
     sp3.print_cells();
     printTree("", sp3.get_root(), true);
+
+//    PEGFactory f;
+//    PEG* calc = f.from_tree(sp3.get_root());
+//    std::cout << *calc;
+
     return 0;
 }

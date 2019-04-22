@@ -172,8 +172,6 @@ bool SerialTreePackrat::visit(PEG& peg)
 
     nt = peg.get_start();
     res = nt->accept(*this);
-    if (res) std::cout << "Inner parsing worked!\n";
-//    root->push_child(cells[0][0].get_node());
 
     /*
     int N = peg.get_rules().size();

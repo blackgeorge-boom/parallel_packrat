@@ -14,6 +14,7 @@ class Expression {
     std::string n;
 public:
     Expression() :n{} {};
+    explicit Expression(std::string name) :n{name} {};
     explicit Expression(const char* name) :n{name} {};
     virtual ~Expression() = default;
 
@@ -31,6 +32,7 @@ class NonTerminal: public Expression{
 public:
     NonTerminal();
     explicit NonTerminal(const char* name);
+    explicit NonTerminal(std::string name);
     ~NonTerminal() override = default;
 
     static void reset_idx() { num = 0; }

@@ -8,7 +8,7 @@
 SerialTreePackrat::SerialTreePackrat(const char* input, PEG g)
     : SerialPackrat(input, g)
 {
-    NonTerminal* nt = new NonTerminal("(Start)");
+    auto nt = new NonTerminal("(Start)");
     root = new TreeNode(nt);
     tree_pos = root;
 }
@@ -17,7 +17,7 @@ SerialTreePackrat::SerialTreePackrat(const char* input, PEG g)
 SerialTreePackrat::SerialTreePackrat(std::string input, PEG g)
     : SerialPackrat(input, g)
 {
-    NonTerminal* nt = new NonTerminal("(Start)");
+    auto nt = new NonTerminal("(Start)");
     root = new TreeNode(nt);
     tree_pos = root;
 }

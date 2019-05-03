@@ -12,29 +12,30 @@ PEG* PEGFactory::from_tree(TreeNode *root)
 
 PEG* PEGFactory::construct_peg(TreeNode *node)
 {
-    PEG* peg = new PEG;
-    std::pair<NonTerminal*, CompositeExpression*>* p;
-
     if (node->name() == "Grammar") {
-        for (auto child : node->get_children()) {
-            p = construct_rule(child);
-            peg->push_rule(p->first, p->second);
-        }
+
+        PEG* peg = new PEG;
+        std::pair<NonTerminal*, CompositeExpression*>* p;
+
+        for (auto child : node->get_children())
+            if (child->name() == "Definition") {
+                p = construct_rule(child);
+                peg->push_rule(p->first, p->second);
+            }
         return peg;
     }
-    else if (! node->get_children().empty()) {
+    else if (node->children_num() > 0)
         for (auto child : node->get_children())
             if (child->name() == "Grammar")
                 return construct_peg(child);
-    }
 
     return nullptr;
 }
 
-std::pair<NonTerminal*, CompositeExpression*>* PEGFactory::construct_rule(TreeNode *node)
+std::pair<NonTerminal*, CompositeExpression*>* PEGFactory::construct_rule(TreeNode* node)
 {
-    NonTerminal* nt = construct_identifier(node->get_children()[0]);
-    CompositeExpression* ce = construct_expression(node->get_children()[2]);
+    NonTerminal* nt = construct_identifier(node->get_ith(0));
+    CompositeExpression* ce = construct_expression(node->get_ith(2));
 
     if (!nt or !ce)
         throw "Cannot construct PEG; malformed parse tree!";
@@ -42,14 +43,14 @@ std::pair<NonTerminal*, CompositeExpression*>* PEGFactory::construct_rule(TreeNo
     return new std::pair<NonTerminal*, CompositeExpression*>(nt, ce);
 }
 
-NonTerminal *PEGFactory::construct_identifier(TreeNode *node)
+NonTerminal* PEGFactory::construct_identifier(TreeNode *node)
 {
     std::string name;
 
     for (auto child : node->get_children()) {
         if (child->name() == "IdentifierStart" or child->name() == "IdentifierRest") {
+            name += child->get_ith(0)->name();
             //TODO: add checking
-            name += child->name();
         }
     }
 
@@ -58,8 +59,155 @@ NonTerminal *PEGFactory::construct_identifier(TreeNode *node)
     if (it != nt_map.end())
         return it->second;
     else {
-        NonTerminal* nt = new NonTerminal(name);
+        auto nt = new NonTerminal(name);
         nt_map.insert(std::pair<std::string, NonTerminal*>(name, nt));
         return nt;
+    }
+}
+
+CompositeExpression* PEGFactory::construct_expression(TreeNode *node)
+{
+    if (node->children_num() > 1) {
+
+        auto ce = new CompositeExpression('/');
+
+        for (auto child : node->get_children())
+            if (child->name() == "Sequence")
+                ce->push_expr(construct_sequence(child));
+
+        return ce;
+    }
+    else {
+        return construct_sequence(node->get_ith(0));
+    }
+}
+
+CompositeExpression* PEGFactory::construct_sequence(TreeNode *node)
+{
+    auto ce = new CompositeExpression('\b');
+
+    if (node->children_num() > 1) {
+
+        for (auto child : node->get_children())
+            if (child->name() == "Prefix") {
+                Expression* e = construct_preffix(child);
+                ce->push_expr(e);
+            }
+
+        return ce;
+    }
+    else {
+        auto pref = construct_preffix(node->get_ith(0));
+        ce->push_expr(pref);
+        return ce;
+    }
+}
+
+Expression* PEGFactory::construct_preffix(TreeNode *node)
+{
+    auto child = node->get_ith(0);
+
+    if (node->children_num() > 1) {
+
+        char op;
+
+        if (child->name() == "And")
+            op = '&';
+        else
+            op = '!';
+
+        auto ce = new CompositeExpression(op);
+        ce->push_expr(construct_suffix(node->get_ith(1)));
+        return ce;
+    }
+    else
+        return construct_suffix(child);
+}
+
+Expression* PEGFactory::construct_suffix(TreeNode *node)
+{
+    auto child = node->get_ith(0);
+
+    if (node->children_num() > 1) {
+
+        char op;
+        auto second_child = node->get_ith(1);
+
+        if (second_child->name() == "QuestionMark")
+            op = '?';
+        else if (second_child->name() == "Star")
+            op = '*';
+        else
+            op = '+';
+
+        return new CompositeExpression(op, {construct_primary(child)});
+    }
+    else
+        return construct_primary(child);
+}
+
+Expression* PEGFactory::construct_primary(TreeNode *node)
+{
+    auto child = node->get_ith(0);
+
+    if (child->name() == "Identifier")
+        return construct_identifier(child);
+    else if (child->name() == "OpenParen")
+        return construct_expression(node->get_ith(1));
+    else if (child->name() == "Literal")
+        return construct_literal(child);
+    else
+        return new AnyChar();
+}
+
+Expression* PEGFactory::construct_literal(TreeNode* node)
+{
+    std::vector<Expression*> terminals;
+
+    for (auto child : node->get_children())
+        if (child->name() == "Character")
+            terminals.push_back(construct_char(child));
+
+    if (terminals.size() > 1)
+        return new CompositeExpression('\b', terminals);
+    else if (terminals.size() == 1)
+        return terminals[0];
+    else {
+        std::cout << "Error while constructing PEG grammar: no Character node under Literal node.";
+        return nullptr;
+    }
+}
+
+Expression* PEGFactory::construct_char(TreeNode* node)
+{
+    auto child = node->get_ith(0);
+
+    if (node->children_num() == 2 && child->name() == "'\\\\'") {
+
+        auto second_child = node->get_ith(1);
+        std::string ch = second_child->name();
+
+        if (ch == "n")
+            return new Terminal('\n');
+        else if (ch == "r")
+            return new Terminal('\r');
+        else if (ch == "t")
+            return new Terminal('\t');
+        else if (ch == "\\")
+            return new Terminal('\\');
+        else if (ch == "\'")
+            return new Terminal('\'');
+        else if (ch == "\"")
+            return new Terminal('\"');
+        else {
+            std::cout << "Error while constructing PEG grammar: Character node contains invalid escape.";
+            return nullptr;
+        }
+    }
+    else if (node->children_num() == 1)
+        return child->get_expr();
+    else {
+        std::cout << "Error while constructing PEG grammar: invalid Character node.";
+        return nullptr;
     }
 }

@@ -129,9 +129,9 @@ int main()
     sp3.print_cells();
     printTree("", sp3.get_root(), true);
 
-//    PEGFactory f;
-//    PEG* calc = f.from_tree(sp3.get_root());
-//    std::cout << *calc;
+    PEGFactory f;
+    PEG* calc = f.from_tree(sp3.get_root());
+    std::cout << *calc;
 
     return 0;
 }

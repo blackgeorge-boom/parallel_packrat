@@ -79,8 +79,9 @@ class CompositeExpression: public Expression {
 public:
     CompositeExpression();
     explicit CompositeExpression(char c);
-    CompositeExpression(char c, std::string&& v);
+    CompositeExpression(char c, std::string&& s);
     CompositeExpression(char c, std::initializer_list<Expression*> a_args);
+    CompositeExpression(char c, std::vector<Expression*> v);
     ~CompositeExpression() override = default;
 
     char op_name() const { return op; }

@@ -19,7 +19,9 @@ public:
 
     Expression* get_expr() const { return expr; }
     std::vector<TreeNode*> get_children() const { return children; }
+    TreeNode* get_ith(int i) { return children[i]; }
     std::string name() { return expr->name(); }
+    long int children_num() const { return children.size(); }
     void push_child(TreeNode* t) { children.push_back(t); }
     void push_children(std::vector<TreeNode*> v) { children = std::move(v); }
 };

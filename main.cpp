@@ -94,14 +94,14 @@ int main()
         std::cout << "Parse successful! \n";
     else
         std::cout << "Syntax Error... \n";
-    sp.print_cells();
+//    sp.print_cells();
 
     NonTerminal::reset_idx();
 
     Meta meta;
-    // std::cout << "\n Meta: \n" << meta << "\n";
+//    std::cout << "\n Meta: \n" << meta << "\n";
 
-    std::ifstream ifs("peg_examples/Calc.txt", std::ifstream::in);
+    std::ifstream ifs("peg_examples/SimpleCalc.txt", std::ifstream::in);
     if (!ifs) std::cout << "Error opening file";
     std::string content( (std::istreambuf_iterator<char>(ifs) ),
                          (std::istreambuf_iterator<char>()    ) );
@@ -116,7 +116,7 @@ int main()
         std::cout << "Parse successful! \n";
     else
         std::cout << "Syntax Error... \n";
-    printTree("", sp2.get_root(), true);
+//    printTree("", sp2.get_root(), true);
 
     SerialTreePackrat sp3("7+1", g);
     res = sp3.visit(g);
@@ -126,12 +126,14 @@ int main()
     else
         std::cout << "Syntax Error... \n";
 
-    sp3.print_cells();
+//    sp3.print_cells();
     printTree("", sp3.get_root(), true);
 
-    PEGFactory f;
-    PEG* calc = f.from_tree(sp3.get_root());
-    std::cout << *calc;
+    NonTerminal::reset_idx();
+
+//    PEGFactory f;
+//    PEG* calc = f.from_tree(sp2.get_root());
+//    std::cout << *calc;
 
     return 0;
 }

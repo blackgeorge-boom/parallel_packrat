@@ -33,7 +33,21 @@ std::ostream &NonTerminal::put(std::ostream &os) const
 
 std::ostream &Terminal::put(std::ostream &os) const
 {
-    return os << this->name();
+    auto n = this->name();
+
+    os << "'";
+
+    if (n == "\\")
+        os << "\\\\";
+    else if (n == "\n")
+        os << "\\n";
+    else if (n == "\t")
+        os << "\\t";
+    else if (n == "\r")
+        os << "\\r";
+    else os << n;
+
+    return os << "'";
 }
 
 std::ostream &Empty::put(std::ostream &os) const

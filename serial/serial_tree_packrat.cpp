@@ -82,7 +82,6 @@ bool SerialTreePackrat::visit(CompositeExpression& ce)
     auto old_tree_pos = tree_pos;
 
     switch (op) {
-
         case '\b':  // sequence
         {
             tree_pos = new TreeNode();

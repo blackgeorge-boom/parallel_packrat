@@ -65,8 +65,8 @@ bool SerialPackrat::visit(NonTerminal &nt)
         }
         case Result::unknown:
         {
-            CompositeExpression *ce = peg.get_expr(&nt);
-            auto res = ce->accept(*this);
+            Expression *e = peg.get_expr(&nt);
+            auto res = e->accept(*this);
 
             if (res) {
                 cur_cell->set_res(Result::success);

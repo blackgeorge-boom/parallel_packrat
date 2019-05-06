@@ -15,7 +15,7 @@ PEG* PEGFactory::construct_peg(TreeNode *node)
     if (node->name() == "Grammar") {
 
         PEG* peg = new PEG;
-        std::pair<NonTerminal*, CompositeExpression*>* p;
+        std::pair<NonTerminal*, Expression*>* p;
 
         for (auto child : node->get_children())
             if (child->name() == "Definition") {
@@ -32,15 +32,15 @@ PEG* PEGFactory::construct_peg(TreeNode *node)
     return nullptr;
 }
 
-std::pair<NonTerminal*, CompositeExpression*>* PEGFactory::construct_rule(TreeNode* node)
+std::pair<NonTerminal*, Expression*>* PEGFactory::construct_rule(TreeNode* node)
 {
     NonTerminal* nt = construct_identifier(node->get_ith(0));
-    CompositeExpression* ce = construct_expression(node->get_ith(2));
+    Expression* e = construct_expression(node->get_ith(2));
 
-    if (!nt or !ce)
+    if (!nt or !e)
         throw "Cannot construct PEG; malformed parse tree!";
 
-    return new std::pair<NonTerminal*, CompositeExpression*>(nt, ce);
+    return new std::pair<NonTerminal*, Expression*>(nt, e);
 }
 
 NonTerminal* PEGFactory::construct_identifier(TreeNode *node)
@@ -65,7 +65,7 @@ NonTerminal* PEGFactory::construct_identifier(TreeNode *node)
     }
 }
 
-CompositeExpression* PEGFactory::construct_expression(TreeNode *node)
+Expression* PEGFactory::construct_expression(TreeNode *node)
 {
     if (node->children_num() > 1) {
 
@@ -82,11 +82,12 @@ CompositeExpression* PEGFactory::construct_expression(TreeNode *node)
     }
 }
 
-CompositeExpression* PEGFactory::construct_sequence(TreeNode *node)
+Expression* PEGFactory::construct_sequence(TreeNode *node)
 {
-    auto ce = new CompositeExpression('\b');
 
     if (node->children_num() > 1) {
+
+        auto ce = new CompositeExpression('\b');
 
         for (auto child : node->get_children())
             if (child->name() == "Prefix") {
@@ -97,9 +98,7 @@ CompositeExpression* PEGFactory::construct_sequence(TreeNode *node)
         return ce;
     }
     else {
-        auto pref = construct_preffix(node->get_ith(0));
-        ce->push_expr(pref);
-        return ce;
+        return construct_preffix(node->get_ith(0));
     }
 }
 
@@ -140,7 +139,9 @@ Expression* PEGFactory::construct_suffix(TreeNode *node)
         else
             op = '+';
 
-        return new CompositeExpression(op, {construct_primary(child)});
+        auto ce = new CompositeExpression(op);
+        ce->push_expr(construct_primary(child));
+        return ce;
     }
     else
         return construct_primary(child);
@@ -167,6 +168,9 @@ Expression* PEGFactory::construct_literal(TreeNode* node)
     for (auto child : node->get_children())
         if (child->name() == "Character")
             terminals.push_back(construct_char(child));
+
+    for (auto t : terminals)
+        std::cout << "--> " << *t << "\n";
 
     if (terminals.size() > 1)
         return new CompositeExpression('\b', terminals);

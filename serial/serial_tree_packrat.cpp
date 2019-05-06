@@ -42,10 +42,10 @@ bool SerialTreePackrat::visit(NonTerminal& nt)
         }
         case Result::unknown:
         {
-            CompositeExpression *ce = peg.get_expr(&nt);
+            Expression *e = peg.get_expr(&nt);
             auto old_tree_pos = tree_pos;
             tree_pos = new TreeNode(&nt);
-            auto res = ce->accept(*this);
+            auto res = e->accept(*this);
 
             if (res) {
                 cur_cell->set_res(Result::success);

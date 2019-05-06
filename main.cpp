@@ -94,12 +94,12 @@ int main()
         std::cout << "Parse successful! \n";
     else
         std::cout << "Syntax Error... \n";
-//    sp.print_cells();
+    sp.print_cells();
 
     NonTerminal::reset_idx();
 
     Meta meta;
-//    std::cout << "\n Meta: \n" << meta << "\n";
+    std::cout << "\n Meta: \n" << meta << "\n";
 
     std::ifstream ifs("peg_examples/SimpleCalc.txt", std::ifstream::in);
     if (!ifs) std::cout << "Error opening file";
@@ -116,7 +116,7 @@ int main()
         std::cout << "Parse successful! \n";
     else
         std::cout << "Syntax Error... \n";
-//    printTree("", sp2.get_root(), true);
+    printTree("", sp2.get_root(), true);
 
     SerialTreePackrat sp3("7+1", g);
     res = sp3.visit(g);
@@ -126,7 +126,7 @@ int main()
     else
         std::cout << "Syntax Error... \n";
 
-//    sp3.print_cells();
+    sp3.print_cells();
     printTree("", sp3.get_root(), true);
 
     NonTerminal::reset_idx();

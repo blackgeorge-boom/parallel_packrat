@@ -17,10 +17,10 @@ public:
 
     PEG* from_tree(TreeNode* root);
     PEG* construct_peg(TreeNode* node);
-    std::pair<NonTerminal*, CompositeExpression*>* construct_rule(TreeNode* node);
+    std::pair<NonTerminal*, Expression*>* construct_rule(TreeNode* node);
     NonTerminal* construct_identifier(TreeNode* node);
-    CompositeExpression* construct_expression(TreeNode* node);
-    CompositeExpression* construct_sequence(TreeNode* node);
+    Expression* construct_expression(TreeNode* node);
+    Expression* construct_sequence(TreeNode* node);
     Expression* construct_preffix(TreeNode* node);
     Expression* construct_suffix(TreeNode* node);
     Expression* construct_primary(TreeNode* node);

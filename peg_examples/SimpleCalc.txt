@@ -6,5 +6,5 @@
 # OPEN           <- '('
 # CLOSE          <- ')'
 
-Decimal <- 'a'
+A <- '\n'
 

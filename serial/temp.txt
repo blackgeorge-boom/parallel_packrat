@@ -1,0 +1,104 @@
+========================================
+Prefix-> (And / Not)? Suffix
+
+└──Sequence
+    └──Prefix
+        └──Suffix
+            └──Primary
+                └──Identifier
+                    ├──IdentifierStart
+                    │   └──'B'
+                    └──Spacing
+                        └──Space
+                            └──' '
+========================================
+Sequence-> (Prefix)*
+
+└──anon
+    └──Sequence
+        └──Prefix
+            └──Suffix
+                └──Primary
+                    └──Identifier
+                        ├──IdentifierStart
+                        │   └──'B'
+                        └──Spacing
+                            └──Space
+                                └──' '
+========================================
+Slash-> '/' Spacing
+
+└──anon
+    └──Slash
+        ├──'/'
+        └──Spacing
+            └──Space
+                └──' '
+========================================
+Prefix-> (And / Not)? Suffix
+
+└──Sequence
+    └──Prefix
+        └──Suffix
+            └──Primary
+                └──Identifier
+                    ├──IdentifierStart
+                    │   └──'C'
+                    └──Spacing
+                        └──Space
+                            └──EndOfLine
+                                └──'\n'
+========================================
+Sequence-> (Prefix)*
+
+└──anon
+    ├──Slash
+    │   ├──'/'
+    │   └──Spacing
+    │       └──Space
+    │           └──' '
+    └──Sequence
+        └──Prefix
+            └──Suffix
+                └──Primary
+                    └──Identifier
+                        ├──IdentifierStart
+                        │   └──'C'
+                        └──Spacing
+                            └──Space
+                                └──EndOfLine
+                                    └──'\n'
+========================================
+Expression-> Sequence (Slash Sequence)*
+
+└──anon
+    ├──Identifier
+    │   ├──IdentifierStart
+    │   │   └──'A'
+    │   └──Spacing
+    │       └──Space
+    │           └──' '
+    ├──LeftArrow
+    │   ├──'<'
+    │   ├──'-'
+    │   └──Spacing
+    │       └──Space
+    │           └──' '
+    └──Expression
+        ├──Slash
+        │   ├──'/'
+        │   └──Spacing
+        │       └──Space
+        │           └──' '
+        └──Sequence
+            └──Prefix
+                └──Suffix
+                    └──Primary
+                        └──Identifier
+                            ├──IdentifierStart
+                            │   └──'C'
+                            └──Spacing
+                                └──Space
+                                    └──EndOfLine
+                                        └──'\n'
+========================================

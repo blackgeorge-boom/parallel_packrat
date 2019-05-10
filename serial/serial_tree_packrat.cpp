@@ -52,10 +52,15 @@ bool SerialTreePackrat::visit(NonTerminal& nt)
                 cur_cell->set_pos(pos); // pos has changed
                 cur_cell->set_node(tree_pos);
 
+//                std::cout << "========================================\n";
+//                std::cout << nt << " -> " << *e << " \n\n";
+//                printTree("", tree_pos, true);
                 old_tree_pos->push_child(tree_pos);
                 tree_pos = old_tree_pos;
+//                printTree("", tree_pos, true);
                 return true;
-            } else {
+            }
+            else {
                 cur_cell->set_res(Result::fail);
                 tree_pos = old_tree_pos;
                 return false;
@@ -85,12 +90,13 @@ bool SerialTreePackrat::visit(CompositeExpression& ce)
         case '\b':  // sequence
         {
             tree_pos = new TreeNode();
-            for (auto expr : exprs)
+            for (auto expr : exprs) {
                 if (!expr->accept(*this)) {
                     pos = orig_pos;
                     tree_pos = old_tree_pos;
                     return false;
                 }
+            }
             old_tree_pos->push_children(tree_pos->get_children());
             tree_pos = old_tree_pos;
             return true;
@@ -156,8 +162,10 @@ bool SerialTreePackrat::visit(Empty& e)
 bool SerialTreePackrat::visit(AnyChar& ac)
 {
     if (pos < in.size()) {
+        std::string s(1, this->cur_tok());
+        auto t = new Terminal(s);
+        tree_pos->push_child(new TreeNode(t));
         pos++;
-        tree_pos->push_child(new TreeNode(&ac));
         return true;
     }
     return false;

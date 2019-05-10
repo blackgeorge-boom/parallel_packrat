@@ -84,7 +84,6 @@ Expression* PEGFactory::construct_expression(TreeNode *node)
 
 Expression* PEGFactory::construct_sequence(TreeNode *node)
 {
-
     if (node->children_num() > 1) {
 
         auto ce = new CompositeExpression('\b');
@@ -92,7 +91,13 @@ Expression* PEGFactory::construct_sequence(TreeNode *node)
         for (auto child : node->get_children())
             if (child->name() == "Prefix") {
                 Expression* e = construct_preffix(child);
-                ce->push_expr(e);
+                auto temp = dynamic_cast<CompositeExpression*>(e);
+                if (temp != nullptr && temp->op_name() == '\b') {
+                    for (auto x : temp->expr_list())
+                        ce->push_expr(x);
+                }
+                else
+                    ce->push_expr(e);
             }
 
         return ce;
@@ -119,8 +124,9 @@ Expression* PEGFactory::construct_preffix(TreeNode *node)
         ce->push_expr(construct_suffix(node->get_ith(1)));
         return ce;
     }
-    else
+    else {
         return construct_suffix(child);
+    }
 }
 
 Expression* PEGFactory::construct_suffix(TreeNode *node)
@@ -143,8 +149,9 @@ Expression* PEGFactory::construct_suffix(TreeNode *node)
         ce->push_expr(construct_primary(child));
         return ce;
     }
-    else
+    else {
         return construct_primary(child);
+    }
 }
 
 Expression* PEGFactory::construct_primary(TreeNode *node)
@@ -169,9 +176,6 @@ Expression* PEGFactory::construct_literal(TreeNode* node)
         if (child->name() == "Character")
             terminals.push_back(construct_char(child));
 
-    for (auto t : terminals)
-        std::cout << "--> " << *t << "\n";
-
     if (terminals.size() > 1)
         return new CompositeExpression('\b', terminals);
     else if (terminals.size() == 1)
@@ -187,29 +191,29 @@ Expression* PEGFactory::construct_char(TreeNode* node)
     auto child = node->get_ith(0);
 
     if (node->children_num() == 2 && child->name() == "'\\\\'") {
-
         auto second_child = node->get_ith(1);
         std::string ch = second_child->name();
 
         if (ch == "n")
-            return new Terminal('\n');
+            return new Terminal("\n");
         else if (ch == "r")
-            return new Terminal('\r');
+            return new Terminal("\r");
         else if (ch == "t")
-            return new Terminal('\t');
+            return new Terminal("\t");
         else if (ch == "\\")
-            return new Terminal('\\');
+            return new Terminal("\\");
         else if (ch == "\'")
-            return new Terminal('\'');
+            return new Terminal("\'");
         else if (ch == "\"")
-            return new Terminal('\"');
+            return new Terminal("\"");
         else {
             std::cout << "Error while constructing PEG grammar: Character node contains invalid escape.";
             return nullptr;
         }
     }
-    else if (node->children_num() == 1)
+    else if (node->children_num() == 1) {
         return child->get_expr();
+    }
     else {
         std::cout << "Error while constructing PEG grammar: invalid Character node.";
         return nullptr;

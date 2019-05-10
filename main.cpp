@@ -11,6 +11,7 @@
 #include "serial/peg_factory.h"
 
 int NonTerminal::num = 0;
+int TreeNode::num = 0;
 
 int main()
 {
@@ -131,9 +132,9 @@ int main()
 
     NonTerminal::reset_idx();
 
-//    PEGFactory f;
-//    PEG* calc = f.from_tree(sp2.get_root());
-//    std::cout << *calc;
+    PEGFactory f;
+    PEG* calc = f.from_tree(sp2.get_root());
+    std::cout << *calc;
 
     return 0;
 }

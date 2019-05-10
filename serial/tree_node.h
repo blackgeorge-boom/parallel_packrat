@@ -10,10 +10,11 @@
 #include "peg_elements.h"
 
 class TreeNode {
+    static int num;
     Expression* expr;
     std::vector<TreeNode*> children;
 public:
-    TreeNode() :expr(), children() {};
+    TreeNode() :children() { expr = new NonTerminal("anon_" + std::to_string(num++)); };
     explicit TreeNode(Expression* e) :expr(e), children() {};
     ~TreeNode() = default;
 
@@ -22,8 +23,9 @@ public:
     TreeNode* get_ith(int i) { return children[i]; }
     std::string name() { return expr->name(); }
     long int children_num() const { return children.size(); }
+
     void push_child(TreeNode* t) { children.push_back(t); }
-    void push_children(std::vector<TreeNode*> v) { children = std::move(v); }
+    void push_children(std::vector<TreeNode*> v) { children.insert(children.end(), v.begin(), v.end()); }
 };
 
 std::ostream& operator<<(std::ostream& os, const TreeNode& t);

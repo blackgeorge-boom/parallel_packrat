@@ -47,6 +47,7 @@ class Terminal: public Expression {
 public:
     Terminal() : Expression() {};
     explicit Terminal(char c) : Expression(&c) {};
+    explicit Terminal(std::string name) : Expression(name) {};
     explicit Terminal(const char* name) : Expression(name) {};
     ~Terminal() override = default;
 

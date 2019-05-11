@@ -91,13 +91,13 @@ Expression* PEGFactory::construct_sequence(TreeNode *node)
         for (auto child : node->get_children())
             if (child->name() == "Prefix") {
                 Expression* e = construct_preffix(child);
-                auto temp = dynamic_cast<CompositeExpression*>(e);
-                if (temp != nullptr && temp->op_name() == '\b') {
-                    for (auto x : temp->expr_list())
-                        ce->push_expr(x);
-                }
-                else
-                    ce->push_expr(e);
+//                auto temp = dynamic_cast<CompositeExpression*>(e);
+//                if (temp != nullptr && temp->op_name() == '\b') {
+//                    for (auto x : temp->expr_list())
+//                        ce->push_expr(x);
+//                }
+//                else
+                ce->push_expr(e);
             }
 
         return ce;
@@ -190,7 +190,7 @@ Expression* PEGFactory::construct_char(TreeNode* node)
 {
     auto child = node->get_ith(0);
 
-    if (node->children_num() == 2 && child->name() == "'\\\\'") {
+    if (node->children_num() == 2 && child->name() == "\\") {
         auto second_child = node->get_ith(1);
         std::string ch = second_child->name();
 
@@ -215,7 +215,7 @@ Expression* PEGFactory::construct_char(TreeNode* node)
         return child->get_expr();
     }
     else {
-        std::cout << "Error while constructing PEG grammar: invalid Character node.";
+        std::cout << "Error while constructing PEG grammar: invalid Character node: " << *child << "\n";
         return nullptr;
     }
 }

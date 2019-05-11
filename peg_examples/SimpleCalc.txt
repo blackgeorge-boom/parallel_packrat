@@ -1,8 +1,8 @@
-ArithmeticExpression <- Additive !(.)
-Additive <- Multitive '+' Additive / Multitive
-Multitive <- Primary '*' Multitive / Primary
-Primary <- '(' Additive ')' / Decimal
-Decimal <- '0' / '1'
+# ArithmeticExpression <- Additive !(.)
+# Additive <- Multitive '+' Additive / Multitive
+# Multitive <- Primary '*' Multitive / Primary
+# Primary <- '(' Additive ')' / Decimal
+# Decimal <- '0' / '1'
 
-# A <- 'a'
+A <- '\r'
 

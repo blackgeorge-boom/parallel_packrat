@@ -43,18 +43,18 @@ int main()
     PEG* calc = f.from_tree(sp.get_root());
     std::cout << *calc;
 
-    auto start = calc->get_non_term(0);
-    calc->set_start(start);
-
-    SerialPackrat sp2("(0+1)*0+1", *calc);
-    res = sp2.visit(*calc);
-
-    if (res)
-        std::cout << "Parse successful! \n";
-    else
-        std::cout << "Syntax Error... \n";
-
-    sp2.print_cells();
+//    auto start = calc->get_non_term(0);
+//    calc->set_start(start);
+//
+//    SerialPackrat sp2("(0+1)*0+1", *calc);
+//    res = sp2.visit(*calc);
+//
+//    if (res)
+//        std::cout << "Parse successful! \n";
+//    else
+//        std::cout << "Syntax Error... \n";
+//
+//    sp2.print_cells();
 //    printTree("", sp2.get_root(), true);
 
     return 0;

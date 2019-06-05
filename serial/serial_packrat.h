@@ -5,8 +5,8 @@
 #ifndef PARALLEL_PACKRAT_SERIAL_PACKRAT_H
 #define PARALLEL_PACKRAT_SERIAL_PACKRAT_H
 
-#include "cell.h"
-#include "peg_visitor.h"
+#include "../packrat_cell/cell.h"
+#include "../peg_visitor/peg_visitor.h"
 
 class SerialPackrat: public PegVisitor {
 protected:

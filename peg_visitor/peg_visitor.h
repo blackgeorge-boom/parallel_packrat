@@ -5,8 +5,8 @@
 #ifndef PARALLEL_PACKRAT_PEG_VISITOR_H
 #define PARALLEL_PACKRAT_PEG_VISITOR_H
 
-#include "peg_elements.h"
-#include "peg.h"
+#include "../peg/peg_elements.h"
+#include "../peg/peg.h"
 
 class PegVisitor {
 public:

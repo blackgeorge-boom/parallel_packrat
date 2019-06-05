@@ -5,7 +5,7 @@
 #ifndef PARALLEL_PACKRAT_GRAMMAR_META_H
 #define PARALLEL_PACKRAT_GRAMMAR_META_H
 
-#include "peg.h"
+#include "../peg/peg.h"
 
 class Meta : public PEG {
 public:

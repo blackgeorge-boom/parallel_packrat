@@ -5,9 +5,9 @@
 #ifndef PARALLEL_PACKRAT_PEG_FACTORY_H
 #define PARALLEL_PACKRAT_PEG_FACTORY_H
 
-#include "tree_node.h"
-#include "peg_elements.h"
-#include "peg.h"
+#include "../syntax_tree/tree_node.h"
+#include "../peg/peg_elements.h"
+#include "../peg/peg.h"
 
 class PEGFactory {
     std::map<std::string, NonTerminal*> nt_map;

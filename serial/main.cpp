@@ -1,14 +1,14 @@
 #include <iostream>
 #include <fstream>
 
-#include "serial/cell.h"
-#include "serial/peg_elements.h"
-#include "serial/peg.h"
-#include "serial/grammar_meta.h"
-#include "serial/serial_packrat.h"
-#include "serial/serial_tree_packrat.h"
-#include "serial/tree_node.h"
-#include "serial/peg_factory.h"
+#include "cell.h"
+#include "peg_elements.h"
+#include "peg.h"
+#include "meta_grammar.h"
+#include "serial_packrat.h"
+#include "serial_tree_packrat.h"
+#include "../syntax_tree/tree_node.h"
+#include "peg_factory.h"
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;

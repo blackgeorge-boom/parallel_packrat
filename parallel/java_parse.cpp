@@ -6,14 +6,14 @@
 #include <fstream>
 #include <chrono>
 
-#include "serial/cell.h"
-#include "serial/peg_elements.h"
-#include "serial/peg.h"
-#include "serial/grammar_meta.h"
-#include "serial/serial_packrat.h"
-#include "serial/serial_tree_packrat.h"
-#include "serial/tree_node.h"
-#include "serial/peg_factory.h"
+#include "../packrat_cell/cell.h"
+#include "../peg/peg_elements.h"
+#include "../peg/peg.h"
+#include "../syntax_tree/tree_node.h"
+#include "../meta_grammar/meta_grammar.h"
+#include "../peg_factory/peg_factory.h"
+#include "../serial/serial_tree_packrat.h"
+#include "simple_parallel.h"
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
@@ -22,7 +22,7 @@ int main()
 {
     Meta meta;
 
-    std::ifstream ifs("peg_examples/Java1.5.txt", std::ifstream::in);
+    std::ifstream ifs("/home/blackgeorge/documents/thesis/code/parallel_packrat/parallel/Java1.5.txt", std::ifstream::in);
     if (!ifs) std::cout << "Error opening file";
     std::string content( (std::istreambuf_iterator<char>(ifs) ),
                          (std::istreambuf_iterator<char>()    ) );
@@ -45,12 +45,12 @@ int main()
     auto start = java->get_non_term(0);
     java->set_start(start);
 
-    std::ifstream ifs2("test/java/Arrays.java", std::ifstream::in);
+    std::ifstream ifs2("/home/blackgeorge/documents/thesis/code/parallel_packrat/test/java/Arrays.java", std::ifstream::in);
     if (!ifs2) std::cout << "Error opening file";
     std::string java_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
 
-    SerialPackrat sp2(java_file, *java);
+    SimpleParallel sp2(java_file, *java);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();

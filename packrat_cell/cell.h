@@ -7,7 +7,7 @@
 
 #include <ostream>
 
-#include "tree_node.h"
+#include "../syntax_tree/tree_node.h"
 
 // you have constructor, assignment and comparison for those
 enum class Result { unknown, fail, success };

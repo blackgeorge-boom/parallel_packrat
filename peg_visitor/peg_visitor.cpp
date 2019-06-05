@@ -3,7 +3,7 @@
 //
 
 #include "peg_visitor.h"
-#include "peg_elements.h"
+#include "../peg/peg_elements.h"
 
 
 bool NonTerminal::accept(PegVisitor &pegv)

@@ -7,7 +7,7 @@
 #ifndef PARALLEL_PACKRAT_TREE_NODE_H
 #define PARALLEL_PACKRAT_TREE_NODE_H
 
-#include "peg_elements.h"
+#include "../peg/peg_elements.h"
 
 class TreeNode {
     static int num;

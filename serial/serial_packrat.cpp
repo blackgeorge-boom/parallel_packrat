@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by blackgeorge on 21/3/2019.
 //
@@ -20,7 +22,7 @@ SerialPackrat::SerialPackrat(const char* input, PEG g)
 
 SerialPackrat::SerialPackrat(std::string input, PEG g)
 {
-    in = input;
+    in = std::move(input);
     pos = 0;
     peg = PEG(g);
 
@@ -173,12 +175,15 @@ bool SerialPackrat::visit(PEG &peg)
     NonTerminal *nt;
     bool res;
 
-    // nt = peg.get_start();
-    // res = nt->accept(*this);
+//     nt = peg.get_start();
+//     res = nt->accept(*this);
     // if (res) std::cout << "Inner parsing worked!\n";
 
     int N = peg.get_rules().size();
     int M = in.size() + 1;
+
+    std::cout << "N: " << N << "\n";
+    std::cout << "M: " << M << "\n";
 
     for (auto j = M - 1; j >= 0; --j) {
         for (auto i = N - 1; i >= 0; --i) {

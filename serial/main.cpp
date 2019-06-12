@@ -119,7 +119,7 @@ int main()
         std::cout << "Syntax Error... \n";
     printTree("", sp2.get_root(), true);
 
-    SerialTreePackrat sp3("7+1", g);
+    SerialTreePackrat sp3("(3+2)*7+1", g);
     res = sp3.visit(g);
 
     if (res)

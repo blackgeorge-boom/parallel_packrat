@@ -17,6 +17,8 @@ protected:
 public:
     SerialPackrat(const char* input, PEG g);
     SerialPackrat(std::string input, PEG g);
+    ~SerialPackrat() override = default;
+    // TODO: check more about destructors
 
     void print_cells() const;
 

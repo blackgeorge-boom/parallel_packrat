@@ -26,7 +26,7 @@ public:
 
 std::ostream& operator<<(std::ostream& os, const Expression& e);
 
-class NonTerminal: public Expression{
+class NonTerminal: public Expression {
     static int num;
     int idx;
 public:

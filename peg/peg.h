@@ -19,6 +19,7 @@ public:
     void push_rule(NonTerminal* nt, Expression* e);
     void set_start(NonTerminal* nt) { s = nt; }
     std::map<NonTerminal*, Expression*> get_rules() const { return r; }
+    std::map<int, NonTerminal*> get_index() const { return idx; }
     NonTerminal* get_start() const { return s; }
 
     Expression* get_expr(NonTerminal* nt);

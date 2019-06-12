@@ -10,6 +10,8 @@
 
 class PegVisitor {
 public:
+    virtual ~PegVisitor() = default;
+
     virtual bool visit(NonTerminal& nt) = 0;
     virtual bool visit(Terminal& t) = 0;
     virtual bool visit(Empty& e) = 0;

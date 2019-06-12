@@ -7,7 +7,9 @@
 PEG::PEG(const PEG &peg)
 {
     r = peg.get_rules();
+    idx = peg.get_index();
     s = peg.get_start();
+    // TODO: fix memory leak
 }
 
 void PEG::push_rule(NonTerminal* nt, Expression* e)

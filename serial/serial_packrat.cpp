@@ -1,4 +1,5 @@
 #include <utility>
+#include <thread>
 
 //
 // Created by blackgeorge on 21/3/2019.
@@ -48,7 +49,7 @@ void SerialPackrat::print_cells() const
     std::cout << "\n";
 }
 
-bool SerialPackrat::visit(NonTerminal &nt)
+bool SerialPackrat::visit(NonTerminal& nt)
 {
     int row = nt.index();
     Cell* cur_cell = &cells[row][pos];

@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by blackgeorge on 21/3/2019.
 //
@@ -10,8 +12,19 @@
 
 class SimpleParallel: public SerialPackrat {
 public:
+    SimpleParallel(std::string input, PEG g) : SerialPackrat(std::move(input), g) {}
     SimpleParallel(const char* input, PEG g) : SerialPackrat(input, g) {}
-    SimpleParallel(std::string input, PEG g) : SerialPackrat(input, g) {}
+
+    bool visit(PEG& peg) override;
+};
+
+class SimpleWorker: public SerialPackrat {
+    int left;
+    int right;
+public:
+    SimpleWorker(std::string input, PEG g, Cell** c, int l, int r);
+    ~SimpleWorker() override = default;
+
     bool visit(PEG& peg) override;
 };
 

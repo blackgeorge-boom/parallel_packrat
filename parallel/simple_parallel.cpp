@@ -21,17 +21,18 @@ bool SimpleParallel::visit(PEG& peg)
 
     std::cout << "M: " << M <<  std::endl;
 
-    tbb::task_scheduler_init init(2);
+    tbb::task_scheduler_init init(4);
 
+    auto grain_size = 4;
     tbb::parallel_for(tbb::blocked_range<int>(0, M),
         [&](const tbb::blocked_range<int>& r)
         {
             for (int j = r.end() - 1; j >= r.begin(); --j) {
                 SimpleWorker sw(in, peg, cells, j, j + 1);
-//                peg.accept(sw);
-                cout_mutex.lock();
+                peg.accept(sw);
+//                cout_mutex.lock();
 //                std::cout << j << std::endl;
-                cout_mutex.unlock();
+//                cout_mutex.unlock();
             }
         }
     );
@@ -41,9 +42,8 @@ bool SimpleParallel::visit(PEG& peg)
 }
 
 SimpleWorker::SimpleWorker(std::string input, PEG g, Cell** c, int l, int r)
-    : SerialPackrat(std::move(input), g)
+    : SerialPackrat(std::move(input), g, c)
 {
-    cells = c;
     left = l;
     right = r;
 }

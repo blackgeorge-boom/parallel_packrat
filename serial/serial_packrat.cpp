@@ -35,6 +35,14 @@ SerialPackrat::SerialPackrat(std::string input, PEG g)
         cells[i] = new Cell[M];
 }
 
+SerialPackrat::SerialPackrat(std::string input, PEG g, Cell** c)
+{
+    in = std::move(input);
+    pos = 0;
+    peg = PEG(g);
+    cells = c;
+}
+
 void SerialPackrat::print_cells() const
 {
     auto N = peg.get_rules().size();

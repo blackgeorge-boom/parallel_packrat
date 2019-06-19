@@ -10,15 +10,13 @@
 #include "../syntax_tree/tree_node.h"
 
 // you have constructor, assignment and comparison for those
-enum class Result { unknown, fail, success };
+enum class Result { unknown, fail, success, pending };
 
 class Cell {
+protected:
     Result r;
     int p;
     TreeNode* node;
-public:
-
-
 public:
     Cell() :r{Result::unknown}, p{-1}, node{} {}
     ~Cell() = default;

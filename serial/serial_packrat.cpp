@@ -35,26 +35,18 @@ SerialPackrat::SerialPackrat(std::string input, PEG g)
         cells[i] = new Cell[M];
 }
 
-SerialPackrat::SerialPackrat(std::string input, PEG g, Cell** c)
-{
-    in = std::move(input);
-    pos = 0;
-    peg = PEG(g);
-    cells = c;
-}
-
 void SerialPackrat::print_cells() const
 {
     auto N = peg.get_rules().size();
     auto M = in.size() + 1;
 
-    std::cout << "\n";
+    std::cout << std::endl;
     for(int i = 0; i < N; ++i) {
         for(int j = 0; j < M; ++j)
             std::cout << cells[i][j] << " ";
-        std::cout << "\n";
+        std::cout << std::endl;
     }
-    std::cout << "\n";
+    std::cout << std::endl;
 }
 
 bool SerialPackrat::visit(NonTerminal& nt)
@@ -87,6 +79,11 @@ bool SerialPackrat::visit(NonTerminal& nt)
                 cur_cell->set_res(Result::fail);
                 return false;
             }
+        }
+        case Result::pending:
+        {
+            std::cout << "Pending!?!" << std::endl;
+            break;
         }
     }
 }

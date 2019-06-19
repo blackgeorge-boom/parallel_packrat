@@ -19,6 +19,9 @@ std::ostream& operator<<(std::ostream& os, const Cell& c)
         case Result::success:
             os << "S";
             break;
+        case Result::pending:
+            os << "P";
+            break;
         default:
             os << "Something's wrong";
     }

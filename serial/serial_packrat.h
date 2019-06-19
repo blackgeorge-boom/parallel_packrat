@@ -15,9 +15,9 @@ protected:
     PEG peg;
     Cell** cells;
 public:
+    SerialPackrat() :in{}, pos{}, peg{}, cells{nullptr} {}
     SerialPackrat(const char* input, PEG g);
     SerialPackrat(std::string input, PEG g);
-    SerialPackrat(std::string input, PEG g, Cell** c);
     ~SerialPackrat() override = default;
     // TODO: check more about destructors
 

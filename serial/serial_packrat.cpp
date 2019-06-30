@@ -7,7 +7,7 @@
 
 #include "serial_packrat.h"
 
-SerialPackrat::SerialPackrat(const char* input, PEG g)
+SerialPackrat::SerialPackrat(const char* input, const PEG& g)
 {
     in = input;
     pos = 0;
@@ -21,7 +21,7 @@ SerialPackrat::SerialPackrat(const char* input, PEG g)
         cells[i] = new Cell[M];
 }
 
-SerialPackrat::SerialPackrat(std::string input, PEG g)
+SerialPackrat::SerialPackrat(std::string input, const PEG& g)
 {
     in = std::move(input);
     pos = 0;
@@ -86,6 +86,7 @@ bool SerialPackrat::visit(NonTerminal& nt)
             break;
         }
     }
+    return false;
 }
 
 bool SerialPackrat::visit(Terminal &t)
@@ -175,10 +176,10 @@ bool SerialPackrat::visit(AnyChar &ac)
     return false;
 }
 
-bool SerialPackrat::visit(PEG &peg)
+bool SerialPackrat::visit(PEG& p)
 {
     std::cout << "\nParsing... \n";
-    NonTerminal *nt;
+    NonTerminal* nt;
     bool res;
 
 //     nt = peg.get_start();

@@ -11,12 +11,10 @@
 #include "../serial/serial_packrat.h"
 
 class SimpleParallel: public SerialPackrat {
-protected:
-    LockedCell** cells;
 public:
-    SimpleParallel(std::string input, PEG g);
-    SimpleParallel(const char* input, PEG g);
-    SimpleParallel(std::string input, PEG g, LockedCell** c);
+    SimpleParallel(std::string input, const PEG& g);
+    SimpleParallel(const char* input, const PEG& g);
+    SimpleParallel(std::string input, const PEG& g, Cell** c);
 
     bool visit(PEG& peg) override;
 };
@@ -25,7 +23,7 @@ class SimpleWorker: public SimpleParallel {
     int left;
     int right;
 public:
-    SimpleWorker(std::string input, PEG g, LockedCell** c, int l, int r);
+    SimpleWorker(std::string input, const PEG& g, Cell** c, int l, int r);
     ~SimpleWorker() override = default;
 
     bool visit(NonTerminal& nt) override;

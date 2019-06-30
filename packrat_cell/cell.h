@@ -6,6 +6,7 @@
 #define PARALLEL_PACKRAT_CELL_H
 
 #include <ostream>
+#include <mutex>
 
 #include "../syntax_tree/tree_node.h"
 
@@ -17,6 +18,7 @@ protected:
     Result r;
     int p;
     TreeNode* node;
+    std::mutex m;
 public:
     Cell() :r{Result::unknown}, p{-1}, node{} {}
     ~Cell() = default;
@@ -27,6 +29,9 @@ public:
     void set_pos(int position) { p = position; }
     TreeNode* get_node() const { return node; }
     void set_node(TreeNode *tree_node) { node = tree_node; }
+
+    void lock() { m.lock(); }
+    void unlock() { m.unlock(); }
 };
 
 std::ostream& operator<<(std::ostream& os, const Cell& c);

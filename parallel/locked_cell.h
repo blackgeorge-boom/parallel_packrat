@@ -5,7 +5,6 @@
 #ifndef PARALLEL_PACKRAT_CELL_LOCKED_H
 #define PARALLEL_PACKRAT_CELL_LOCKED_H
 
-#include <mutex>
 
 #include "../packrat_cell/cell.h"
 

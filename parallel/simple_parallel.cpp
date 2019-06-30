@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by blackgeorge on 21/3/2019.
 //
@@ -10,35 +12,13 @@
 
 #include "simple_parallel.h"
 
-SimpleParallel::SimpleParallel(const char* input, PEG g)
-{
-    in = input;
-    pos = 0;
-    peg = PEG(g);
+SimpleParallel::SimpleParallel(const char* input, const PEG& g)
+    : SerialPackrat(input, g) {}
 
-    auto N = peg.get_rules().size();
-    auto M = in.size() + 1;
+SimpleParallel::SimpleParallel(std::string input, const PEG& g)
+    : SerialPackrat(std::move(input), g) {}
 
-    cells = new LockedCell*[N];
-    for(int i = 0; i < N; ++i)
-        cells[i] = new LockedCell[M];
-}
-
-SimpleParallel::SimpleParallel(std::string input, PEG g)
-{
-    in = std::move(input);
-    pos = 0;
-    peg = PEG(g);
-
-    auto N = peg.get_rules().size();
-    auto M = in.size() + 1;
-
-    cells = new LockedCell*[N];
-    for(int i = 0; i < N; ++i)
-        cells[i] = new LockedCell[M];
-}
-
-SimpleParallel::SimpleParallel(std::string input, PEG g, LockedCell** c)
+SimpleParallel::SimpleParallel(std::string input, const PEG& g, Cell** c)
 {
     in = std::move(input);
     pos = 0;
@@ -57,27 +37,29 @@ bool SimpleParallel::visit(PEG& peg)
 
     std::cout << "M: " << M <<  std::endl;
 
-    tbb::task_scheduler_init init(3);
+    tbb::task_scheduler_init init(4);
 
     tbb::parallel_for(tbb::blocked_range<int>(0, M),
         [&](const tbb::blocked_range<int>& r)
         {
             for (int j = r.end() - 1; j >= r.begin(); --j) {
+//            for (int j = r.begin(); j < r.end(); ++j) {
                 SimpleWorker sw(in, peg, cells, j, j + 1);
                 peg.accept(sw);
 //                cout_mutex.lock();
-//                std::cout << j << std::endl;
+//                std::cout << std::this_thread::get_id()<< ", " << j << std::endl;
+//                print_cells();
 //                cout_mutex.unlock();
             }
         }
     );
 
-    auto x = cells[0][0].res();
+//    print_cells();
     res = cells[0][0].res() == Result::success;
     return res;
 }
 
-SimpleWorker::SimpleWorker(std::string input, PEG g, LockedCell** c, int l, int r)
+SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int l, int r)
     : SimpleParallel(std::move(input), g, c)
 {
     left = l;
@@ -87,7 +69,7 @@ SimpleWorker::SimpleWorker(std::string input, PEG g, LockedCell** c, int l, int 
 bool SimpleWorker::visit(NonTerminal& nt)
 {
     int row = nt.index();
-    LockedCell* cur_cell = &cells[row][pos];
+    Cell* cur_cell = &cells[row][pos];
     Result cur_res = cur_cell->res();
 
     switch (cur_res) {
@@ -105,19 +87,24 @@ bool SimpleWorker::visit(NonTerminal& nt)
         {
             while (cur_cell->res() == Result::pending)
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            if (cur_cell->res() == Result::pending)
+                std::cout << "wuuut" << std::endl;
+            return cur_cell->res() == Result::success;
         }
         case Result::unknown:
         {
             cur_cell->lock();
-            Expression *e = peg.get_expr(&nt);
+            Expression* e = peg.get_expr(&nt);
             auto res = e->accept(*this);
 
             if (res) {
                 cur_cell->set_res(Result::success);
                 cur_cell->set_pos(pos); // pos has changed
+                cur_cell->unlock();
                 return true;
             } else {
                 cur_cell->set_res(Result::fail);
+                cur_cell->unlock();
                 return false;
             }
         }

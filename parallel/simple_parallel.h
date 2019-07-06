@@ -7,7 +7,6 @@
 #ifndef PARALLEL_PACKRAT_SIMPLE_PARALLEL_H
 #define PARALLEL_PACKRAT_SIMPLE_PARALLEL_H
 
-#include "locked_cell.h"
 #include "../serial/serial_packrat.h"
 
 class SimpleParallel: public SerialPackrat {

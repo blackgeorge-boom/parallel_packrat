@@ -7,6 +7,7 @@
 #include <utility>
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 #include "tbb/tbb.h"
 
@@ -26,24 +27,25 @@ SimpleParallel::SimpleParallel(std::string input, const PEG& g, Cell** c)
     cells = c;
 }
 
-std::mutex cout_mutex;
+std::mutex cout_mutex;  // for debugging with cout
 
 bool SimpleParallel::visit(PEG& peg)
 {
     std::cout << "Parsing..." << std::endl;
-    bool res;
 
     int M = in.size() + 1;
-
     std::cout << "M: " << M <<  std::endl;
 
-    tbb::task_scheduler_init init(4);
+    std::atomic<int> monotonic_begin{M - 1};
 
     tbb::parallel_for(tbb::blocked_range<int>(0, M),
         [&](const tbb::blocked_range<int>& r)
         {
-            for (int j = r.end() - 1; j >= r.begin(); --j) {
-//            for (int j = r.begin(); j < r.end(); ++j) {
+            int r_size = static_cast<int>(r.size());        // !!!
+            int begin = monotonic_begin.fetch_sub(r_size);  // !!!
+            int end = begin + r_size;                       // !!!
+
+            for (int j = begin; j < end; ++j) {
                 SimpleWorker sw(in, peg, cells, j, j + 1);
                 peg.accept(sw);
 //                cout_mutex.lock();
@@ -55,7 +57,7 @@ bool SimpleParallel::visit(PEG& peg)
     );
 
 //    print_cells();
-    res = cells[0][0].res() == Result::success;
+    auto res = cells[0][0].res() == Result::success;
     return res;
 }
 
@@ -85,8 +87,10 @@ bool SimpleWorker::visit(NonTerminal& nt)
         }
         case Result::pending:
         {
-            while (cur_cell->res() == Result::pending)
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            while (cur_cell->res() == Result::pending) {
+                std::cout << "Lets see..." << std::endl;
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            }
             if (cur_cell->res() == Result::pending)
                 std::cout << "wuuut" << std::endl;
             return cur_cell->res() == Result::success;
@@ -94,17 +98,17 @@ bool SimpleWorker::visit(NonTerminal& nt)
         case Result::unknown:
         {
             cur_cell->lock();
+            cur_cell->set_res(Result::pending);
+            cur_cell->unlock();
             Expression* e = peg.get_expr(&nt);
             auto res = e->accept(*this);
 
             if (res) {
                 cur_cell->set_res(Result::success);
                 cur_cell->set_pos(pos); // pos has changed
-                cur_cell->unlock();
                 return true;
             } else {
                 cur_cell->set_res(Result::fail);
-                cur_cell->unlock();
                 return false;
             }
         }

@@ -182,9 +182,10 @@ bool SerialPackrat::visit(PEG& p)
     NonTerminal* nt;
     bool res;
 
-//     nt = peg.get_start();
-//     res = nt->accept(*this);
-    // if (res) std::cout << "Inner parsing worked!\n";
+    nt = peg.get_start();
+    res = nt->accept(*this);
+    res = cells[0][0].res() == Result::success;
+    return res;
 
     int N = peg.get_rules().size();
     int M = in.size() + 1;

@@ -183,9 +183,9 @@ bool SerialPackrat::visit(PEG& p)
     bool res;
 
     nt = peg.get_start();
-    res = nt->accept(*this);
-    res = cells[0][0].res() == Result::success;
-    return res;
+//    res = nt->accept(*this);
+//    res = cells[0][0].res() == Result::success;
+//    return res;
 
     int N = peg.get_rules().size();
     int M = in.size() + 1;
@@ -193,8 +193,8 @@ bool SerialPackrat::visit(PEG& p)
     std::cout << "N: " << N << "\n";
     std::cout << "M: " << M << "\n";
 
-    for (auto j = M - 1; j >= 0; --j) {
-        for (auto i = N - 1; i >= 0; --i) {
+    for (auto i = N - 1; i >= 0; --i) {
+        for (auto j = M - 1; j >= 0; --j) {
             pos = j;
             nt = peg.get_non_term(i);
             nt->accept(*this);

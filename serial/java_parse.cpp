@@ -22,7 +22,8 @@ int main()
 {
     Meta meta;
 
-    std::ifstream ifs("test/peg_examples/Java1.5.txt", std::ifstream::in);
+    std::ifstream ifs("../test/peg_examples/Java1.5.txt", std::ifstream::in);
+//    std::ifstream ifs("../test/peg_examples/SimpleCalc.txt", std::ifstream::in);
     if (!ifs) std::cout << "Error opening file";
     std::string content( (std::istreambuf_iterator<char>(ifs) ),
                          (std::istreambuf_iterator<char>()    ) );
@@ -45,7 +46,8 @@ int main()
     auto start = java->get_non_term(0);
     java->set_start(start);
 
-    std::ifstream ifs2("test/java/Arrays.java", std::ifstream::in);
+    std::ifstream ifs2("../test/java/Arrays.java", std::ifstream::in);
+//    std::ifstream ifs2("../test/calc/simple.txt", std::ifstream::in);
     if (!ifs2) std::cout << "Error opening file";
     std::string java_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );

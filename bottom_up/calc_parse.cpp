@@ -13,7 +13,7 @@
 #include "../meta_grammar/meta_grammar.h"
 #include "../peg_factory/peg_factory.h"
 #include "../serial/serial_tree_packrat.h"
-#include "simple_parallel.h"
+#include "column_parallel.h"
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
@@ -49,8 +49,8 @@ int main()
 //    if (!ifs2) std::cout << "Error opening file";
 //    std::string calc_file( (std::istreambuf_iterator<char>(ifs2) ),
 //                           (std::istreambuf_iterator<char>()     ) );
-//    SimpleParallel sp2(calc_file, *calc);
-    SimpleParallel sp2("(0+1)*0+1", *calc);
+//    ColumnParallel sp2(calc_file, *calc);
+    ColumnParallel sp2("(0+1)*0+1", *calc);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();

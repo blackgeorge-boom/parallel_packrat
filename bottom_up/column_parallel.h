@@ -9,21 +9,21 @@
 
 #include "../serial/serial_packrat.h"
 
-class SimpleParallel: public SerialPackrat {
+class ColumnParallel: public SerialPackrat {
 public:
-    SimpleParallel(std::string input, const PEG& g);
-    SimpleParallel(const char* input, const PEG& g);
-    SimpleParallel(std::string input, const PEG& g, Cell** c);
+    ColumnParallel(std::string input, const PEG& g);
+    ColumnParallel(const char* input, const PEG& g);
+    ColumnParallel(std::string input, const PEG& g, Cell** c);
 
     bool visit(PEG& peg) override;
 };
 
-class SimpleWorker: public SimpleParallel {
+class ColumnWorker: public ColumnParallel {
     int left;
     int right;
 public:
-    SimpleWorker(std::string input, const PEG& g, Cell** c, int l, int r);
-    ~SimpleWorker() override = default;
+    ColumnWorker(std::string input, const PEG& g, Cell** c, int l, int r);
+    ~ColumnWorker() override = default;
 
     bool visit(NonTerminal& nt) override;
     bool visit(PEG& peg) override;

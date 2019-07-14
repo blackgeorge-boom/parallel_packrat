@@ -22,7 +22,7 @@ int main()
 {
     Meta meta;
 
-    std::ifstream ifs("/home/blackgeorge/documents/thesis/code/parallel_packrat/test/peg_examples/SimpleCalc.txt", std::ifstream::in);
+    std::ifstream ifs("test/peg_examples/SimpleCalc.txt", std::ifstream::in);
     if (!ifs) std::cout << "Error opening file";
     std::string content( (std::istreambuf_iterator<char>(ifs) ),
                          (std::istreambuf_iterator<char>()    ) );
@@ -45,12 +45,12 @@ int main()
     auto start = calc->get_non_term(0);
     calc->set_start(start);
 
-//    std::ifstream ifs2("/home/blackgeorge/documents/thesis/code/parallel_packrat/test/calc/simple.txt", std::ifstream::in);
-//    if (!ifs2) std::cout << "Error opening file";
-//    std::string calc_file( (std::istreambuf_iterator<char>(ifs2) ),
-//                           (std::istreambuf_iterator<char>()     ) );
-//    ColumnParallel sp2(calc_file, *calc);
-    ColumnParallel sp2("(0+1)*0+1", *calc);
+    std::ifstream ifs2("test/calc/simple.txt", std::ifstream::in);
+    if (!ifs2) std::cout << "Error opening file";
+    std::string calc_file( (std::istreambuf_iterator<char>(ifs2) ),
+                           (std::istreambuf_iterator<char>()     ) );
+    ColumnParallel sp2(calc_file, *calc);
+//    ColumnParallel sp2("(0+1)*0+1", *calc);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();

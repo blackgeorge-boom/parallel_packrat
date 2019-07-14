@@ -18,15 +18,4 @@ public:
     bool visit(PEG& peg) override;
 };
 
-class ColumnWorker: public ColumnParallel {
-    int left;
-    int right;
-public:
-    ColumnWorker(std::string input, const PEG& g, Cell** c, int l, int r);
-    ~ColumnWorker() override = default;
-
-    bool visit(NonTerminal& nt) override;
-    bool visit(PEG& peg) override;
-};
-
 #endif //PARALLEL_PACKRAT_SIMPLE_PARALLEL_H

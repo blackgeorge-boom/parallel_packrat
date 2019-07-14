@@ -69,10 +69,8 @@ bool SimpleWorker::visit(PEG& peg)
 {
     NonTerminal* nt;
 
-    int N = peg.get_rules().size();
-
     for (int j = right - 1; j >= left; --j) {
-        for (auto i = N - 1; i >= 0; --i) {
+        for (auto i = bottom - 1; i >= up; --i) {
             pos = j;
             nt = peg.get_non_term(i);
             nt->accept(*this);

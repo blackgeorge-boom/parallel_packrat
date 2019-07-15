@@ -13,7 +13,6 @@ class ColumnParallel: public SerialPackrat {
 public:
     ColumnParallel(std::string input, const PEG& g);
     ColumnParallel(const char* input, const PEG& g);
-    ColumnParallel(std::string input, const PEG& g, Cell** c);
 
     bool visit(PEG& peg) override;
 };

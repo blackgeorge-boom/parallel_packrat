@@ -14,6 +14,7 @@
 #include "../peg_factory/peg_factory.h"
 #include "../serial/serial_tree_packrat.h"
 #include "column_parallel.h"
+#include "row_parallel.h"
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
@@ -50,7 +51,7 @@ int main()
     std::string java_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
 
-    ColumnParallel sp2(java_file, *java);
+    RowParallel sp2(java_file, *java);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();

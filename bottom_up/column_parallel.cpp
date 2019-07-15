@@ -19,23 +19,17 @@ ColumnParallel::ColumnParallel(const char* input, const PEG& g)
 ColumnParallel::ColumnParallel(std::string input, const PEG& g)
     : SerialPackrat(std::move(input), g) {}
 
-ColumnParallel::ColumnParallel(std::string input, const PEG& g, Cell** c)
-{
-    in = std::move(input);
-    pos = 0;
-    peg = PEG(g);
-    cells = c;
-}
-
 std::mutex cout_mutex;  // for debugging with cout
 
 bool ColumnParallel::visit(PEG& peg)
 {
     std::cout << "Parsing..." << std::endl;
 
+    tbb::task_scheduler_init tbb_init{1};
+
     int N = peg.get_rules().size();
     int M = in.size() + 1;
-    std::cout << "N: " << M <<  std::endl;
+    std::cout << "N: " << N <<  std::endl;
     std::cout << "M: " << M <<  std::endl;
 
     std::atomic<int> monotonic_begin{M - 1};

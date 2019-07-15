@@ -14,6 +14,7 @@
 #include "../peg_factory/peg_factory.h"
 #include "../serial/serial_tree_packrat.h"
 #include "column_parallel.h"
+#include "row_parallel.h"
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
@@ -49,7 +50,7 @@ int main()
     if (!ifs2) std::cout << "Error opening file";
     std::string calc_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
-    ColumnParallel sp2(calc_file, *calc);
+    RowParallel sp2(calc_file, *calc);
 //    ColumnParallel sp2("(0+1)*0+1", *calc);
 
     using namespace std::chrono;

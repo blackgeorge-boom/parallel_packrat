@@ -38,7 +38,7 @@ bool SimpleWorker::visit(NonTerminal &nt)
         case Result::pending:
         {
             while (cur_cell->res() == Result::pending) {
-//                std::cout << "Lets see..." << std::endl;
+                std::cout << "Lets see..." << std::this_thread::get_id() << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
             if (cur_cell->res() == Result::pending)

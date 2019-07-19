@@ -40,12 +40,12 @@ bool RowParallel::visit(PEG& peg)
     tbb::parallel_for(tbb::blocked_range<int>(0, N),
         [&](const tbb::blocked_range<int>& r)
         {
-            int r_size = static_cast<int>(r.size());        // !!!
-            int begin = monotonic_begin.fetch_sub(r_size);  // !!!
-            int end = begin + r_size;                       // !!!
+//            int r_size = static_cast<int>(r.size());        // !!!
+//            int begin = monotonic_begin.fetch_sub(r_size);  // !!!
+//            int end = begin + r_size;                       // !!!
 
             // TODO: Deadlocks!!
-            for (int i = begin; i < end; ++i) {
+            for (int i = r.begin(); i < r.end(); ++i) {
                 SimpleWorker sw(in, peg, cells, 0, M, i + 1, i);
                 peg.accept(sw);
 //                cout_mutex.lock();

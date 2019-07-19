@@ -38,7 +38,8 @@ bool SimpleWorker::visit(NonTerminal &nt)
         case Result::pending:
         {
             while (cur_cell->res() == Result::pending) {
-                std::cout << "Lets see..." << std::this_thread::get_id() << std::endl;
+                std::cout << "Stuck: " << std::this_thread::get_id() <<
+                " " << row << ", " << pos << " " << nt << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
             if (cur_cell->res() == Result::pending)
@@ -69,6 +70,7 @@ bool SimpleWorker::visit(PEG& peg)
 {
     NonTerminal* nt;
 
+//    std::cout << std::this_thread::get_id() << std::endl;
     for (int j = right - 1; j >= left; --j) {
         for (auto i = bottom - 1; i >= up; --i) {
             pos = j;

@@ -8,9 +8,9 @@
 #include "../serial/serial_packrat.h"
 
 class SimpleWorker: public SerialPackrat {
-    int left, right, bottom, up;
+    int left, right, up, bottom;
 public:
-    SimpleWorker(std::string input, const PEG& g, Cell** c, int l, int r, int b, int u);
+    SimpleWorker(std::string input, const PEG& g, Cell** c, int l, int r, int u, int b);
     ~SimpleWorker() override = default;
 
     bool visit(NonTerminal& nt) override;

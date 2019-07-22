@@ -13,8 +13,7 @@
 #include "../meta_grammar/meta_grammar.h"
 #include "../peg_factory/peg_factory.h"
 #include "../serial/serial_tree_packrat.h"
-#include "column_parallel.h"
-#include "row_parallel.h"
+#include "parallel_packrats.h"
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
@@ -51,7 +50,7 @@ int main()
     std::string java_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
 
-    RowParallel sp2(java_file, *java);
+    ColumnParallel sp2(java_file, *java, 4, true);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();

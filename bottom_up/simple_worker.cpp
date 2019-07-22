@@ -5,7 +5,7 @@
 #include <thread>
 #include "simple_worker.h"
 
-SimpleWorker::SimpleWorker(std::string input, const PEG &g, Cell **c, int l, int r, int b, int u)
+SimpleWorker::SimpleWorker(std::string input, const PEG &g, Cell **c, int l, int r, int u, int b)
 {
     in = std::move(input);
     pos = 0;
@@ -14,8 +14,8 @@ SimpleWorker::SimpleWorker(std::string input, const PEG &g, Cell **c, int l, int
     
     left = l;
     right = r;
-    bottom = b;
     up = u;
+    bottom = b;
 }
 
 bool SimpleWorker::visit(NonTerminal &nt) 

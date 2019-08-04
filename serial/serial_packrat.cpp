@@ -178,14 +178,14 @@ bool SerialPackrat::visit(AnyChar &ac)
 
 bool SerialPackrat::visit(PEG& p)
 {
-    std::cout << "\nParsing... \n";
+    std::cout << "Parsing..." << std::endl;
     NonTerminal* nt;
     bool res;
 
     nt = peg.get_start();
-//    res = nt->accept(*this);
-//    res = cells[0][0].res() == Result::success;
-//    return res;
+    res = nt->accept(*this);
+    res = cells[0][0].res() == Result::success;
+    return res;
 
     int N = peg.get_rules().size();
     int M = in.size() + 1;

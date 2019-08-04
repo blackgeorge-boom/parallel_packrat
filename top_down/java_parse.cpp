@@ -12,8 +12,7 @@
 #include "../syntax_tree/tree_node.h"
 #include "../meta_grammar/meta_grammar.h"
 #include "../peg_factory/peg_factory.h"
-#include "serial_packrat.h"
-#include "serial_tree_packrat.h"
+#include "../serial/serial_tree_packrat.h"
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
@@ -23,7 +22,6 @@ int main()
     Meta meta;
 
     std::ifstream ifs("test/peg_examples/Java1.5.txt", std::ifstream::in);
-//    std::ifstream ifs("../test/peg_examples/SimpleCalc.txt", std::ifstream::in);
     if (!ifs) std::cout << "Error opening file";
     std::string content( (std::istreambuf_iterator<char>(ifs) ),
                          (std::istreambuf_iterator<char>()    ) );
@@ -33,9 +31,9 @@ int main()
     auto res = sp.visit(meta);
 
     if (res)
-        std::cout << "Parse successful! \n";
+        std::cout << "Parse successful!" << std::endl;
     else
-        std::cout << "Syntax Error... \n";
+        std::cout << "Syntax Error..." << std::endl;
 
     NonTerminal::reset_idx();
 
@@ -47,7 +45,6 @@ int main()
     java->set_start(start);
 
     std::ifstream ifs2("test/java/Arrays.java", std::ifstream::in);
-//    std::ifstream ifs2("../test/calc/simple.txt", std::ifstream::in);
     if (!ifs2) std::cout << "Error opening file";
     std::string java_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
@@ -60,9 +57,9 @@ int main()
     auto tf = high_resolution_clock::now();
 
     if (res)
-        std::cout << "Parse successful! \n";
+        std::cout << "Parse successful!" << std::endl;
     else
-        std::cout << "Syntax Error... \n";
+        std::cout << "Syntax Error..." << std::endl;
 
     std::cout << "done " << duration_cast<milliseconds>(tf-t0).count() << " ms";
 }

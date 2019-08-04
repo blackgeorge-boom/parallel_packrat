@@ -7,7 +7,6 @@
 #include <chrono>
 
 #include "../packrat_cell/cell.h"
-#include "../peg/peg_elements.h"
 #include "../peg/peg.h"
 #include "../syntax_tree/tree_node.h"
 #include "../meta_grammar/meta_grammar.h"
@@ -49,7 +48,7 @@ int main()
     if (!ifs2) std::cout << "Error opening file";
     std::string calc_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
-    ColumnParallel sp2(calc_file, *calc, 4, false);
+    BlockParallel sp2(calc_file, *calc, 4, 2, false);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();

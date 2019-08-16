@@ -12,6 +12,7 @@
 #include "../meta_grammar/meta_grammar.h"
 #include "../peg_factory/peg_factory.h"
 #include "../serial/serial_tree_packrat.h"
+#include "parallel_packrats.h"
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
@@ -47,7 +48,7 @@ int main()
     if (!ifs2) std::cout << "Error opening file";
     std::string calc_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
-    SerialPackrat sp2(calc_file, *calc);
+    TableParallel sp2(calc_file, *calc);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();

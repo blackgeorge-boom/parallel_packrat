@@ -173,7 +173,7 @@ bool SerialTreePackrat::visit(AnyChar& ac)
 
 bool SerialTreePackrat::visit(PEG& peg)
 {
-    std::cout << "\nParsing... \n";
+    std::cout << "Parsing..." << std::endl;
     NonTerminal *nt;
     bool res;
 

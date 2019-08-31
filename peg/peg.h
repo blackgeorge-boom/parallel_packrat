@@ -10,20 +10,26 @@
 class PEG {
     std::map<NonTerminal*, Expression*> r;
     std::map<int, NonTerminal*> idx;
+    std::map<Expression*, bool> pht;
     NonTerminal* s;
 public:
-    PEG(): r{}, idx{}, s{} {};
+    PEG(): r{}, idx{}, pht{}, s{} {};
     PEG(const PEG& peg);
     virtual ~PEG() = default;
 
-    void push_rule(NonTerminal* nt, Expression* e);
-    void set_start(NonTerminal* nt) { s = nt; }
     std::map<NonTerminal*, Expression*> get_rules() const { return r; }
-    std::map<int, NonTerminal*> get_index() const { return idx; }
-    NonTerminal* get_start() const { return s; }
-
+    void push_rule(NonTerminal* nt, Expression* e);
     Expression* get_expr(NonTerminal* nt);
+
+    std::map<int, NonTerminal*> get_index() const { return idx; }
     NonTerminal* get_non_term(int i);
+
+    std::map<Expression*, bool> get_pht() const { return pht; }
+    void set_pht(std::map<Expression*, bool> m) { pht = m; }
+    bool get_history(Expression* e);
+
+    NonTerminal* get_start() const { return s; }
+    void set_start(NonTerminal* nt) { s = nt; }
 
     bool accept(class PegVisitor& pegv);
 };

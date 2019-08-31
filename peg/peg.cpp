@@ -8,6 +8,7 @@ PEG::PEG(const PEG &peg)
 {
     r = peg.get_rules();
     idx = peg.get_index();
+    pht = peg.get_pht();
     s = peg.get_start();
     // TODO: fix memory leak
 }
@@ -23,11 +24,18 @@ Expression* PEG::get_expr(NonTerminal* nt)
     return r.find(nt)->second;
 }
 
-NonTerminal* PEG::get_non_term(int i) {
+NonTerminal* PEG::get_non_term(int i)
+{
     return idx.find(i)->second;
 }
 
-std::ostream &operator<<(std::ostream &os, const PEG &peg) {
+bool PEG::get_history(Expression *e)
+{
+    return pht[e];
+}
+
+std::ostream &operator<<(std::ostream &os, const PEG &peg)
+{
     for (auto const& x : peg.get_rules()) {
         auto key = x.first;     // pointer to non terminal
         auto value = x.second;  // pointer to expression

@@ -2,13 +2,22 @@
 // Created by blackgeorge on 8/16/19.
 //
 
+#include <mutex>
+#include <thread>
+
+#include <tbb/task_group.h>
+#include <tbb/task_scheduler_init.h>
 #include "parallel_packrats.h"
+
+std::mutex cout_mutex;
 
 bool TableParallel::visit(CompositeExpression &ce)
 {
     char op = ce.op_name();
     std::vector<Expression*> exprs = ce.expr_list();
     int orig_pos = pos;
+
+    tbb::task_scheduler_init init(4);
 
     switch (op) {
 
@@ -23,11 +32,21 @@ bool TableParallel::visit(CompositeExpression &ce)
         }
         case '/':   // ordered choice
         {
+            tbb::task_group g;
             for (auto expr : exprs) {
                 pos = orig_pos;
-                if (expr->accept(*this))
-                    return true;
+//                if (expr->accept(*this))
+//                    return true;
+                g.run([&]()
+                      {
+                          cout_mutex.lock();
+                          std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+                          cout_mutex.unlock();
+                          expr->accept(*this);
+                      }
+                );
             }
+            g.wait();
             pos = orig_pos;
             return false;
         }

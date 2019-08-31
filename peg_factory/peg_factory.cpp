@@ -4,10 +4,14 @@
 
 #include "peg_factory.h"
 
+std::map<Expression*, bool> pht;
+
 PEG* PEGFactory::from_tree(TreeNode *root)
 {
     nt_map.clear();
-    return construct_peg(root);
+    auto peg_created = construct_peg(root);
+    peg_created->set_pht(pht);
+    return peg_created;
 }
 
 PEG* PEGFactory::construct_peg(TreeNode *node)
@@ -72,8 +76,11 @@ Expression* PEGFactory::construct_expression(TreeNode *node)
         auto ce = new CompositeExpression('/');
 
         for (auto child : node->get_children())
-            if (child->name() == "Sequence")
-                ce->push_expr(construct_sequence(child));
+            if (child->name() == "Sequence") {
+                auto child_expr = construct_sequence(child);
+                ce->push_expr(child_expr);
+                pht[child_expr] = 1;
+            }
 
         return ce;
     }

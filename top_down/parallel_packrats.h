@@ -8,10 +8,9 @@
 #include "../serial/serial_packrat.h"
 
 class TableParallel: public SerialPackrat {
-    std::map<NonTerminal*, bool> pht;
 public:
     TableParallel(std::string input, const PEG& g)
-            : SerialPackrat{input, g}, pht{} {}
+            : SerialPackrat{input, g} {}
 
     bool visit(CompositeExpression& ce);
     bool visit(PEG& peg) override;

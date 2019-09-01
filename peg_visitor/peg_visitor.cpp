@@ -6,32 +6,32 @@
 #include "../peg/peg_elements.h"
 
 
-bool NonTerminal::accept(PegVisitor &pegv)
+bool NonTerminal::accept(PegVisitor& pegv)
 {
     return pegv.visit(*this);
 }
 
-bool Terminal::accept(PegVisitor &pegv)
+bool Terminal::accept(PegVisitor& pegv)
 {
     return pegv.visit(*this);
 }
 
-bool CompositeExpression::accept(PegVisitor &pegv)
+bool CompositeExpression::accept(PegVisitor& pegv)
 {
     return pegv.visit(*this);
 }
 
-bool Empty::accept(PegVisitor &pegv)
+bool Empty::accept(PegVisitor& pegv)
 {
     return pegv.visit(*this);
 }
 
-bool AnyChar::accept(PegVisitor &pegv)
+bool AnyChar::accept(PegVisitor& pegv)
 {
     return pegv.visit(*this);
 }
 
-bool PEG::accept(class PegVisitor &pegv)
+bool PEG::accept(class PegVisitor& pegv)
 {
     return pegv.visit(*this);
 }

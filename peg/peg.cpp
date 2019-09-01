@@ -4,7 +4,7 @@
 
 #include "peg.h"
 
-PEG::PEG(const PEG &peg)
+PEG::PEG(const PEG& peg)
 {
     r = peg.get_rules();
     idx = peg.get_index();

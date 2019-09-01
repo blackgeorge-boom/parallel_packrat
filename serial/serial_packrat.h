@@ -24,7 +24,7 @@ public:
     void print_cells() const;
 
     char cur_tok() { return in[pos]; }
-    void next_tok() { pos++; }
+    void set_pos(int p) { pos = p; }
 
     bool visit(NonTerminal& nt) override;
     bool visit(Terminal& t) override;

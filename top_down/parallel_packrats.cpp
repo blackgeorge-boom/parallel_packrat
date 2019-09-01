@@ -17,7 +17,7 @@ bool TableParallel::visit(CompositeExpression &ce)
     std::vector<Expression*> exprs = ce.expr_list();
     int orig_pos = pos;
 
-    tbb::task_scheduler_init init(4);
+    tbb::task_scheduler_init init(1);
 
     switch (op) {
 
@@ -33,17 +33,42 @@ bool TableParallel::visit(CompositeExpression &ce)
         case '/':   // ordered choice
         {
             tbb::task_group g;
+
+            auto it = exprs.begin();
+            auto i = 0;
+            bool results[exprs.size()];
+            std::vector<std::pair<Expression*, int>> rest;
+
             for (auto expr : exprs) {
+                if (peg.get_history(expr)) {
+                    g.run([&]()
+                          {
+                              TableParallel tb{in, peg};
+                              tb.set_pos(pos);
+                              cout_mutex.lock();
+                              std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+                              cout_mutex.unlock();
+                              results[i] = (*it)->accept(*this);
+                          }
+                    );
+                }
+                else {
+                    rest.push_back(std::pair(expr, i));
+                }
+                i++;
+            }
+
+            for (auto r : rest)
                 pos = orig_pos;
-//                if (expr->accept(*this))
-//                    return true;
-                g.run([&]()
-                      {
-                          cout_mutex.lock();
-                          std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
-                          cout_mutex.unlock();
-                          expr->accept(*this);
-                      }
+                g.run([=]()
+                    {
+                        TableParallel tb{in, peg};
+                        tb.set_pos(pos);
+                        cout_mutex.lock();
+                        std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+                        cout_mutex.unlock();
+                        r.second = (r.first)->accept(*this);
+                    }
                 );
             }
             g.wait();

@@ -12,8 +12,7 @@ public:
     TableParallel(std::string input, const PEG& g)
             : SerialPackrat{input, g} {}
 
-    bool visit(CompositeExpression& ce);
-    bool visit(PEG& peg) override;
+    bool visit(CompositeExpression& ce) override;
 };
 
 #endif //PARALLEL_PACKRAT_PARALLEL_PACKRATS_H

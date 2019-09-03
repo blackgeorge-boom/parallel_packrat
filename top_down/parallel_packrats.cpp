@@ -7,11 +7,13 @@
 
 #include <tbb/task_group.h>
 #include <tbb/task_scheduler_init.h>
+
 #include "parallel_packrats.h"
+#include "simple_worker.h"
 
 std::mutex cout_mutex;
 
-bool TableParallel::visit(CompositeExpression &ce)
+bool TableParallel::visit(CompositeExpression& ce)
 {
     char op = ce.op_name();
     std::vector<Expression*> exprs = ce.expr_list();
@@ -34,44 +36,41 @@ bool TableParallel::visit(CompositeExpression &ce)
         {
             tbb::task_group g;
 
-            auto it = exprs.begin();
             auto i = 0;
             bool results[exprs.size()];
+            bool positions[exprs.size()];
             std::vector<std::pair<Expression*, int>> rest;
 
             for (auto expr : exprs) {
                 if (peg.get_history(expr)) {
                     g.run([&]()
                           {
-                              TableParallel tb{in, peg};
-                              tb.set_pos(pos);
+                              SimpleWorker sw{in, peg, cells, pos};
+                              std::cout << pos << std::endl;
                               cout_mutex.lock();
                               std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
                               cout_mutex.unlock();
-                              results[i] = (*it)->accept(*this);
+                              results[i] = expr->accept(sw);
+                              positions[i] = sw.cur_tok();
                           }
                     );
                 }
                 else {
-                    rest.push_back(std::pair(expr, i));
+                    rest.push_back(std::pair<Expression*, int>(expr, i));
                 }
                 i++;
             }
 
-            for (auto r : rest)
-                pos = orig_pos;
-                g.run([=]()
-                    {
-                        TableParallel tb{in, peg};
-                        tb.set_pos(pos);
-                        cout_mutex.lock();
-                        std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
-                        cout_mutex.unlock();
-                        r.second = (r.first)->accept(*this);
-                    }
-                );
-            }
             g.wait();
+
+            std::cout << pos << std::endl;
+            for (auto j = 0; j < exprs.size(); ++j)
+                if (results[i]) {
+                    pos = positions[i];
+                    std::cout << pos << std::endl;
+                    return true;
+                }
+
             pos = orig_pos;
             return false;
         }
@@ -110,17 +109,4 @@ bool TableParallel::visit(CompositeExpression &ce)
             return false;
         }
     }
-}
-
-bool TableParallel::visit(PEG &peg) 
-{
-    std::cout << "Parsing..." << std::endl;
-    NonTerminal* nt;
-    bool res;
-
-    nt = peg.get_start();
-    res = nt->accept(*this);
-    res = cells[0][0].res() == Result::success;
-    
-    return res;
 }

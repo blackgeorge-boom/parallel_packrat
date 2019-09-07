@@ -13,6 +13,7 @@ public:
             : SerialPackrat{input, g} {}
 
     bool visit(CompositeExpression& ce) override;
+    bool visit(PEG& peg) override;
 };
 
 #endif //PARALLEL_PACKRAT_PARALLEL_PACKRATS_H

@@ -42,7 +42,9 @@ bool TableParallel::visit(CompositeExpression& ce)
             std::vector<std::pair<Expression*, int>> rest;
 
             for (auto expr : exprs) {
+                std::cout << *expr << std::endl;
                 if (peg.get_history(expr)) {
+                    std::cout << "Case 1" << std::endl;
                     g.run([&]()
                           {
                               SimpleWorker sw{in, peg, cells, pos};
@@ -56,6 +58,7 @@ bool TableParallel::visit(CompositeExpression& ce)
                     );
                 }
                 else {
+                    std::cout << "Case 2" << std::endl;
                     rest.push_back(std::pair<Expression*, int>(expr, i));
                 }
                 i++;
@@ -66,6 +69,7 @@ bool TableParallel::visit(CompositeExpression& ce)
             std::cout << pos << std::endl;
             for (auto j = 0; j < exprs.size(); ++j)
                 if (results[i]) {
+                    std::cout << "Success!" << std::endl;
                     pos = positions[i];
                     std::cout << pos << std::endl;
                     return true;
@@ -109,4 +113,16 @@ bool TableParallel::visit(CompositeExpression& ce)
             return false;
         }
     }
+}
+
+bool TableParallel::visit(PEG& p)
+{
+    std::cout << "Parsing..." << std::endl;
+    NonTerminal *nt;
+    bool res;
+
+    nt = peg.get_start();
+    nt->accept(*this);
+    res = cells[0][0].res() == Result::success;
+    return res;
 }

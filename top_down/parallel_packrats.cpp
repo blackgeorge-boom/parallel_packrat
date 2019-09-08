@@ -37,41 +37,33 @@ bool TableParallel::visit(CompositeExpression& ce)
             tbb::task_group g;
 
             auto i = 0;
-            bool results[exprs.size()];
-            bool positions[exprs.size()];
+            std::vector<bool> results;
+            std::vector<int> positions;
             std::vector<std::pair<Expression*, int>> rest;
 
+            // TODO: check
+            auto local_pos = pos;
+
             for (auto expr : exprs) {
-                std::cout << *expr << std::endl;
-                if (peg.get_history(expr)) {
-                    std::cout << "Case 1" << std::endl;
-                    g.run([&]()
-                          {
-                              SimpleWorker sw{in, peg, cells, pos};
-                              std::cout << pos << std::endl;
-                              cout_mutex.lock();
-                              std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
-                              cout_mutex.unlock();
-                              results[i] = expr->accept(sw);
-                              positions[i] = sw.cur_tok();
-                          }
-                    );
-                }
-                else {
-                    std::cout << "Case 2" << std::endl;
-                    rest.push_back(std::pair<Expression*, int>(expr, i));
-                }
-                i++;
+                std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+                g.run([&]()
+                      {
+                          SimpleWorker sw{in, peg, cells, local_pos};
+                          cout_mutex.lock();
+                          std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+                          cout_mutex.unlock();
+                          results.push_back(expr->accept(sw));
+                          positions.push_back(sw.cur_pos());
+                      }
+                );
             }
 
             g.wait();
 
-            std::cout << pos << std::endl;
             for (auto j = 0; j < exprs.size(); ++j)
-                if (results[i]) {
-                    std::cout << "Success!" << std::endl;
-                    pos = positions[i];
-                    std::cout << pos << std::endl;
+                if (results[j]) {
+                    pos = positions[j];
+                    std::cout << "Success! " << pos << std::endl;
                     return true;
                 }
 
@@ -124,5 +116,6 @@ bool TableParallel::visit(PEG& p)
     nt = peg.get_start();
     nt->accept(*this);
     res = cells[0][0].res() == Result::success;
+    print_cells();
     return res;
 }

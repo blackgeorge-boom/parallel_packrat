@@ -23,6 +23,7 @@ public:
 
     void print_cells() const;
 
+    int cur_pos() { return pos; }
     char cur_tok() { return in[pos]; }
     void set_pos(int p) { pos = p; }
 

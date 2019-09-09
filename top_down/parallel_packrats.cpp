@@ -37,30 +37,32 @@ bool TableParallel::visit(CompositeExpression& ce)
             tbb::task_group g;
 
             auto i = 0;
-            std::vector<bool> results;
-            std::vector<int> positions;
+            auto expr_size = exprs.size();
+            bool results[expr_size];
+            int positions[expr_size];
             std::vector<std::pair<Expression*, int>> rest;
 
             // TODO: check
             auto local_pos = pos;
 
-            for (auto expr : exprs) {
-                std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
-                g.run([&]()
+            for (auto& expr : exprs) {
+                std::cout << "Outside " << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+                g.run([&, local_pos, expr, i]()
                       {
                           SimpleWorker sw{in, peg, cells, local_pos};
                           cout_mutex.lock();
                           std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
                           cout_mutex.unlock();
-                          results.push_back(expr->accept(sw));
-                          positions.push_back(sw.cur_pos());
+                          results[i] = expr->accept(sw);
+                          positions[i] = sw.cur_pos();
                       }
                 );
+                i++;
             }
 
             g.wait();
 
-            for (auto j = 0; j < exprs.size(); ++j)
+            for (auto j = 0; j < expr_size; ++j)
                 if (results[j]) {
                     pos = positions[j];
                     std::cout << "Success! " << pos << std::endl;

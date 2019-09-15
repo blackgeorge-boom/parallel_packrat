@@ -42,22 +42,21 @@ bool TableParallel::visit(CompositeExpression& ce)
             int positions[expr_size];
             std::vector<std::pair<Expression*, int>> rest;
 
-            // TODO: check
-            auto local_pos = pos;
-
             for (auto& expr : exprs) {
-                std::cout << "Outside " << std::this_thread::get_id() << ", " <<  *expr << std::endl;
-                g.run([&, local_pos, expr, i]()
-                      {
-                          SimpleWorker sw{in, peg, cells, local_pos};
-                          cout_mutex.lock();
-                          std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
-                          cout_mutex.unlock();
-                          results[i] = expr->accept(sw);
-                          positions[i] = sw.cur_pos();
-                      }
-                );
-                i++;
+//                std::cout << "Outside " << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+                if (peg.get_history(expr)) {
+                    g.run([&, expr, i]()
+                          {
+                              SimpleWorker sw{in, peg, cells, pos};
+                              cout_mutex.lock();
+//                              std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+                              cout_mutex.unlock();
+                              results[i] = expr->accept(sw);
+                              positions[i] = sw.cur_pos();
+                          }
+                    );
+                    i++;
+                }
             }
 
             g.wait();
@@ -65,7 +64,6 @@ bool TableParallel::visit(CompositeExpression& ce)
             for (auto j = 0; j < expr_size; ++j)
                 if (results[j]) {
                     pos = positions[j];
-                    std::cout << "Success! " << pos << std::endl;
                     return true;
                 }
 
@@ -118,6 +116,5 @@ bool TableParallel::visit(PEG& p)
     nt = peg.get_start();
     nt->accept(*this);
     res = cells[0][0].res() == Result::success;
-    print_cells();
     return res;
 }

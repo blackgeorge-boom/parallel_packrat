@@ -183,7 +183,7 @@ bool SerialPackrat::visit(PEG& p)
     bool res;
 
     nt = peg.get_start();
-    res = nt->accept(*this);
+    nt->accept(*this);
     res = cells[0][0].res() == Result::success;
     return res;
 

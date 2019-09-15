@@ -7,7 +7,6 @@
 #include <chrono>
 
 #include "../packrat_cell/cell.h"
-#include "../peg/peg_elements.h"
 #include "../peg/peg.h"
 #include "../syntax_tree/tree_node.h"
 #include "../meta_grammar/meta_grammar.h"
@@ -45,7 +44,7 @@ int main()
     auto start = java->get_non_term(0);
     java->set_start(start);
 
-    std::ifstream ifs2("test/java/Arrays.java", std::ifstream::in);
+    std::ifstream ifs2("test/java/BigDecimal.java", std::ifstream::in);
     if (!ifs2) std::cout << "Error opening file";
     std::string java_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );

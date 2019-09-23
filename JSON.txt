@@ -1,0 +1,47 @@
+# JSON Grammar
+
+# Hierarchical syntax
+
+JSON <- S? ( Object / Array / String / True / False / Null / Number ) S?
+
+Object <- '{'
+             ( String ':' JSON ( ',' String ':' JSON )*
+             / S? )
+          '}'
+
+Array <- '['
+            ( JSON ( ',' JSON )*
+            / S? )
+         ']'
+
+# Lexical syntax
+
+String <- S? '"' ( !StringForbiden / Escape )* '"' S?
+
+StringForbiden <- '"' / '\\'
+                      / '\u0000' / '\u0001' / '\u0002' / '\u0003' / '\u0004' / '\u0005' / '\u0006' / '\u0007'
+                      / '\u0008' / '\u0009' / '\u000A' / '\u000B' / '\u000C' / '\u000D' / '\u000E' / '\u000F'
+                      / '\u0010' / '\u0011' / '\u0012' / '\u0013' / '\u0014' / '\u0015' / '\u0016' / '\u0017'
+                      / '\u0018' / '\u0019' / '\u001A' / '\u001B' / '\u001C' / '\u001D' / '\u001E' / '\u001F'
+
+True <- 't' 'r' 'u' 'e'
+False <- 'f' 'a' 'l' 's' 'e'
+Null <- 'n' 'u' 'l' 'l'
+
+Number <- Minus? IntegralPart FractionalPart? ExponentPart?
+Minus <- '-'
+IntegralPart <- '0' / NumberFirst NumberRest*
+FractionalPart <- "." NumberRest+
+ExponentPart <- ( 'e' / 'E' ) ( '+' / '-' )? NumberRest+
+
+NumberFirst    <- '1' / '2' / '3' / '4' / '5' / '6' / '7' / '8' / '9'
+NumberRest     <- '0' / NumberFirst
+
+Escape <- '\\' ( '"' / '/' / '\\' / 'b' / 'f' / 'n' / 'r' / 't' / UnicodeEscape )
+
+UnicodeEscape <- 'u' UnicodeElement UnicodeElement UnicodeElement UnicodeElement
+UnicodeElement <- NumberRest
+                  / 'A' / 'B' / 'C' / 'D'/ 'E' / 'F'
+                  / 'a' / 'b' / 'c' / 'd'/ 'e' / 'f'
+
+S <- ( '\u0009' / '\u000A' / '\u000D' / '\u0020' )+

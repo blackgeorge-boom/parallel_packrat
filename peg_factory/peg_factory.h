@@ -26,5 +26,6 @@ public:
     Expression* construct_primary(TreeNode* node);
     Expression* construct_literal(TreeNode* node);
     Expression* construct_char(TreeNode* node);
+    Expression* construct_unicode(TreeNode* node);
 };
 #endif //PARALLEL_PACKRAT_PEG_FACTORY_H

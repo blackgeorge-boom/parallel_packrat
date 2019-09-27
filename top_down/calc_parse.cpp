@@ -21,7 +21,8 @@ int main()
 {
     Meta meta;
 
-    std::ifstream ifs("test/peg_examples/SimpleCalc.txt", std::ifstream::in);
+//    std::ifstream ifs("test/peg_examples/SimpleCalc.txt", std::ifstream::in);
+    std::ifstream ifs("test/peg_examples/JSON.txt", std::ifstream::in);
     if (!ifs) std::cout << "Error opening file";
     std::string content( (std::istreambuf_iterator<char>(ifs) ),
                          (std::istreambuf_iterator<char>()    ) );
@@ -35,16 +36,21 @@ int main()
     else
         std::cout << "Syntax Error..." << std::endl;
 
+    printTree("", sp.get_root(), true);
+
     NonTerminal::reset_idx();
 
     PEGFactory f;
 
     PEG* calc = f.from_tree(sp.get_root());
 
+    std::cout << *calc << std::endl;
+
     auto start = calc->get_non_term(0);
     calc->set_start(start);
 
-    std::ifstream ifs2("test/calc/simple.txt", std::ifstream::in);
+//    std::ifstream ifs2("test/calc/simple.txt", std::ifstream::in);
+    std::ifstream ifs2("test/json/simple.json", std::ifstream::in);
     if (!ifs2) std::cout << "Error opening file";
     std::string calc_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );

@@ -213,6 +213,8 @@ Expression* PEGFactory::construct_char(TreeNode* node)
             return new Terminal("\'");
         else if (ch == "\"")
             return new Terminal("\"");
+        else if (ch == "UnicodeEscape")
+            return construct_unicode(second_child);
         else {
             std::cout << "Error while constructing PEG grammar: Character node contains invalid escape.";
             return nullptr;
@@ -225,4 +227,15 @@ Expression* PEGFactory::construct_char(TreeNode* node)
         std::cout << "Error while constructing PEG grammar: invalid Character node: " << *child << "\n";
         return nullptr;
     }
+}
+
+Expression *PEGFactory::construct_unicode(TreeNode* node)
+{
+    std::string u_start("\\u");
+
+    auto u_first = node->get_ith(1)->get_ith(0)->name();
+    auto u_second = node->get_ith(2)->get_ith(0)->name();
+    auto u_third = node->get_ith(3)->get_ith(0)->name();
+    auto u_fourth = node->get_ith(4)->get_ith(0)->name();
+    return new Terminal(u_start + u_first + u_second + u_third + u_fourth);
 }

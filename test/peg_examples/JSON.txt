@@ -4,15 +4,9 @@
 
 JSON <- S? ( Object / Array / String / True / False / Null / Number ) S?
 
-Object <- '{'
-             ( String ':' JSON ( ',' String ':' JSON )*
-             / S? )
-          '}'
+Object <- '{' ( String ':' JSON ( ',' String ':' JSON )* / S? ) '}'
 
-Array <- '['
-            ( JSON ( ',' JSON )*
-            / S? )
-         ']'
+Array <- '[' ( JSON ( ',' JSON )* / S? ) ']'
 
 # Lexical syntax
 
@@ -34,14 +28,14 @@ IntegralPart <- '0' / NumberFirst NumberRest*
 FractionalPart <- "." NumberRest+
 ExponentPart <- ( 'e' / 'E' ) ( '+' / '-' )? NumberRest+
 
-NumberFirst    <- '1' / '2' / '3' / '4' / '5' / '6' / '7' / '8' / '9'
-NumberRest     <- '0' / NumberFirst
+NumberFirst <- '1' / '2' / '3' / '4' / '5' / '6' / '7' / '8' / '9'
+NumberRest <- '0' / NumberFirst
 
 Escape <- '\\' ( '"' / '/' / '\\' / 'b' / 'f' / 'n' / 'r' / 't' / UnicodeEscape )
 
 UnicodeEscape <- 'u' UnicodeElement UnicodeElement UnicodeElement UnicodeElement
 UnicodeElement <- NumberRest
-                  / 'A' / 'B' / 'C' / 'D'/ 'E' / 'F'
-                  / 'a' / 'b' / 'c' / 'd'/ 'e' / 'f'
+                / 'A' / 'B' / 'C' / 'D'/ 'E' / 'F'
+                / 'a' / 'b' / 'c' / 'd'/ 'e' / 'f'
 
 S <- ( '\u0009' / '\u000A' / '\u000D' / '\u0020' )+

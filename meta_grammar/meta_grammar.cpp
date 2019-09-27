@@ -26,6 +26,7 @@ Meta::Meta() : PEG()
     static Terminal tab("\t");
     static Terminal cr("\r");
     static Terminal lf("\n");
+    static Terminal unicodeStart("u");
     static AnyChar anyChar;
 
     // Create non terminals.
@@ -41,6 +42,8 @@ Meta::Meta() : PEG()
     static NonTerminal identifierRest("IdentifierRest");
     static NonTerminal literal("Literal");
     static NonTerminal character("Character");
+    static NonTerminal unicodeEscape("UnicodeEscape");
+    static NonTerminal unicodeElement("UnicodeElement");
     static NonTerminal leftArrow("LeftArrow");
     static NonTerminal slash("Slash");
     static NonTerminal and_("And");
@@ -157,13 +160,24 @@ Meta::Meta() : PEG()
     static CompositeExpression characterExp('/');
     static CompositeExpression characterSubExp('\b');
     characterSubExp.push_expr(&backSlash);
-    characterSubExp.push_expr(new CompositeExpression('/', "nrt\\'\""));
+    static CompositeExpression charEscape('/', "nrt\\'\"");
+    charEscape.push_expr(&unicodeEscape);
+    characterSubExp.push_expr(&charEscape);
     characterExp.push_expr(&characterSubExp);
     static CompositeExpression characterSubExp2('\b');
     characterSubExp2.push_expr(new CompositeExpression('!', {&backSlash}));
     characterSubExp2.push_expr(&anyChar);
     characterExp.push_expr(&characterSubExp2);
     this->push_rule(&character, &characterExp);
+
+    // UnicodeEscape <- 'u' UnicodeElement{4}
+    static CompositeExpression unicodeEscExp('\b', {&unicodeStart, &unicodeElement, &unicodeElement, &unicodeElement, &unicodeElement});
+    this->push_rule(&unicodeEscape, &unicodeEscExp);
+
+    // UnicodeElement <- [0-9A-Fa-f]
+    static CompositeExpression unicodeElemExp('/', "0123456789ABCDEFabcdef");
+    this->push_rule(&unicodeElement, &unicodeElemExp);
+
 
     // LEFTARROW  <- '<-' Spacing                                   # Type 10
     static CompositeExpression leftArrowExp('\b', {&lessThan, &minus, &spacing});

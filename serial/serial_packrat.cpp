@@ -1,5 +1,7 @@
 #include <utility>
 #include <thread>
+#include <cstring>
+#include <cmath>
 
 //
 // Created by blackgeorge on 21/3/2019.
@@ -30,7 +32,7 @@ SerialPackrat::SerialPackrat(std::string input, const PEG& g)
     auto N = peg.get_rules().size();
     auto M = in.size() + 1;
 
-    cells = new Cell*[N];
+    cells = new Cell*[M];
     for(int i = 0; i < N; ++i)
         cells[i] = new Cell[M];
 }
@@ -89,9 +91,36 @@ bool SerialPackrat::visit(NonTerminal& nt)
     return false;
 }
 
+int hex2dec(std::string hex)
+{
+    int hex_digit = 0;
+    int result = 0;
+
+    auto len = hex.length();
+
+    for (auto i = 0; i < len; ++i)
+    {
+        if(hex[i] >= '0' && hex[i] <= '9')
+            hex_digit = hex[i] - 48;
+        else if(hex[i] >= 'a' && hex[i] <= 'f')
+            hex_digit = hex[i] - 87;
+        else if(hex[i] >= 'A' && hex[i] <= 'F')
+            hex_digit = hex[i] - 55;
+
+        result += hex_digit * pow(16, len - i - 1);
+    }
+
+    return result;
+}
+
 bool SerialPackrat::visit(Terminal &t)
 {
-    if (pos < in.size() && t.name()[0] == this->cur_tok()) {
+    int terminal_char = t.name()[0];
+
+    if (t.name().length() > 1)
+        terminal_char = hex2dec(t.name().substr(2, 4));
+
+    if (pos < in.size() && terminal_char == this->cur_tok()) {
         pos++;
         return true;
     }

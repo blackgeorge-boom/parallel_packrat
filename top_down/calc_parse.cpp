@@ -50,11 +50,11 @@ int main()
     calc->set_start(start);
 
 //    std::ifstream ifs2("test/calc/simple.txt", std::ifstream::in);
-    std::ifstream ifs2("test/json/simple.json", std::ifstream::in);
+    std::ifstream ifs2("test/json/big.json", std::ifstream::in);
     if (!ifs2) std::cout << "Error opening file";
     std::string calc_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
-    TableParallel sp2(calc_file, *calc);
+    SerialPackrat sp2(calc_file, *calc);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();
@@ -66,7 +66,7 @@ int main()
     else
         std::cout << "Syntax Error..." << std::endl;
 
-    std::cout << "done " << duration_cast<milliseconds>(tf-t0).count() << " ms";
+    std::cout << "Done in: " << duration_cast<milliseconds>(tf-t0).count() << " ms";
 }
 
 

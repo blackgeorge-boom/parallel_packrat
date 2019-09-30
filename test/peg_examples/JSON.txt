@@ -10,7 +10,7 @@ Array <- '[' ( JSON ( ',' JSON )* / S? ) ']'
 
 # Lexical syntax
 
-String <- S? '"' ( !StringForbiden / Escape )* '"' S?
+String <- S? '"' ( !StringForbiden . / Escape )* '"' S?
 
 StringForbiden <- '"' / '\\'
                       / '\u0000' / '\u0001' / '\u0002' / '\u0003' / '\u0004' / '\u0005' / '\u0006' / '\u0007'

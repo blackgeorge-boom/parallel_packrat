@@ -50,7 +50,7 @@ int main()
     calc->set_start(start);
 
 //    std::ifstream ifs2("test/calc/simple.txt", std::ifstream::in);
-    std::ifstream ifs2("test/json/big.json", std::ifstream::in);
+    std::ifstream ifs2("test/json/medium.json", std::ifstream::in);
     if (!ifs2) std::cout << "Error opening file";
     std::string calc_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );

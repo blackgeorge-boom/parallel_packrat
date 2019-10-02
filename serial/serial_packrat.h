@@ -3,7 +3,7 @@
 //
 
 #ifndef PARALLEL_PACKRAT_SERIAL_PACKRAT_H
-#define PARALLEL_PACKRAT_SERIAL_PACKRAT_H
+#define PARALLEL_PACKRAT_HASH_SERIAL_H
 
 #include "../packrat_cell/cell.h"
 #include "../peg_visitor/peg_visitor.h"

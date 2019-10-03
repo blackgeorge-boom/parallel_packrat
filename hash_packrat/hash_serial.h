@@ -9,10 +9,9 @@
 #include "../serial/serial_packrat.h"
 
 class HashPackrat: public SerialPackrat {
-    std::unordered_map<std::pair<int, int>, Cell> memoCells;
+    std::unordered_map<std::string, int> memoCells{};
 public:
-    HashPackrat(std::string input, const PEG& g)
-            : SerialPackrat{input, g} {}
+    HashPackrat(std::string input, const PEG& g);
     ~HashPackrat() override = default;
 
     bool visit(NonTerminal& nt) override;

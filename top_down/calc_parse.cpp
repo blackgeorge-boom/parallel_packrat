@@ -12,7 +12,7 @@
 #include "../meta_grammar/meta_grammar.h"
 #include "../peg_factory/peg_factory.h"
 #include "../serial/serial_tree_packrat.h"
-#include "parallel_packrats.h"
+//#include "parallel_packrats.h"
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;

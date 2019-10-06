@@ -5,6 +5,8 @@
 #ifndef PARALLEL_PACKRAT_PEG_H
 #define PARALLEL_PACKRAT_PEG_H
 
+#include <utility>
+
 #include "peg_elements.h"
 
 class PEG {
@@ -24,8 +26,8 @@ public:
     std::map<int, NonTerminal*> get_index() const { return idx; }
     NonTerminal* get_non_term(int i);
 
-    std::map<Expression*, bool> get_pht() const { return pht; }
-    void set_pht(std::map<Expression*, bool> m) { pht = m; }
+    std::map<Expression*, bool> get_pht() { return pht; }
+    void set_pht(std::map<Expression*, bool> m) { pht = std::move(m); }
     bool get_history(Expression* e);
 
     NonTerminal* get_start() const { return s; }

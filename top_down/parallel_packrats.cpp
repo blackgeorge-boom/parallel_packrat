@@ -45,13 +45,14 @@ bool TableParallel::visit(CompositeExpression& ce)
             for (auto& expr : exprs) {
 //                std::cout << "Outside " << std::this_thread::get_id() << ", " <<  *expr << std::endl;
                 if (peg.get_history(expr)) {
-                    g.run([&, expr, i]()
+                    g.run([&, expr, i, peg]()
                           {
                               SimpleWorker sw{in, peg, cells, pos};
-                              cout_mutex.lock();
-                              std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
-                              cout_mutex.unlock();
+//                              cout_mutex.lock();
+//                              std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+//                              cout_mutex.unlock();
                               results[i] = expr->accept(sw);
+                              peg.get_pht()[expr] = results[i];
                               positions[i] = sw.cur_pos();
                           }
                     );

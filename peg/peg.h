@@ -26,7 +26,7 @@ public:
     std::map<int, NonTerminal*> get_index() const { return idx; }
     NonTerminal* get_non_term(int i);
 
-    std::map<Expression*, bool> get_pht() { return pht; }
+    std::map<Expression*, bool> get_pht() const { return pht; }
     void set_pht(std::map<Expression*, bool> m) { pht = std::move(m); }
     bool get_history(Expression* e);
 

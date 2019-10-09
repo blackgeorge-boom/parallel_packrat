@@ -19,7 +19,7 @@ bool TableParallel::visit(CompositeExpression& ce)
     std::vector<Expression*> exprs = ce.expr_list();
     int orig_pos = pos;
 
-    tbb::task_scheduler_init init(1);
+    tbb::task_scheduler_init init(2);
 
     switch (op) {
 
@@ -43,21 +43,23 @@ bool TableParallel::visit(CompositeExpression& ce)
             std::vector<std::pair<Expression*, int>> rest;
 
             for (auto& expr : exprs) {
-//                std::cout << "Outside " << std::this_thread::get_id() << ", " <<  *expr << std::endl;
                 if (peg.get_history(expr)) {
-                    g.run([&, expr, i, peg]()
+                    g.run([&, expr, i, this]()
                           {
                               SimpleWorker sw{in, peg, cells, pos};
-//                              cout_mutex.lock();
-//                              std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
-//                              cout_mutex.unlock();
                               results[i] = expr->accept(sw);
+                              cout_mutex.lock();
+                              std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << std::endl;
+                              cout_mutex.unlock();
                               peg.get_pht()[expr] = results[i];
                               positions[i] = sw.cur_pos();
                           }
                     );
                     i++;
                 }
+                else
+                      std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+
             }
 
             g.wait();

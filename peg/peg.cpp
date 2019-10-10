@@ -29,7 +29,13 @@ NonTerminal* PEG::get_non_term(int i)
     return idx.find(i)->second;
 }
 
-bool PEG::get_history(Expression *e)
+void PEG::push_history(Expression* e, bool pred)
+{
+//    pht.insert(std::pair<Expression*, bool>(e, pred));
+    pht[e] = pred;
+}
+
+bool PEG::get_history(Expression* e)
 {
     return pht[e];
 }

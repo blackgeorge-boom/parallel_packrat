@@ -9,9 +9,9 @@ std::map<Expression*, bool> pht;
 PEG* PEGFactory::from_tree(TreeNode *root)
 {
     nt_map.clear();
-    auto peg_created = construct_peg(root);
-    peg_created->set_pht(pht);
-    return peg_created;
+    auto result_peg = construct_peg(root);
+    result_peg->set_pht(pht);
+    return result_peg;
 }
 
 PEG* PEGFactory::construct_peg(TreeNode *node)

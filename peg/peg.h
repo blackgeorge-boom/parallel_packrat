@@ -27,8 +27,9 @@ public:
     NonTerminal* get_non_term(int i);
 
     std::map<Expression*, bool> get_pht() const { return pht; }
-    void set_pht(std::map<Expression*, bool> m) { pht = std::move(m); }
+    void push_history(Expression* e, bool pred);
     bool get_history(Expression* e);
+    void set_pht(std::map<Expression*, bool> table) { pht =  std::move(table); }
 
     NonTerminal* get_start() const { return s; }
     void set_start(NonTerminal* nt) { s = nt; }

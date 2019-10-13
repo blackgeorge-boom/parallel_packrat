@@ -51,7 +51,9 @@ int main()
     if (!ifs2) std::cout << "Error opening file";
     std::string calc_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
-    TableParallel sp2(calc_file, *calc);
+
+    SerialPackrat sp2(calc_file, *calc);
+    TableParallel sp3(calc_file, *calc);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();
@@ -62,8 +64,17 @@ int main()
         std::cout << "Parse successful!" << std::endl;
     else
         std::cout << "Syntax Error..." << std::endl;
+    std::cout << "done " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    std::cout << "Done in: " << duration_cast<milliseconds>(tf-t0).count() << " ms";
+    t0 = high_resolution_clock::now();
+    res = sp3.visit(*calc);
+    tf = high_resolution_clock::now();
+
+    if (res)
+        std::cout << "Parse successful!" << std::endl;
+    else
+        std::cout << "Syntax Error..." << std::endl;
+    std::cout << "done " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 }
 
 

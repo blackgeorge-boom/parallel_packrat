@@ -19,7 +19,7 @@ bool TableParallel::visit(CompositeExpression& ce)
     std::vector<Expression*> exprs = ce.expr_list();
     int orig_pos = pos;
 
-    tbb::task_scheduler_init init(2);
+    tbb::task_scheduler_init init(4);
 
     switch (op) {
 
@@ -49,16 +49,26 @@ bool TableParallel::visit(CompositeExpression& ce)
                               SimpleWorker sw{in, peg, cells, pos};
                               results[i] = expr->accept(sw);
 //                              cout_mutex.lock();
+//                              std::cout << "Case if: \n";
 //                              std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << std::endl;
 //                              cout_mutex.unlock();
                               peg.push_history(expr, results[i]);
                               positions[i] = sw.cur_pos();
                           }
                     );
-                    i++;
                 }
-//                else
-//                      std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+                else {
+//                    cout_mutex.lock();
+//                    if (dynamic_cast<NonTerminal*>(expr)) {
+//                        std::cout << "Case else: \n";
+//                        std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
+//                    }
+//                    cout_mutex.unlock();
+                    results[i] = expr->accept(*this);
+                    peg.push_history(expr, results[i]);
+                    positions[i] = this->cur_pos();
+                }
+                i++;
             }
 
             g.wait();

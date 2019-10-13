@@ -31,7 +31,7 @@ int main()
     auto res = sp.visit(meta);
 
     if (res)
-        std::cout << "Parse successful!" << std::endl;
+        std::cout << "Generating grammar successful!" << std::endl;
     else
         std::cout << "Syntax Error..." << std::endl;
 
@@ -49,7 +49,8 @@ int main()
     std::string java_file( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
 
-    TableParallel sp2(java_file, *java);
+    SerialPackrat sp2(java_file, *java);
+    TableParallel sp3(java_file, *java);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();
@@ -57,11 +58,20 @@ int main()
     auto tf = high_resolution_clock::now();
 
     if (res)
-        std::cout << "Parse successful!" << std::endl;
+        std::cout << "Serial parsing successful!" << std::endl;
     else
         std::cout << "Syntax Error..." << std::endl;
+    std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    std::cout << "done " << duration_cast<milliseconds>(tf-t0).count() << " ms";
+    t0 = high_resolution_clock::now();
+    res = sp3.visit(*java);
+    tf = high_resolution_clock::now();
+
+    if (res)
+        std::cout << "Parallel parsing successful!" << std::endl;
+    else
+        std::cout << "Syntax Error..." << std::endl;
+    std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 }
 
 

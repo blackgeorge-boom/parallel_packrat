@@ -17,14 +17,21 @@
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
 
-int main()
+int main(int agrc, char** argv)
 {
+    std::string grammar_def(argv[1]);
+    std::string file_to_parse(argv[2]);
+
     Meta meta;
 
-    std::ifstream ifs("test/peg_examples/Java1.5.txt", std::ifstream::in);
-    if (!ifs) std::cout << "Error opening file";
-    std::string content( (std::istreambuf_iterator<char>(ifs) ),
-                         (std::istreambuf_iterator<char>()    ) );
+    std::ifstream ifs(grammar_def, std::ifstream::in);
+    if (!ifs) {
+        std::cout << "Error opening file";
+        return 0;
+    }
+
+    std::string content((std::istreambuf_iterator<char>(ifs)),
+                    std::istreambuf_iterator<char>());
 
     SerialTreePackrat sp(content, meta);
 
@@ -32,45 +39,55 @@ int main()
 
     if (res)
         std::cout << "Generating grammar successful!" << std::endl;
-    else
+    else {
         std::cout << "Syntax Error..." << std::endl;
+        return 0;
+    }
 
     NonTerminal::reset_idx();
 
     PEGFactory f;
 
-    PEG* java = f.from_tree(sp.get_root());
+    PEG* grammar = f.from_tree(sp.get_root());
 
-    auto start = java->get_non_term(0);
-    java->set_start(start);
+    auto start = grammar->get_non_term(0);
+    grammar->set_start(start);
 
-    std::ifstream ifs2("test/java/BigDecimal.java", std::ifstream::in);
-    if (!ifs2) std::cout << "Error opening file";
-    std::string java_file( (std::istreambuf_iterator<char>(ifs2) ),
+    std::ifstream ifs2(file_to_parse, std::ifstream::in);
+    if (!ifs2) {
+        std::cout << "Error opening file";
+        return 0;
+    }
+
+    std::string input( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
 
-    SerialPackrat sp2(java_file, *java);
-    TableParallel sp3(java_file, *java);
+    SerialPackrat sp2(input, *grammar);
+    TableParallel sp3(input, *grammar);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();
-    res = sp2.visit(*java);
+    res = sp2.visit(*grammar);
     auto tf = high_resolution_clock::now();
 
     if (res)
         std::cout << "Serial parsing successful!" << std::endl;
-    else
+    else {
         std::cout << "Syntax Error..." << std::endl;
+        return 0;
+    }
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
     t0 = high_resolution_clock::now();
-    res = sp3.visit(*java);
+    res = sp3.visit(*grammar);
     tf = high_resolution_clock::now();
 
     if (res)
         std::cout << "Parallel parsing successful!" << std::endl;
-    else
+    else {
         std::cout << "Syntax Error..." << std::endl;
+        return 0;
+    }
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 }
 

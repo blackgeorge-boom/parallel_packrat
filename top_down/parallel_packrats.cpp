@@ -34,7 +34,7 @@ bool TableParallel::visit(CompositeExpression& ce)
         }
         case '/':   // ordered choice
         {
-            tbb::task_group g;
+            MyTask task;
 
             auto i = 0;
             auto expr_size = exprs.size();
@@ -129,4 +129,17 @@ bool TableParallel::visit(PEG& p)
     nt->accept(*this);
     res = cells[0][0].res() == Result::success;
     return res;
+}
+
+void MyTask::run()
+{
+    std::cout << "Task Start" << std::endl;
+
+    // Check if thread is requested to stop ?
+    while (stopRequested() == false)
+    {
+        std::cout << "Doing Some Work" << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+    std::cout << "Task End" << std::endl;
 }

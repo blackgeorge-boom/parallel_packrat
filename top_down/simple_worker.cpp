@@ -17,12 +17,14 @@ SimpleWorker::SimpleWorker(std::string input, const PEG &g, Cell **c, int p)
 
 bool SimpleWorker::visit(NonTerminal &nt) 
 {
+    if (stopRequested())
+        return false;
+
     int row = nt.index();
     Cell* cur_cell = &cells[row][pos];
     Result cur_res = cur_cell->res();
 
     switch (cur_res) {
-
         case Result::success:
         {
             pos = cur_cell->pos();

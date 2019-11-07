@@ -4,13 +4,13 @@
 
 #include "stoppable.h"
 
-Stoppable::Stoppable(Stoppable&& obj)
+Stoppable::Stoppable(Stoppable&& obj) noexcept
     : exitSignal(std::move(obj.exitSignal)), futureObj(std::move(obj.futureObj))
 {
     std::cout << "Move Constructor is called" << std::endl;
 }
 
-Stoppable& Stopable::operator=(Stoppable&& obj)
+Stoppable& Stoppable::operator=(Stoppable&& obj) noexcept
 {
     std::cout << "Move Assignment is called" << std::endl;
     exitSignal = std::move(obj.exitSignal);

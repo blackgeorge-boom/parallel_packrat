@@ -19,8 +19,6 @@ bool TableParallel::visit(CompositeExpression& ce)
     std::vector<Expression*> exprs = ce.expr_list();
     int orig_pos = pos;
 
-    tbb::task_scheduler_init init(4);
-
     switch (op) {
 
         case '\b':  // sequence
@@ -34,51 +32,52 @@ bool TableParallel::visit(CompositeExpression& ce)
         }
         case '/':   // ordered choice
         {
-            MyTask task;
-
             auto i = 0;
             auto expr_size = exprs.size();
+
             bool results[expr_size];
             int positions[expr_size];
-            std::vector<std::pair<Expression*, int>> rest;
+            std::vector<SimpleWorker> workers;
+            std::vector<std::thread> threads;
 
             for (auto& expr : exprs) {
-                if (peg.get_history(expr)) {
-                    g.run([&, expr, i, this]()
-                          {
-                              SimpleWorker sw{in, peg, cells, pos};
-                              results[i] = expr->accept(sw);
+                SimpleWorker sw{in, peg, cells, pos};
+                std::thread th([&, expr, i, this]()
+                               {
+                                   results[i] = expr->accept(sw);
 //                              cout_mutex.lock();
 //                              std::cout << "Case if: \n";
 //                              std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << std::endl;
 //                              cout_mutex.unlock();
-                              peg.push_history(expr, results[i]);
-                              positions[i] = sw.cur_pos();
-                          }
-                    );
-                }
-                else {
+//                                       peg.push_history(expr, results[i]);
+                                   positions[i] = sw.cur_pos();
+                               }
+                );
 //                    cout_mutex.lock();
 //                    if (dynamic_cast<NonTerminal*>(expr)) {
 //                        std::cout << "Case else: \n";
 //                        std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
 //                    }
 //                    cout_mutex.unlock();
-                    results[i] = expr->accept(*this);
-                    peg.push_history(expr, results[i]);
-                    positions[i] = this->cur_pos();
-                }
+//                    results[i] = expr->accept(*this);
+//                    peg.push_history(expr, results[i]);
+//                    positions[i] = this->cur_pos();
+//                workers.push_back(std::move(sw));
+                threads.push_back(std::move(th));
                 i++;
             }
 
-            g.wait();
-
-            for (auto j = 0; j < expr_size; ++j)
+            for (auto j = 0; j < expr_size; ++j) {
+                threads[j].join();
                 if (results[j]) {
                     pos = positions[j];
+                    for (auto k = j + 1; k < expr_size; ++k) {
+//                        workers[k].stop();
+                        threads[k].join();
+                    }
                     return true;
                 }
-
+            }
             pos = orig_pos;
             return false;
         }
@@ -129,17 +128,4 @@ bool TableParallel::visit(PEG& p)
     nt->accept(*this);
     res = cells[0][0].res() == Result::success;
     return res;
-}
-
-void MyTask::run()
-{
-    std::cout << "Task Start" << std::endl;
-
-    // Check if thread is requested to stop ?
-    while (stopRequested() == false)
-    {
-        std::cout << "Doing Some Work" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-    std::cout << "Task End" << std::endl;
 }

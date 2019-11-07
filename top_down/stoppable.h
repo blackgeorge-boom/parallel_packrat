@@ -16,16 +16,16 @@ class Stoppable {
 public:
     Stoppable() : futureObj(exitSignal.get_future()) {}
 
-    Stoppable(Stoppable&& obj);
+    Stoppable(Stoppable&& obj) noexcept;
 
-    Stoppable& operator=(Stoppable&& obj);
+    Stoppable& operator=(Stoppable&& obj) noexcept;
 
     // Task need to provide definition  for this function
     // It will be called by thread function
-    virtual void run() = 0;
+    // virtual void run() = 0;
 
     // Thread function to be executed by thread
-    void operator()() { run(); }
+    // void operator()() { run(); }
 
     //Checks if thread is requested to stop
     bool stopRequested();

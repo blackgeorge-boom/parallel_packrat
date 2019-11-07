@@ -17,11 +17,4 @@ public:
     bool visit(PEG& peg) override;
 };
 
-class MyTask: public Stoppable {
-public:
-    // Function to be executed by thread function
-    void run(std::string in, );
-};
-
-
 #endif //PARALLEL_PACKRAT_PARALLEL_PACKRATS_H

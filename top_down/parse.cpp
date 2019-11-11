@@ -74,7 +74,6 @@ int main(int agrc, char** argv)
         std::cout << "Serial parsing successful!" << std::endl;
     else {
         std::cout << "Syntax Error..." << std::endl;
-        return 0;
     }
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
@@ -86,7 +85,6 @@ int main(int agrc, char** argv)
         std::cout << "Parallel parsing successful!" << std::endl;
     else {
         std::cout << "Syntax Error..." << std::endl;
-        return 0;
     }
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 }

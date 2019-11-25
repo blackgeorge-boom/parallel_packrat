@@ -17,7 +17,7 @@
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
 
-int main(int agrc, char** argv)
+int main(int argc, char** argv)
 {
     std::string grammar_def(argv[1]);
     std::string file_to_parse(argv[2]);
@@ -53,6 +53,7 @@ int main(int agrc, char** argv)
     auto start = grammar->get_non_term(0);
     grammar->set_start(start);
 
+
     std::ifstream ifs2(file_to_parse, std::ifstream::in);
     if (!ifs2) {
         std::cout << "Error opening file";
@@ -63,7 +64,6 @@ int main(int agrc, char** argv)
                            (std::istreambuf_iterator<char>()     ) );
 
     SerialPackrat sp2(input, *grammar);
-    TableParallel sp3(input, *grammar);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();
@@ -72,10 +72,12 @@ int main(int agrc, char** argv)
 
     if (res)
         std::cout << "Serial parsing successful!" << std::endl;
-    else {
+    else
         std::cout << "Syntax Error..." << std::endl;
-    }
+
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
+
+    TableParallel sp3(input, *grammar);
 
     t0 = high_resolution_clock::now();
     res = sp3.visit(*grammar);
@@ -83,10 +85,10 @@ int main(int agrc, char** argv)
 
     if (res)
         std::cout << "Parallel parsing successful!" << std::endl;
-    else {
+    else
         std::cout << "Syntax Error..." << std::endl;
-    }
+
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
+
+    return 0;
 }
-
-

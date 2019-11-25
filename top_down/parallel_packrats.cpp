@@ -47,22 +47,13 @@ bool TableParallel::visit(CompositeExpression& ce)
 //                                   SimpleWorker sw {in, peg, cells, pos};
                                    results[i] = expr->accept(workers[i]);
                                    positions[i] = workers[i].cur_pos();
-//                              cout_mutex.lock();
-//                              std::cout << "Case if: \n";
-//                              std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << std::endl;
-//                              cout_mutex.unlock();
-//                                       peg.push_history(expr, results[i]);
+//                                   if (results[i]) {
+//                                       cout_mutex.lock();
+//                                       std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << " " << workers[i].cur_pos() << std::endl;
+//                                       cout_mutex.unlock();
+//                                   }
                                }
                 );
-//                    cout_mutex.lock();
-//                    if (dynamic_cast<NonTerminal*>(expr)) {
-//                        std::cout << "Case else: \n";
-//                        std::cout << std::this_thread::get_id() << ", " <<  *expr << std::endl;
-//                    }
-//                    cout_mutex.unlock();
-//                    results[i] = expr->accept(*this);
-//                    peg.push_history(expr, results[i]);
-//                    positions[i] = this->cur_pos();
                 threads.push_back(std::move(th));
                 i++;
             }

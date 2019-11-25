@@ -18,7 +18,7 @@ public:
     SerialPackrat() :in{}, pos{}, peg{}, cells{nullptr} {}
     SerialPackrat(const char* input, const PEG& g);
     SerialPackrat(std::string input, const PEG& g);
-    SerialPackrat(SerialPackrat&& sp) = default;
+    SerialPackrat(SerialPackrat&& sp);
     ~SerialPackrat() override = default;
     // TODO: check more about destructors
 

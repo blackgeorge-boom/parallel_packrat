@@ -19,7 +19,7 @@ SerialPackrat::SerialPackrat(const char* input, const PEG& g)
     auto M = in.size() + 1;
 
     cells = new Cell*[N];
-    for(int i = 0; i < N; ++i)
+    for (int i = 0; i < N; ++i)
         cells[i] = new Cell[M];
 }
 
@@ -35,6 +35,14 @@ SerialPackrat::SerialPackrat(std::string input, const PEG& g)
     cells = new Cell*[M];
     for(int i = 0; i < N; ++i)
         cells[i] = new Cell[M];
+}
+
+SerialPackrat::SerialPackrat(SerialPackrat&& sp)
+{
+    in = std::move(sp.in);
+    pos = sp.pos;
+    peg = PEG(sp.peg); // TODO: check
+    cells = sp.cells;
 }
 
 void SerialPackrat::print_cells() const

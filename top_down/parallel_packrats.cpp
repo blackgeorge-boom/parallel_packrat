@@ -42,19 +42,20 @@ bool TableParallel::visit(CompositeExpression& ce)
 
             for (auto& expr : exprs) {
                 workers.push_back(SimpleWorker {in, peg, cells, pos});
-                std::thread th([&, expr, i, this]()
+                //std::thread th([&, expr, i, this]()
+                threads.push_back(std::thread([&, expr, i, this]()
                                {
-//                                   SimpleWorker sw {in, peg, cells, pos};
-                                   results[i] = expr->accept(workers[i]);
-                                   positions[i] = workers[i].cur_pos();
-//                                   if (results[i]) {
-//                                       cout_mutex.lock();
-//                                       std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << " " << workers[i].cur_pos() << std::endl;
-//                                       cout_mutex.unlock();
-//                                   }
+                                   //SimpleWorker sw {in, peg, cells, pos};
+                                   SimpleWorker& sw = workers[i];
+                                   results[i] = expr->accept(sw);
+                                   positions[i] = sw.cur_pos();
+//                                   cout_mutex.lock();
+//                                   std::cout << i << "\n";
+//                                   std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << " " << workers[i].cur_pos() << std::endl;
+//                                   cout_mutex.unlock();
                                }
+                                  )
                 );
-                threads.push_back(std::move(th));
                 i++;
             }
 

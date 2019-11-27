@@ -11,7 +11,7 @@
 class SimpleWorker: public SerialPackrat {
 public:
     SimpleWorker(std::string input, const PEG& g, Cell** c, int p);
-    SimpleWorker(SimpleWorker&& sw) = default;
+    SimpleWorker(SimpleWorker&& sw);
     ~SimpleWorker() override = default;
 
     bool visit(NonTerminal& nt) override;

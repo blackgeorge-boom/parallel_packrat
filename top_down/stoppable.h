@@ -27,7 +27,7 @@ public:
     // Thread function to be executed by thread
     // void operator()() { run(); }
 
-    //Checks if thread is requested to stop
+    // Checks if thread is requested to stop
     bool stopRequested();
 
     // Request the thread to stop by setting value in promise object

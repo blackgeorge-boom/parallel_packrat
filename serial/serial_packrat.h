@@ -18,15 +18,17 @@ public:
     SerialPackrat() :in{}, pos{}, peg{}, cells{nullptr} {}
     SerialPackrat(const char* input, const PEG& g);
     SerialPackrat(std::string input, const PEG& g);
-    SerialPackrat(SerialPackrat&& sp);
+
+    SerialPackrat(SerialPackrat& sp) = delete;
+    SerialPackrat(SerialPackrat&& sp) noexcept;
+    SerialPackrat& operator=(SerialPackrat& sp) = delete;
+    SerialPackrat&& operator=(SerialPackrat&& sp) = delete;
     ~SerialPackrat() override = default;
-    // TODO: check more about destructors
 
     void print_cells() const;
 
     int cur_pos() { return pos; }
     char cur_tok() { return in[pos]; }
-    void set_pos(int p) { pos = p; }
 
     bool visit(NonTerminal& nt) override;
     bool visit(Terminal& t) override;

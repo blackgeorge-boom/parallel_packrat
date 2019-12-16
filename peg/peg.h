@@ -17,7 +17,8 @@ class PEG {
 public:
     PEG(): r{}, idx{}, pht{}, s{} {};
     PEG(const PEG& peg);
-    virtual ~PEG() = default;
+    PEG& operator=(const PEG&);
+    virtual ~PEG();
 
     std::map<NonTerminal*, Expression*> get_rules() const { return r; }
     void push_rule(NonTerminal* nt, Expression* e);

@@ -41,12 +41,12 @@ bool TableParallel::visit(CompositeExpression& ce)
             std::vector<std::thread> threads;
 
             for (auto& expr : exprs) {
-                workers.push_back(SimpleWorker {in, peg, cells, pos});
-                //std::thread th([&, expr, i, this]()
-                threads.push_back(std::thread([&, expr, i, this]()
+                workers.emplace_back(in, peg, cells, pos);
+                threads.emplace_back([&, expr, i, this]()
                                {
-                                   //SimpleWorker sw {in, peg, cells, pos};
-                                   SimpleWorker& sw = workers[i];
+                                   SimpleWorker sw {in, peg, cells, pos};
+//                                   SimpleWorker& sw = workers[i];
+//                                   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
                                    results[i] = expr->accept(sw);
                                    positions[i] = sw.cur_pos();
 //                                   cout_mutex.lock();
@@ -54,7 +54,7 @@ bool TableParallel::visit(CompositeExpression& ce)
 //                                   std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << " " << workers[i].cur_pos() << std::endl;
 //                                   cout_mutex.unlock();
                                }
-                                  )
+
                 );
                 i++;
             }
@@ -64,7 +64,7 @@ bool TableParallel::visit(CompositeExpression& ce)
                 if (results[j]) {
                     pos = positions[j];
                     for (auto k = j + 1; k < expr_size; ++k) {
-//                        workers[k].stop();
+                        workers[k].stop();
                         threads[k].join();
                     }
                     return true;

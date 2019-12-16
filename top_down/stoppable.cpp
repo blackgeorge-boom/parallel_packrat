@@ -7,12 +7,10 @@
 Stoppable::Stoppable(Stoppable&& obj) noexcept
     : exitSignal(std::move(obj.exitSignal)), futureObj(std::move(obj.futureObj))
 {
-    std::cout << "Move Constructor is called" << std::endl;
 }
 
 Stoppable& Stoppable::operator=(Stoppable&& obj) noexcept
 {
-    std::cout << "Move Assignment is called" << std::endl;
     exitSignal = std::move(obj.exitSignal);
     futureObj = std::move(obj.futureObj);
     return *this;
@@ -20,8 +18,11 @@ Stoppable& Stoppable::operator=(Stoppable&& obj) noexcept
 
 bool Stoppable::stopRequested()
 {
+//    std::cout << "Inside stopRequested\n";
+    std::chrono::milliseconds span {0};
+
     // checks if value in future object is available
-    return !(futureObj.wait_for(std::chrono::milliseconds(0)) ==
+    return !(futureObj.wait_for(span) ==
              std::future_status::timeout);
 }
 

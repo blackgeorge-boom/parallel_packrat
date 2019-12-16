@@ -10,7 +10,28 @@ PEG::PEG(const PEG& peg)
     idx = peg.get_index();
     pht = peg.get_pht();
     s = peg.get_start();
-    // TODO: fix memory leak
+}
+
+PEG& PEG::operator=(const PEG& peg)
+{
+    r = std::map<NonTerminal*, Expression*>{};
+    idx = std::map<int, NonTerminal*> {};
+    pht = std::map<Expression*, bool> {};
+
+    r = peg.get_rules();
+    idx = peg.get_index();
+    pht = peg.get_pht();
+    s = peg.get_start();
+
+    return *this;
+}
+
+PEG::~PEG()
+{
+    r = std::map<NonTerminal*, Expression*>{};
+    idx = std::map<int, NonTerminal*> {};
+    pht = std::map<Expression*, bool> {};
+    s = nullptr;
 }
 
 void PEG::push_rule(NonTerminal* nt, Expression* e)

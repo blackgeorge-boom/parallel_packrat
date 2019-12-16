@@ -37,7 +37,7 @@ SerialPackrat::SerialPackrat(std::string input, const PEG& g)
         cells[i] = new Cell[M];
 }
 
-SerialPackrat::SerialPackrat(SerialPackrat&& sp)
+SerialPackrat::SerialPackrat(SerialPackrat&& sp) noexcept
 {
     in = std::move(sp.in);
     pos = sp.pos;

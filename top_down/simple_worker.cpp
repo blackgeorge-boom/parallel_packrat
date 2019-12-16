@@ -15,21 +15,13 @@ SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p)
     pos = p;
 }
 
-SimpleWorker::SimpleWorker(SimpleWorker &&sw)
-{
-    in = sw.in;
-    pos = sw.pos;
-    peg = PEG(sw.peg); // TODO: check
-//    std::cout << "Moving " << sw.cells << std::endl;
-    cells = sw.cells;
-}
-
 bool SimpleWorker::visit(NonTerminal &nt)
 {
-//    if (stopRequested())
-//        return false;
+    if (stopRequested()) //TODO:
+        return false;
 
-//    std::cout << "Reaching " << cells << std::endl;
+    std::cout << "Did not stop " << sched_getcpu() << "\n"; // TODO: why same numbers appear serially?
+
     int row = nt.index();
     Cell* cur_cell = &cells[row][pos];
     Result cur_res = cur_cell->res();

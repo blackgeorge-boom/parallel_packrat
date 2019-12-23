@@ -11,8 +11,11 @@
 class SimpleWorker: public SerialPackrat, public Stoppable {
 public:
     SimpleWorker(std::string input, const PEG& g, Cell** c, int p);
+//    ~SimpleWorker() override {"destroy simple worker\n";}
 
+    bool visit(CompositeExpression& ce) override;
     bool visit(NonTerminal& nt) override;
+    bool visit(Terminal& t) override;
 };
 
 #endif //PARALLEL_PACKRAT_SIMPLE_WORKER_H

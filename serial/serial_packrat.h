@@ -23,7 +23,8 @@ public:
     SerialPackrat(SerialPackrat&& sp) noexcept;
     SerialPackrat& operator=(SerialPackrat& sp) = delete;
     SerialPackrat&& operator=(SerialPackrat&& sp) = delete;
-    ~SerialPackrat() override = default;
+//    ~SerialPackrat() override = default;
+    ~SerialPackrat() override {"Destroying Serial Packrat";}
 
     void print_cells() const;
 
@@ -37,5 +38,7 @@ public:
     bool visit(AnyChar& ac) override;
     bool visit(PEG& peg) override;
 };
+
+int hex2dec(std::string hex);
 
 #endif //PARALLEL_PACKRAT_SERIAL_PACKRAT_H

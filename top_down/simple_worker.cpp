@@ -17,8 +17,10 @@ SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p)
 
 bool SimpleWorker::visit(NonTerminal &nt)
 {
-    if (stopRequested()) //TODO:
-        return false;
+//    if (stopRequested()) {//TODO:
+//        std::cout << "stopped\n";
+//        return false;
+//    }
 
     std::cout << "Did not stop " << sched_getcpu() << "\n"; // TODO: why same numbers appear serially?
 
@@ -53,7 +55,7 @@ bool SimpleWorker::visit(NonTerminal &nt)
             cur_cell->set_res(Result::pending);
             cur_cell->unlock();
             Expression* e = peg.get_expr(&nt);
-            auto res = e->accept(*this);
+            auto res = e->accept(*this); // TODO: check
 
             if (res) {
                 cur_cell->set_res(Result::success);
@@ -66,3 +68,93 @@ bool SimpleWorker::visit(NonTerminal &nt)
         }
     }
 }
+
+bool SimpleWorker::visit(CompositeExpression &ce)
+{
+
+//    if (stopRequested()) {//TODO:
+//        std::cout << "Stopped\n";
+//        return false;
+//    }
+
+    char op = ce.op_name();
+    std::vector<Expression*> exprs = ce.expr_list();
+    int orig_pos = pos;
+
+    switch (op) {
+
+        case '\b':  // sequence
+        {
+            for (auto expr : exprs)
+                if (!expr->accept(*this)) {
+                    pos = orig_pos;
+                    return false;
+                }
+            return true;
+        }
+        case '/':   // ordered choice
+        {
+            for (auto expr : exprs) {
+                pos = orig_pos;
+                if (expr->accept(*this))
+                    return true;
+            }
+            pos = orig_pos;
+            return false;
+        }
+        case '&':   // followed by
+        {
+            auto res = exprs[0]->accept(*this);
+            pos = orig_pos;
+            return res;
+        }
+        case '!':   // not followed by
+        {
+            auto res = exprs[0]->accept(*this);
+            pos = orig_pos;
+            return !res;
+        }
+        case '?':   // optional
+        {
+            exprs[0]->accept(*this);
+            return true;
+        }
+        case '*':   // repetition
+        {
+            while (exprs[0]->accept(*this)) ;
+            return true;
+        }
+        case '+':   // positive repetition
+        {
+            if (!exprs[0]->accept(*this))
+                return false;
+            while (exprs[0]->accept(*this)) ;
+            return true;
+        }
+        default:
+        {
+            std::cout << "Visiting not handled!";
+            return false;
+        }
+    }
+}
+
+bool SimpleWorker::visit(Terminal& t)
+{
+//    if (stopRequested()) {//TODO:
+//        std::cout << "Stopped\n";
+//        return false;
+//    }
+
+    int terminal_char = t.name()[0];
+
+    if (t.name().length() > 1)
+        terminal_char = hex2dec(t.name().substr(2, 4));
+
+    if (pos < in.size() && terminal_char == this->cur_tok()) {
+        pos++;
+        return true;
+    }
+    return false;
+}
+

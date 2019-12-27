@@ -23,8 +23,7 @@ public:
     SerialPackrat(SerialPackrat&& sp) noexcept;
     SerialPackrat& operator=(SerialPackrat& sp) = delete;
     SerialPackrat&& operator=(SerialPackrat&& sp) = delete;
-//    ~SerialPackrat() override = default;
-    ~SerialPackrat() override {"Destroying Serial Packrat";}
+    ~SerialPackrat() override = default;
 
     void print_cells() const;
 

@@ -39,7 +39,8 @@ SerialPackrat::SerialPackrat(std::string input, const PEG& g)
 
 SerialPackrat::SerialPackrat(SerialPackrat&& sp) noexcept
 {
-    in = std::move(sp.in);
+//    std::cout << "Move\n";
+    in = sp.in; // TODO: check
     pos = sp.pos;
     peg = PEG(sp.peg); // TODO: check
     cells = sp.cells;

@@ -37,18 +37,18 @@ bool TableParallel::visit(CompositeExpression& ce)
 
             bool results[expr_size];
             int positions[expr_size];
-            std::vector<SimpleWorker> workers;
+            std::vector<SimpleWorker*> workers;
             std::vector<std::thread> threads;
 
             for (auto& expr : exprs) {
-                workers.emplace_back(in, peg, cells, pos);
+                workers.emplace_back(new SimpleWorker(in, peg, cells, pos));
                 threads.emplace_back([&, expr, i, this]()
                                {
 //                                   SimpleWorker sw {in, peg, cells, pos};
 //                                   SimpleWorker& sw = workers[i];
 //                                   std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-                                   results[i] = expr->accept(workers[i]);
-                                   positions[i] = workers[i].cur_pos();
+                                   results[i] = expr->accept(*workers[i]);
+                                   positions[i] = (*workers[i]).cur_pos();
 //                                   cout_mutex.lock();
 //                                   std::cout << i << "\n";
 //                                   std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << " " << workers[i].cur_pos() << std::endl;
@@ -60,11 +60,13 @@ bool TableParallel::visit(CompositeExpression& ce)
 
             for (auto j = 0; j < expr_size; ++j) {
                 threads[j].join();
+                delete workers[j];
                 if (results[j]) {
                     pos = positions[j];
                     for (auto k = j + 1; k < expr_size; ++k) {
-//                        workers[k].stop();
+                        workers[k]->stop();
                         threads[k].join();
+                        delete workers[k];
                     }
                     return true;
                 }

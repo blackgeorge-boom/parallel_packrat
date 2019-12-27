@@ -17,12 +17,13 @@ SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p)
 
 bool SimpleWorker::visit(NonTerminal &nt)
 {
-//    if (stopRequested()) {//TODO:
+    if (stopRequested()) {//TODO:
 //        std::cout << "stopped\n";
-//        return false;
+        return false;
+    }
+//    else {
+//    std::cout << "not stopped\n";
 //    }
-
-    std::cout << "Did not stop " << sched_getcpu() << "\n"; // TODO: why same numbers appear serially?
 
     int row = nt.index();
     Cell* cur_cell = &cells[row][pos];

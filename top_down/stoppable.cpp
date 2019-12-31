@@ -19,7 +19,7 @@ Stoppable& Stoppable::operator=(Stoppable&& obj) noexcept
 bool Stoppable::stopRequested()
 {
 //    std::cout << "Inside stopRequested\n";
-    std::chrono::milliseconds span {1};
+    std::chrono::milliseconds span {0};
 
     // checks if value in future object is available
     return !(futureObj.wait_for(span) ==

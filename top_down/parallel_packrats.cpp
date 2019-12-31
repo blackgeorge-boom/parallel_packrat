@@ -33,43 +33,62 @@ bool TableParallel::visit(CompositeExpression& ce)
         case '/':   // ordered choice
         {
             auto i = 0;
-            auto expr_size = exprs.size();
 
-            bool results[expr_size];
-            int positions[expr_size];
+            std::vector<bool> results;
+            std::vector<int> positions;
             std::vector<SimpleWorker*> workers;
             std::vector<std::thread> threads;
+            std::vector<Expression*> other_exprs;
 
             for (auto& expr : exprs) {
-                workers.emplace_back(new SimpleWorker(in, peg, cells, pos));
-                threads.emplace_back([&, expr, i, this]()
-                               {
+                if (peg.get_history(expr)) {
+                    workers.emplace_back(new SimpleWorker(in, peg, cells, pos));
+                    threads.emplace_back([&, expr, i, this]() {
+//                                     std::cout << "Thread #" << i << ": on CPU " << sched_getcpu() << "\n";
 //                                   SimpleWorker sw {in, peg, cells, pos};
 //                                   SimpleWorker& sw = workers[i];
 //                                   std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-                                   results[i] = expr->accept(*workers[i]);
-                                   positions[i] = (*workers[i]).cur_pos();
+                                             results.push_back(expr->accept(*workers[i]));
+                                             positions.push_back((*workers[i]).cur_pos());
+                                             other_exprs.push_back(expr);
 //                                   cout_mutex.lock();
 //                                   std::cout << i << "\n";
 //                                   std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << " " << workers[i].cur_pos() << std::endl;
 //                                   cout_mutex.unlock();
-                               }
-                );
-                i++;
+                                         }
+                    );
+                    i++;
+                }
+                else {
+                    if (expr->accept(*this)) {
+                        for (auto w : workers)
+                            w->stop();
+                        for (auto& t : threads)
+                            t.join();
+                        pos = this->cur_pos();
+                        peg.push_history(expr, true);
+                        return true;
+                    }
+                }
+                peg.push_history(expr, false);
             }
 
-            for (auto j = 0; j < expr_size; ++j) {
+            auto j = 0;
+            for (auto w : workers) {
+                w->stop();
                 threads[j].join();
                 delete workers[j];
                 if (results[j]) {
                     pos = positions[j];
-                    for (auto k = j + 1; k < expr_size; ++k) {
+                    for (auto k = j + 1; k < workers.size(); ++k) {
                         workers[k]->stop();
                         threads[k].join();
                         delete workers[k];
                     }
+                    peg.push_history(other_exprs[j], true);
                     return true;
                 }
+                j++;
             }
             pos = orig_pos;
             return false;

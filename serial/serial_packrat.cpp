@@ -22,7 +22,6 @@ SerialPackrat::SerialPackrat(const char* input, const PEG& g)
     for (int i = 0; i < N; ++i)
         cells[i] = new Cell[M];
 }
-
 SerialPackrat::SerialPackrat(std::string input, const PEG& g)
 {
     in = std::move(input);
@@ -32,14 +31,14 @@ SerialPackrat::SerialPackrat(std::string input, const PEG& g)
     auto N = peg.get_rules().size();
     auto M = in.size() + 1;
 
-    cells = new Cell*[M];
-    for(int i = 0; i < N; ++i)
+    cells = new Cell*[N];
+    for (int i = 0; i < N; ++i)
         cells[i] = new Cell[M];
 }
 
 SerialPackrat::SerialPackrat(SerialPackrat&& sp) noexcept
 {
-//    std::cout << "Move\n";
+    std::cout << "Move\n";
     in = sp.in; // TODO: check
     pos = sp.pos;
     peg = PEG(sp.peg); // TODO: check

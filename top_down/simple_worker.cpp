@@ -17,13 +17,10 @@ SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p)
 
 bool SimpleWorker::visit(NonTerminal &nt)
 {
-    if (stopRequested()) {//TODO:
-//        std::cout << "stopped\n";
+    if (stopRequested()) {  // TODO: does not provide efficiency with positive pht
+        std::cout << "stopped\n";
         return false;
     }
-//    else {
-//    std::cout << "not stopped\n";
-//    }
 
     int row = nt.index();
     Cell* cur_cell = &cells[row][pos];

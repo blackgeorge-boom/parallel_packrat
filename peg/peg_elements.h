@@ -89,7 +89,7 @@ public:
     void push_expr(Expression* e) { expr.push_back(e); }
     std::vector<Expression*> expr_list() const { return expr; };
 
-    const CompositeExpression& operator=(const CompositeExpression& ce);
+    CompositeExpression& operator=(const CompositeExpression& ce) = delete;
     std::ostream& put(std::ostream& os) const override;
     bool accept(PegVisitor& pegv) override;
 };

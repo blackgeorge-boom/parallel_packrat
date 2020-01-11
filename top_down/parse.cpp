@@ -53,7 +53,6 @@ int main(int argc, char** argv)
     auto start = grammar->get_non_term(0);
     grammar->set_start(start);
 
-
     std::ifstream ifs2(file_to_parse, std::ifstream::in);
     if (!ifs2) {
         std::cout << "Error opening file";

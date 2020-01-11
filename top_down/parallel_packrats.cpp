@@ -41,21 +41,14 @@ bool TableParallel::visit(CompositeExpression& ce)
             std::vector<Expression*> other_exprs;
 
             for (auto& expr : exprs) {
-                if (peg.get_history(expr)) {
+                if (peg.get_history(expr)) { // TODO: better with negation
                     workers.emplace_back(new SimpleWorker(in, peg, cells, pos));
-                    threads.emplace_back([&, expr, i, this]() {
-//                                     std::cout << "Thread #" << i << ": on CPU " << sched_getcpu() << "\n";
-//                                   SimpleWorker sw {in, peg, cells, pos};
-//                                   SimpleWorker& sw = workers[i];
-//                                   std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-                                             results.push_back(expr->accept(*workers[i]));
-                                             positions.push_back((*workers[i]).cur_pos());
-                                             other_exprs.push_back(expr);
-//                                   cout_mutex.lock();
-//                                   std::cout << i << "\n";
-//                                   std::cout << std::this_thread::get_id() << ", " <<  *expr <<  " " << results[i] << " " << workers[i].cur_pos() << std::endl;
-//                                   cout_mutex.unlock();
-                                         }
+                    threads.emplace_back([&, expr, i, this]()
+                                        {
+                                            results.push_back(expr->accept(*workers[i]));
+                                            positions.push_back((*workers[i]).cur_pos());
+                                            other_exprs.push_back(expr);
+                                        }
                     );
                     i++;
                 }
@@ -75,7 +68,6 @@ bool TableParallel::visit(CompositeExpression& ce)
 
             auto j = 0;
             for (auto w : workers) {
-                w->stop();
                 threads[j].join();
                 delete workers[j];
                 if (results[j]) {
@@ -126,6 +118,53 @@ bool TableParallel::visit(CompositeExpression& ce)
         {
             std::cout << "Visiting not handled!";
             return false;
+        }
+    }
+}
+
+bool TableParallel::visit(NonTerminal &nt)
+{
+    int row = nt.index();
+    Cell* cur_cell = &cells[row][pos];
+    Result cur_res = cur_cell->res();
+
+    switch (cur_res) {
+        case Result::success:
+        {
+            pos = cur_cell->pos();
+            return true;
+        }
+        case Result::fail:
+        {
+            return false;
+        }
+        case Result::pending:
+        {
+            while (cur_cell->res() == Result::pending) {
+                std::cout << "Stuck: " << std::this_thread::get_id() <<
+                          " " << row << ", " << pos << " " << nt << std::endl;
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            }
+            if (cur_cell->res() == Result::pending)
+                std::cout << "wuuut" << std::endl;
+            return cur_cell->res() == Result::success;
+        }
+        case Result::unknown:
+        {
+            cur_cell->lock();
+            cur_cell->set_res(Result::pending);
+            cur_cell->unlock();
+            Expression* e = peg.get_expr(&nt);
+            auto res = e->accept(*this); // TODO: check
+
+            if (res) {
+                cur_cell->set_res(Result::success);
+                cur_cell->set_pos(pos); // pos has changed
+                return true;
+            } else {
+                cur_cell->set_res(Result::fail);
+                return false;
+            }
         }
     }
 }

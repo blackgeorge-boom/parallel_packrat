@@ -41,7 +41,7 @@ bool TableParallel::visit(CompositeExpression& ce)
             std::vector<Expression*> other_exprs;
 
             for (auto& expr : exprs) {
-                if (peg.get_history(expr)) { // TODO: better with negation
+                if (!peg.get_history(expr)) { // TODO: better with negation
                     workers.emplace_back(new SimpleWorker(in, peg, cells, pos));
                     threads.emplace_back([&, expr, i, this]()
                                         {
@@ -54,8 +54,10 @@ bool TableParallel::visit(CompositeExpression& ce)
                 }
                 else {
                     if (expr->accept(*this)) {
-                        for (auto w : workers)
+                        for (auto w : workers) {
                             w->stop();
+                            delete w;
+                        }
                         for (auto& t : threads)
                             t.join();
                         pos = this->cur_pos();
@@ -74,8 +76,8 @@ bool TableParallel::visit(CompositeExpression& ce)
                     pos = positions[j];
                     for (auto k = j + 1; k < workers.size(); ++k) {
                         workers[k]->stop();
-                        threads[k].join();
                         delete workers[k];
+                        threads[k].join();
                     }
                     peg.push_history(other_exprs[j], true);
                     return true;

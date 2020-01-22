@@ -5,21 +5,24 @@
 #include "hash_serial.h"
 
 #include <utility>
+#include <cmath>
 
 HashPackrat::HashPackrat(std::string input, const PEG &g)
 {
     in = std::move(input);
     pos = 0;
     peg = PEG(g);
+    shift = ceil(log2(peg.get_rules().size()));
     cells = nullptr;
 }
 
 bool HashPackrat::visit(NonTerminal& nt)
 {
     int row = nt.index();
-    auto coords = std::string(std::to_string(row) + "," + std::to_string(pos));
+    long int index = (pos << shift) | row;
 
-    auto it = memoCells.find(coords);
+    auto it = memoCells.find(index);
+
     if (it != memoCells.end()) {
 
         int cur_res = it->second;
@@ -29,12 +32,12 @@ bool HashPackrat::visit(NonTerminal& nt)
             return true;
         }
         return false;
-
     }
     else {
+
         Expression* e = peg.get_expr(&nt);
         auto res = e->accept(*this);
-        int* cur_res = &memoCells[coords];
+        int* cur_res = &memoCells[index];
 
         if (res) {
             *cur_res = pos; // pos has changed

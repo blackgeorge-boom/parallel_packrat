@@ -19,9 +19,9 @@ HashPackrat::HashPackrat(std::string input, const PEG &g)
 bool HashPackrat::visit(NonTerminal& nt)
 {
     int row = nt.index();
-    long int index = (pos << shift) | row;
+    long int key = (pos << shift) | row;
 
-    auto it = memoCells.find(index);
+    auto it = memoCells.find(key);
 
     if (it != memoCells.end()) {
 
@@ -37,7 +37,7 @@ bool HashPackrat::visit(NonTerminal& nt)
 
         Expression* e = peg.get_expr(&nt);
         auto res = e->accept(*this);
-        int* cur_res = &memoCells[index];
+        int* cur_res = &memoCells[key];
 
         if (res) {
             *cur_res = pos; // pos has changed

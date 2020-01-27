@@ -22,6 +22,7 @@ SerialPackrat::SerialPackrat(const char* input, const PEG& g)
     for (int i = 0; i < N; ++i)
         cells[i] = new Cell[M];
 }
+
 SerialPackrat::SerialPackrat(std::string input, const PEG& g)
 {
     in = std::move(input);

@@ -13,10 +13,13 @@
 
 class ElasticCell: public Cell {
 protected:
-    int index;
+    long int key;
 public:
-    ElasticCell() : Cell(), index{-1} {}
+    ElasticCell() : Cell(), key{-1} {}
     ~ElasticCell() = default;
+
+    int get_key() { return key; }
+    void set_key(long int k) { key = k; }
 };
 
 #endif //PARALLEL_PACKRAT_ELASTIC_CELL_H

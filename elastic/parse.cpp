@@ -62,11 +62,11 @@ int main(int argc, char** argv)
     std::string input( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
 
-    SerialPackrat sp2(input, *grammar);
+//    SerialPackrat sp2(input, *grammar);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();
-    res = sp2.visit(*grammar);
+//    res = sp2.visit(*grammar);
     auto tf = high_resolution_clock::now();
 
     if (res)
@@ -76,14 +76,14 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    HashPackrat sp3(input, *grammar);
+    Elastic sp3(input, *grammar, 1024); // TODO: Benchmark window size
 
     t0 = high_resolution_clock::now();
     res = sp3.visit(*grammar);
     tf = high_resolution_clock::now();
 
     if (res)
-        std::cout << "Parallel parsing successful!" << std::endl;
+        std::cout << "Elastic parsing successful!" << std::endl;
     else
         std::cout << "Syntax Error..." << std::endl;
 

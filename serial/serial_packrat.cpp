@@ -79,7 +79,7 @@ bool SerialPackrat::visit(NonTerminal& nt)
         }
         case Result::unknown:
         {
-            Expression *e = peg.get_expr(&nt);
+            Expression* e = peg.get_expr(&nt);
             auto res = e->accept(*this);
 
             if (res) {

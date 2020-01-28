@@ -9,6 +9,25 @@
 \usepackage{enumitem}
 \usepackage{bm}
 
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+%% I define a "style" for the "cells"
+\tikzset{
+  my cell/.style={
+    draw,
+    minimum size=5ex,
+    node distance=0pt,
+  }}
+%% to make changing appearances for various aspects of
+%% the diagram easier, I define several macros which need
+%% only be changed here.  Even though two of these macros
+%% have the same definition, I use two to allow the possibility
+%% that these styles could be diffferent.
+\newcommand\mynodestyle{\sffamily}
+\newcommand\myrelocatestyle{\sffamily\bfseries}
+\newcommand\mynumberstyle{\sffamily}
 
 %%%
 %%%  The document
@@ -256,7 +275,18 @@ H  πρώτη δική μας προσέγγιση ήταν να αντί για
 
 Παρά την ποικιλία των παρεχόμενων εκφράσεων, όλες αυτές μπορούν να συρρικνωθούν σε έναν μικρό "πυρήνα" από στοιχειώδεις εκφράσεις.
 
-\section{Θεωρία πεδίων}
+\section{Ένα παράδειγμα μιας PEG}
+
+Το Σχήμα 1 παρουσιάζει μία PEG γραμματική για μία απλοϊκή αριθμητική γλώσσα.
+
+Πρακτικά, η περιγραφή της γραμματικής μας ορίζει νοηματικά τί θα έκανε ένας καθοδικός συντακτικός αναλυτής για να αναγνωρίσει μία συμβολοσειρά στην είσοδο.
+
+Αρχικά, περιγράφουμε πώς θα αναγνώριζε της συμβολοσειρά $2 + 5 * 3$.
+
+Με βάση τον ορισμό της γραμματικής, για να αναγνωρίσει το μη τερματικό $Ε$, ο συντακτικός αναλυτής θα προσπαθούσε πρώτα να αναγνωρίσει την έκφραση $T + E$ (μόνο αν αποτύχει η υποέκφραση αυτή θα δοκιμάσει την $Τ$).
+Ακολούθως, θα πήγαινε στο $Τ$, μετά στ 
+
+Η σειρά με την οποία μπαίνουν οι υποεκφράσεις στις διατεταγμένες επιλογές δεν είναι τυχαία.
 
 \chapter{ Packrat Parsing }
 

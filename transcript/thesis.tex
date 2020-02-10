@@ -277,7 +277,23 @@ H  πρώτη δική μας προσέγγιση ήταν να αντί για
 
 \section{Ένα παράδειγμα μιας PEG}
 
-Το Σχήμα 1 παρουσιάζει μία PEG γραμματική για μία απλοϊκή αριθμητική γλώσσα.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.3\textwidth]{pics/peg_example}
+    \caption{Μία PEG για μία απλή αριθμητική γλώσσα}
+    \label{fig:peg_example}
+\end{figure}
+
+Το Σχήμα \ref{fig:peg_example} παρουσιάζει μία PEG γραμματική για μία απλοϊκή αριθμητική γλώσσα.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{pics/calc_parse}
+	\caption{Αναγνωρίζοντας το `$(12-3)$' με βάση τη γραμματική στο Σχήμα \ref{fig:peg_example}}
+    \label{fig:calc_parse}
+\end{figure}
+
+Το Σχήμα \ref{fig:calc_parse} απεικονίζει πώς η συμβολοσειρά `$(12-3)$' μπορεί να αναγνωριστεί σύμφωνα με τη γραμματική στο Σχήμα \ref{fig:peg_example}.
 
 Πρακτικά, η περιγραφή της γραμματικής μας ορίζει νοηματικά τί θα έκανε ένας καθοδικός συντακτικός αναλυτής για να αναγνωρίσει μία συμβολοσειρά στην είσοδο.
 

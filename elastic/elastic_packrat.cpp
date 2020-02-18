@@ -7,7 +7,7 @@
 #include <utility>
 #include <cmath>
 
-Elastic::Elastic(std::string input, const PEG &g, int window_size, char threshold)
+Elastic::Elastic(std::string input, const PEG &g, int window_size, int threshold)
 {
     in = std::move(input);
     pos = 0;
@@ -18,7 +18,7 @@ Elastic::Elastic(std::string input, const PEG &g, int window_size, char threshol
 
     shift = ceil(log2(n));
 
-    nt_elapsed = new char[n];
+    nt_elapsed = new int[n];
     nt_utilized = new bool[n];
     nt_activated = new bool[n];
     for (auto i = 0; i < n; ++i) {

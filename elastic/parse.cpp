@@ -62,11 +62,11 @@ int main(int argc, char** argv)
     std::string input( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
 
-    SerialPackrat sp2(input, *grammar);
+//    SerialPackrat sp2(input, *grammar);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();
-    res = sp2.visit(*grammar);
+//    res = sp2.visit(*grammar);
     auto tf = high_resolution_clock::now();
 
     if (res)

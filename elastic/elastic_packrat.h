@@ -14,13 +14,13 @@ class Elastic: public SerialPackrat {
     int w;
     int n;
     int shift;
-    char nt_lim;
-    char* nt_elapsed;
+    int nt_lim;
+    int* nt_elapsed;
     bool* nt_utilized;
     bool* nt_activated;
     ElasticCell* elastic_cells;
 public:
-    Elastic(std::string input, const PEG& g, int window_size, char threshold);
+    Elastic(std::string input, const PEG& g, int window_size, int threshold);
 
     bool visit(NonTerminal& nt) override;
     bool visit(PEG& peg) override;

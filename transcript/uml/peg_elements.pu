@@ -1,0 +1,36 @@
+@startuml
+
+scale 3
+
+abstract class Expression {
+	string name
+	bool accept(PegVisitor)
+}
+
+class NonTerminal {
+	static int num
+	int index
+	int get_index()
+}
+
+class Terminal 
+
+class Empty 
+
+class AnyChar
+
+class CompositeExpression {
+	char operator
+	vector<Expression*> expressions
+	char operator_name()
+	void push_expression(Expression)
+	vector<Expression*> get_expressions()
+}
+
+Expression <|-- NonTerminal
+Expression <|-- Terminal
+Expression <|-- Empty
+Expression <|-- AnyChar
+Expression <|-- CompositeExpression
+
+@enduml

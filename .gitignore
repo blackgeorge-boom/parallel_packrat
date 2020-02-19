@@ -153,6 +153,7 @@ test/json/medium.json
 .pdf
 thesis.pdf
 ford_thesis.pdf
+byte_of_vim.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl

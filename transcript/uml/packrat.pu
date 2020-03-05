@@ -1,0 +1,18 @@
+@startuml
+
+scale 3
+
+class Packrat {
+    string in;
+    int pos;
+    PEG peg;
+    Cell** cells;
+	bool visit(NonTerminal& nt);
+    bool visit(Terminal& t);
+    bool visit(CompositeExpression& ce);
+    bool visit(Empty& e);
+    bool visit(AnyChar& ac);
+    bool visit(PEG& peg);
+}
+
+@enduml

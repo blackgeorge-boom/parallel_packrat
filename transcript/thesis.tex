@@ -11,6 +11,7 @@
 \usepackage{bm}
 \usepackage{changepage}
 \usepackage{tikz}
+%\usepackage{hyperref}
 \usetikzlibrary{calc}
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{positioning}
@@ -34,6 +35,21 @@
 
 \DeclareMathSymbol{\mlq}{\mathord}{operators}{``}
 \DeclareMathSymbol{\mrq}{\mathord}{operators}{`'}
+\newcommand\fnurl[2]{%
+  \href{#2}{#1}\footnote{\url{#2}}%
+}
+\tikzset{%
+	>={Latex[width=2mm,length=2mm]},
+  	% Specifications for style of nodes:
+	base/.style = {rectangle, rounded corners, draw=black,
+				   minimum width=4cm, minimum height=1cm,
+				   text centered, font=\sffamily},
+	factory/.style = {base, fill=blue!30},
+	parser/.style = {base, fill=red!30},
+	ast/.style = {base, fill=green!30},
+	process/.style = {base, minimum width=2.5cm, fill=orange!15,
+					  font=\ttfamily},
+}
 %%%
 %%%  The document
 %%%
@@ -611,13 +627,49 @@ To πλεονέκτημα που θα προσέφερε ένα τέτοιο ε�
 Ακόμη, επιτρέπει στον σχεδιαστή μίας γλώσσας να επικεντρωθεί στις υψηλού επιπέδου λεπτομέρειες της γραμματικής, χωρίς το φόρτο της διαρκούς υλοποίησης του αναλυτή με το χέρι. 
 Τέλος, δίνει τη δυνατότητα με αυτόματο τρόπο να μπορούμε να επεξεργαζόμαστε τις γραμματικές σε υψηλό επίπεδο (π.χ. να ελέγξουμε με κάποιο εργαλείο ότι οι κανόνες δεν έχουν κάποια κυκλική αναφορά), ενώ επιτρέπει και την εύκολη επαναχρησιμοποίηση κανόνων σε διάφορες γραμματικές.
 
-\section{Τυπική Περιγραφή Γραμματικών}
-Είπαμε ότι ως είσοδο στο γεννήτορα συντακτικών αναλυτών θα δίνουμε μία τυπική περιγραφή μίας γραμματικής. Πώς, όμως, ορίζεται μία τέτοια περιγραφή? Στο Σχήμα \ref{fig:peg_specification}, παρουσιάζεται η τυπική περιγραφή μίας PEG εκφρασμένης σε τυπική περιγραφή.
+Η διαδικασία που θα περιγράψουμε σε αυτό το κεφάλαιο συνοψίζεται στο Σχήμα \ref{fig:peg_factory_pipeline}.
 
-\begin{adjustwidth}{1.8cm}{}
+\begin{figure}[h]
+\begin{tikzpicture}[node distance=2.0cm,
+					every node/.style={fill=white, font=\sffamily}, align=center]
+
+  	% Specification of nodes (position, etc.)
+
+	\node (grammarInput)[base]              			{Java.txt};
+	\node (metaParser)	[parser, below of=grammarInput]	{Meta Grammar Parser};
+	\node (javaAst)		[ast, below of=metaParser]  	{Java Grammar AST};
+	\node (pegFactory)	[factory, below of=javaAst]		{PEG Parser Factory};
+	\node (javaParser)	[parser, right of=pegFactory, xshift=4cm, yshift=-2cm]	{Java Parser};
+	\node (javaCodeAst)	[ast, below of=javaParser] 		{Arrays.java AST};
+	\node (javaInput)   [base, above of=javaParser]              			{Arrays.java};
+
+    % Specification of lines between nodes specified above
+    % with aditional nodes for description
+
+	\draw[->]             (grammarInput) -- (metaParser);
+	\draw[->]             (metaParser) --  node {Συντακτική ανάλυση της τυπικής περιγραφής} (javaAst);
+	\draw[->]             (javaAst) -- node {Το AST τροφοδοτείται σε έναν γεννήτορα συντακτικών αναλυτών} (pegFactory);
+	\draw[->]             (pegFactory.south) |- node {Γεννιέται ένας packrat parser για Java}  (javaParser);
+	\draw[->]             (javaInput) -- (javaParser);
+	\draw[->]             (javaParser) -- (javaCodeAst);
+
+\end{tikzpicture}
+	\label{fig:peg_factory_pipeline}
+	\caption{Η διαδικασία αυτόματης παραγωγής ενός packrat parser για Java προγράμματα}
+\end{figure}
+
+Έστω ότι θέλουμε να αναλύσουμε συντακτικά ένα πρόγραμμα Arrays.java. 
+Αρχικά, θεωρούμε ότι διαθέτουμε μία τυπική περιγραφή της γραμματικής Java, εκφρασμένης ως parsing expression grammar, μέσα σε ένα .txt αρχείο.
+Αυτή η περιγραφή αναλύεται από έναν "Meta parser" και κατασκευάζεται το συντακτικό της δέντρο (AST).
+Ακολούθως, το δέντρο αυτό τροφοδοτείται σε έναν γεννήτορα αναλυτών (PEG Parser Factory), ο οποίος διασχίζει το δέντρο και γεννάει έναν packrat parser για Java προγράμματα.
+Πλέον, μπορούμε να τροφοδοτήσουμε το Arrays.java στον packrat parser.
+
+\section{Τυπική Περιγραφή Γραμματικών}
+Είπαμε ότι ως είσοδο στο γεννήτορα συντακτικών αναλυτών θα δίνουμε μία τυπική περιγραφή μίας γραμματικής. 
+Πώς, όμως, ορίζεται μία τέτοια περιγραφή? Στο Σχήμα \ref{fig:peg_specification}, παρουσιάζεται η συντακτική περιγραφή μίας PEG εκφρασμένης σε τυπική περιγραφή PEG \footnote{http://sourceforge.net/projects/instil-lang}.
+
 \begin{figure}[h]
 \begin{Verbatim}
-# Hierarchical syntax
 
 Grammar    <- Spacing Definition+ EndOfFile                     # Type 0
 Definition <- Identifier LEFTARROW Expression                   # Type 1
@@ -628,46 +680,67 @@ Suffix     <- Primary (QUESTION / STAR / PLUS)?                 # Type 5
 Primary    <- Identifier !LEFTARROW                             # Type 6
             / OPEN Expression CLOSE
             / Literal / DOT
-
-# Lexical syntax
-Identifier <- IdentifierStart IdentifierRest* Spacing
-IdentifierStart <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 'g' / 'h' / 'i' / 'j' / 'k' / 'l' / 'm' / 
-		   'n' / 'o' / 'p' / 'q' / 'r' / 's' / 't' / 'u' / 'v' / 'w' / 'x' / 'y' / 'z' / 
-		   'A' / 'B' / 'C' / 'D' / 'E' / 'F' / 'G' / 'H' / 'I' / 'J' / 'K' / 'L' / 'M' / 
-		   'N' / 'O' / 'P' / 'Q' / 'R' / 'S' / 'T' / 'U' / 'V' / 'W' / 'X' / 'Y' / 'Z' / '_'
-IdentifierRest <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 'g' / 'h' / 'i' / 'j' / 'k' / 'l' / 'm' / 
-		  'n' / 'o' / 'p' / 'q' / 'r' / 's' / 't' / 'u' / 'v' / 'w' / 'x' / 'y' / 'z' / 
-		  'A' / 'B' / 'C' / 'D' / 'E' / 'F' / 'G' / 'H' / 'I' / 'J' / 'K' / 'L' / 'M' / 
-		  'N' / 'O' / 'P' / 'Q' / 'R' / 'S' / 'T' / 'U' / 'V' / 'W' / 'X' / 'Y' / 'Z' / '_' / 
-		  '0' / '1' / '2' / '3' / '4' / '5' / '6' / '7' / '8' / '9'
-
-Literal    <- "'" (!"'" Character)* "'" Spacing                 # Type 8
-            / '"' (!'"' Character)* '"' Spacing
-Character  <- ('\\' ('n' / 'r' / 't' / '\\' / "'" / '"' / UnicodeEscape)) / (!'\\' .)
-UnicodeEscape <- 'u' UnicodeElement UnicodeElement UnicodeElement UnicodeElement
-UnicodeElement <- '0' / '1' / '2'/ '3' / '4' / '5' / '6' / '7' / '8' / '9' / 
-				  'A' / 'B' / 'C' / 'D'/ 'E' / 'F' / 'a' / 'b' / 'c' / 'd'/ 'e' / 'f'
-
-LEFTARROW  <- '<-' Spacing                                      # Type 10
-SLASH      <- '/' Spacing                                       # Type 11
-AND        <- '&' Spacing                                       # Type 12
-NOT        <- '!' Spacing                                       # Type 13
-QUESTION   <- '?' Spacing                                       # Type 14
-STAR       <- '*' Spacing                                       # Type 15
-PLUS       <- '+' Spacing                                       # Type 16
-OPEN       <- '(' Spacing                                       # Type 17
-CLOSE      <- ')' Spacing                                       # Type 18
-DOT        <- '.' Spacing                                       # Type 19
-Spacing    <- (Space / Comment)*                                # Type 20
-Comment    <- '#' (!EndOfLine .)* EndOfLine                     # Type 21
-Space      <- ' ' / '\t' / EndOfLine                            # Type 22
-EndOfLine  <- '\r\n' / '\n' / '\r'                              # Type 23
-EndOfFile  <- !.                                                # Type 24
 \end{Verbatim}
 \label{fig:peg_specification}
-\caption{Τυπική περιγραφής μίας Parsing Expression Grammar σε τυπική περιγραφή}
+\caption{Μία PEG περιγράφει τυπικά τη συντακτική δομή της}
 \end{figure}
-\end{adjustwidth}
+
+Δηλαδή, μία PEG (κανόνας Grammar) αποτελείται από διαδοχικούς ορισμούς (κανόνας Definition). 
+Ο κάθε ορισμός αποτελείται από ένα μη τερματικό (κανόνας Identifier), ένα αριστερό βέλος (LEFTARROW) και μία έκφραση (κανόνας Expression) κ.ό.κ.
+
+Το Σχήμα \ref{fig:peg_specification} περιγράφει μόνο τη συντακτική δομή, και όχι το πώς κατασκευάζονται οι λέξεις (tokens) μίας γραμματικής PEG.
+H πλήρης περιγραφή γίνεται στο Παράρτημα Α.
+
+Η είσοδος στο γεννήτορά μας είναι πλέον έτοιμη. 
+Πρακτικά, είναι ένα αρχείο κειμένου που θα περιγράφει τη γραμματική μίας γλώσσας (Java, XML κλπ) σε PEG τυπική μορφή.
+
+\section{Στιγμιότυπο μίας μετα-γραμματικής που περιγράφει Parsing Expresssion Grammars}
+
+Έχοντας έτοιμη την είσοδο της τυπικής περιγραφής, χρειαζόμαστε μία μετα-γραμματική για να την αναλύσει, όπως περιγράψαμε στο Σχήμα \ref{fig:peg_factory_pipeline}. 
+Το στιγμιότυπο αυτής της γραμματικής αναγκαστικά πρέπει να φτιαχτεί "με το χέρι".
+Δηλαδή, να δημιουργήσουμε τα κατάλληλα αντικείμενα που απαρτίζουν τις εκφράσεις και τους κανόνες μίας τέτοιας γραμματικής.
+
+Ενδεικτικά, στο Σχήμα \ref{fig:meta_example}, παραθέτουμε τον κώδικα για τη δημιουργία του πρώτου κανόνα της μετα-γραμματικής, που λέει ότι μία PEG αποτελείται από ένα σύνολο διαδοχικών κανόνων (definitions). O τελεστής της "ακολουθίας" θεωρούμε ότι είναι ο χαρακτήρας `$\backslash b$'. 
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+NonTerminal grammar("Grammar");
+NonTerminal spacing("Spacing");
+NonTerminal definition("Definition");
+NonTerminal endOfFile("EndOfFile");
+
+// Grammar <- Spacing Definition+ EndOfFile                     # Type 0
+CompositeExpression grammarExp('\b');
+grammarExp.push_expr(&spacing);
+grammarExp.push_expr(new CompositeExpression('+', {&definition}));
+grammarExp.push_expr(&endOfFile);
+this->push_rule(&grammar, &grammarExp);
+\end{minted}
+\caption{%
+  \label{fig:meta_example}}
+\end{figure}
+
+\section{Γεννήτορας συντακτικών αναλυτών packrat}
+
+Συνεχίζοντας το σκεπτικό του Σχήματος \ref{fig:peg_factory_pipeline}, έχοντας κατασκευάσει τη μετα-γραμματική, της δίνουμε ως είσοδο μία τυπική περιγραφή της γραμματικής (π.χ. ένα .txt αρχείο). 
+Το αποτέλεσμα είναι το Αφηρημένο Συντακτικό Δέντρο (AST). 
+Σε αυτή την ενότητα περιγράφουμε πώς ένας γεννήτορας συντακτικών αναλυτών (peg parser factory), παίρνει ως είσοδο το AST και δίνει ως έξοδο τον αντίστοιχο packrat parser.
+
+Η βασική ιδέα είναι ότι οι κόμβοι του AST έχουν ονόματα τα οποία δείχνουν σε ποιο τερματικό της μετα-γραμματικής αντιστοιχούν.
+Για παράδειγμα, ένας κόμβος με το όνομα "$Sequence$" αντιλαμβανόμαστε ότι αντιστοιχεί σε κάποια ακολουθία, οπότε τα παιδιά του θα είναι τα μέλη της ακολουθίας.
+Έτσι, θα επισκεπτούμε ένα-ένα τα παιδία του και θα τα βάλουμε σε ένα $CompositeExpression$ ακολουθίας.
+
+Έστω, λοιπόν, ότι μία γραμμή στο Java.txt (που περιέχει την τυπική περιγραφή σε Java), δίνει τον εξής κανόνα:
+
+\begin{equation}
+	Block \; \leftarrow \; LWING \; BlockStatements \; RWING
+\end{equation}
+
+ο οποίος λέει πως ένα block εντολών σε Java αποτελείται από ένα σύνολο εντολών ανάμεσα σε παρενθέσεις.
+Ο meta-parser όταν αναλύσει αυτήν την πρόταση θα δώσει ως εσωτερικό κόμβο του AST το εξής:
+
+
 
 \chapter{ Παράλληλο Packrat Parsing με Υπομνηματισμό }
 
@@ -730,9 +803,66 @@ int main() {
 
 \appendix
 
-\chapter{Ευρετήριο συμβολισμών}
+\chapter{Μία PEG περιγράφει τυπικά την ίδια τη σύνταξη της}
 
-$A \rightarrow B$ : συνάρτηση από το πεδίο $A$ στο πεδίο $B$.
+\begin{Verbatim}
+# Hierarchical syntax
+
+Grammar    <- Spacing Definition+ EndOfFile                     # Type 0
+Definition <- Identifier LEFTARROW Expression                   # Type 1
+Expression <- Sequence (SLASH Sequence)*                        # Type 2
+Sequence   <- Prefix*                                           # Type 3
+Prefix     <- (AND / NOT)? Suffix                               # Type 4
+Suffix     <- Primary (QUESTION / STAR / PLUS)?                 # Type 5
+Primary    <- Identifier !LEFTARROW                             # Type 6
+            / OPEN Expression CLOSE
+            / Literal / DOT
+
+# Lexical syntax
+
+Identifier <- IdentifierStart IdentifierRest* Spacing
+IdentifierStart <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 'g' / 'h' / 
+		   'i' / 'j' / 'k' / 'l' / 'm' / 'n' / 'o' / 'p' / 
+		   'q' / 'r' / 's' / 't' / 'u' / 'v' / 'w' / 'x' / 'y' / 'z' / 
+		   ᾽A' / 'B' / 'C' / 'D' / 'E' / 'F' / 'G' / 'H' / 
+		   'I' / 'J' / 'K' / 'L' / 'M' / 'N' / 'O' / 'P' / 
+		   'Q' / 'R' / 'S' / 'T' / 'U' / 'V' / 'W' / 'X' / 'Y' / 'Z' / '_'
+
+IdentifierRest <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 'g' / 'h' / 
+		  'i' / 'j' / 'k' / 'l' / 'm' / 'n' / 'o' / 'p' / 
+		  'q' / 'r' / 's' / 't' / 'u' / 'v' / 'w' / 'x' / 'y' / 'z' / 
+		  'A' / 'B' / 'C' / 'D' / 'E' / 'F' / 'G' / 'H' / 
+		  'I' / 'J' / 'K' / 'L' / 'M' / 'N' / 'O' / 'P' / 
+		  'Q' / 'R' / 'S' / 'T' / 'U' / 'V' / 'W' / 'X' / 'Y' / 'Z' / '_' / 
+		  '0' / '1' / '2' / '3' / '4' / '5' / '6' / '7' / '8' / '9'
+
+Literal    <- "'" (!"'" Character)* "'" Spacing                 # Type 8
+            / '"' (!'"' Character)* '"' Spacing
+
+Character  <- ('\\' ('n' / 'r' / 't' / '\\' / "'" / '"' / UnicodeEscape)) / (!'\\' .)
+
+UnicodeEscape <- 'u' UnicodeElement UnicodeElement UnicodeElement UnicodeElement
+
+UnicodeElement <- '0' / '1' / '2'/ '3' / '4' / '5' / '6' / '7' / '8' / '9' / 
+		  'A' / 'B' / 'C' / 'D'/ 'E' / 'F' / 'a' / 'b' / 'c' / 'd'/ 'e' / 'f'
+
+
+LEFTARROW  <- '<-' Spacing                                      # Type 10
+SLASH      <- '/' Spacing                                       # Type 11
+AND        <- '&' Spacing                                       # Type 12
+NOT        <- '!' Spacing                                       # Type 13
+QUESTION   <- '?' Spacing                                       # Type 14
+STAR       <- '*' Spacing                                       # Type 15
+PLUS       <- '+' Spacing                                       # Type 16
+OPEN       <- '(' Spacing                                       # Type 17
+CLOSE      <- ')' Spacing                                       # Type 18
+DOT        <- '.' Spacing                                       # Type 19
+Spacing    <- (Space / Comment)*                                # Type 20
+Comment    <- '#' (!EndOfLine .)* EndOfLine                     # Type 21
+Space      <- ' ' / '\t' / EndOfLine                            # Type 22
+EndOfLine  <- '\r\n' / '\n' / '\r'                              # Type 23
+EndOfFile  <- !.                                                # Type 24
+\end{Verbatim}
 
 \chapter{Ευρετήριο γλωσσών}
 

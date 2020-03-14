@@ -22,6 +22,8 @@ class Elastic: public SerialPackrat {
 public:
     Elastic(std::string input, const PEG& g, int window_size, int threshold);
 
+    void print_active() const;
+
     bool visit(NonTerminal& nt) override;
     bool visit(PEG& peg) override;
 };

@@ -37,7 +37,6 @@ bool Elastic::visit(NonTerminal& nt)
 
     if (!nt_activated[row]) {
         Expression* e = peg.get_expr(&nt);
-//        std::cout << "hereee\n";
         return e->accept(*this);
     }
 
@@ -45,7 +44,7 @@ bool Elastic::visit(NonTerminal& nt)
         nt_elapsed[row] = nt_elapsed[row] - 1;
 
     long int key = (pos << shift) | row;
-//    unsigned int index = key % (w * n);
+//    unsigned int index = key % (w * n);   // TODO
     unsigned int index = hash(key) % (w * n);
 
     ElasticCell* cur_cell = &elastic_cells[index];
@@ -55,6 +54,8 @@ bool Elastic::visit(NonTerminal& nt)
         cur_res = Result::unknown;
 //        std::cout << "conflict\n";
     }
+//    else
+//        std::cout << "no conflict\n";   // TODO: benchmark
 
     switch (cur_res) {
 
@@ -106,6 +107,17 @@ bool Elastic::visit(PEG& peg)
 
     nt = peg.get_start();
     return nt->accept(*this);
+}
+
+void Elastic::print_active() const
+{
+    auto N = peg.get_rules().size();
+
+    std::cout << std::endl;
+    for(int i = 0; i < N; ++i) {
+        std::cout << nt_activated[i] << " ";
+    }
+    std::cout << std::endl;
 }
 
 unsigned int hash(unsigned int x)

@@ -89,5 +89,7 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
+    sp3.print_active();
+
     return 0;
 }

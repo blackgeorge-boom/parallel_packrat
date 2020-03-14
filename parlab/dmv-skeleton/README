@@ -1,0 +1,56 @@
+This is a code skeleton for the Assignment #4 of the Parallel Processing Systems
+course. The code is fully functional as it is now, meaning you can compile and
+run it without a problem. The performance of the GPU kernels are of course
+bogus, since they currently do nothing. This is what you should do! :-)
+
+The structure of the repository is as follows:
+
+    dmv-skeleton/
+    | -- common/
+    | -- cuda/
+    | -- opencl/
+
+You can choose to complete the CUDA or OpenCL implementation, or you can even
+do both! The code has some `FILLME:' annotations to denote the parts where you
+have to fill in some code. Of course, you can do whatever other magic you like,
+but use the same timing operations, in order to have a common baseline for
+measuring the performance.
+
+Before starting filling up the necessary GPU code, do the following three things
+first:
+
+(a) Run `make help' to see what options the Makefile supports.
+
+(b) Run `make all' to compile the project.
+
+(c) Run `./cuda/dmv_main' or `./opencl/dmv_main' to get a help message of what
+    the program expects from you. Play a bit to get the feeling.
+
+Now, you can inspect the code and get started. The 'common/' subdirectory
+includes some utilities that are shared for both implementations. The code of
+the '/cuda' and '/opencl' subdirectories is structured in four parts:
+
+(a) The main program (dmv_main.c/cu), which is responsible for printing the
+    messages you 've just seen, setting up the data structures and
+    calling/measuring the performance of the kernels (CPU and GPU ones).
+
+(b) The CPU kernels (dmv.c), which also holds all the necessary algebra stuff
+    (matrix + vector operations).
+
+(c) The GPU kernels (dmv_gpu.cu/cl), which you must fill.
+
+(d) Utility functions (the rest of the files), which are responsible for making
+    the code readable.
+
+Finally, have a look in the `run_dmv.sh' script before submitting jobs to the
+lab's GPU machines.
+
+For any questions, just send us in parlab@lists.cslab.ece.ntua.gr.
+
+
+Revision History
+================
+2013-01-23: Fixed ordering of linking flags in Makefile
+2013-01-16: Updated skeleton to meet requirements of the fall 2012 course.
+2016-01-09: Updated skeleton to meet requirements of the fall 2015 course.
+2017-12-03: Extended skeleton with OpenCL implementation.

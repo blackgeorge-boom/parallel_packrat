@@ -2,7 +2,7 @@
 // Created by blackgeorge on 11/7/2019.
 //
 
-#ifndef PARALLEL_PACKRAT_SIMPLE_WORKER_H
+#ifndef PARALLEL_PACKRAT_ELASTIC_WORKER_H
 #define PARALLEL_PACKRAT_SIMPLE_WORKER_H
 
 #include "../serial/serial_packrat.h"
@@ -17,4 +17,4 @@ public:
     bool visit(PEG& peg) override;
 };
 
-#endif //PARALLEL_PACKRAT_SIMPLE_WORKER_H
+#endif //PARALLEL_PACKRAT_ELASTIC_WORKER_H

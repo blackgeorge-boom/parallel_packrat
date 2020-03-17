@@ -7,6 +7,15 @@
 #include <utility>
 #include <cmath>
 
+void Elastic::addData(const long unsigned int& key)
+{
+    ElasticTable::accessor a;
+    auto ec = new TempCell();
+    table.insert(a, key);
+    a->second = *ec;
+    a.release();
+}
+
 Elastic::Elastic(std::string input, const PEG &g, int window_size, int threshold)
 {
     in = std::move(input);
@@ -43,11 +52,23 @@ bool Elastic::visit(NonTerminal& nt)
     if (nt_elapsed[row] >= 0)
         nt_elapsed[row] = nt_elapsed[row] - 1;
 
-    long int key = (pos << shift) | row;
+    long unsigned int key = (pos << shift) | row;
 //    unsigned int index = key % (w * n);   // TODO
+
     unsigned int index = hash(key) % (w * n);
 
-    ElasticCell* cur_cell = &elastic_cells[index];
+    ElasticTable::accessor a;
+
+    const long unsigned int& temp = 3;
+//    ElasticCell* cur_cell = &elastic_cells[index];
+    auto cur_cell = new ElasticCell();
+    if (!table.find(a, key)) {
+        std::cout << "ok\n";
+        this->addData(key);
+    } else
+        std::cout << "not ok\n";
+
+//    cur_cell = &a->second;
     Result cur_res = cur_cell->res();
 
     if (cur_cell->get_key() != key) {

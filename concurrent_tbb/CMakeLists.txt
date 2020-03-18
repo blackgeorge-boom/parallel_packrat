@@ -13,6 +13,7 @@ add_executable(elastic_conc parse.cpp ../packrat_cell/cell.cpp ../packrat_cell/c
                ../peg_visitor/peg_visitor.h ../meta_grammar/meta_grammar.h
                ../serial/serial_tree_packrat.cpp ../serial/serial_tree_packrat.h ../syntax_tree/tree_node.cpp
                ../syntax_tree/tree_node.h ../peg_factory/peg_factory.cpp ../peg_factory/peg_factory.h
-               ../packrat_cell/elastic_cell.h elastic_packrat.h elastic_packrat.cpp elastic_worker.h elastic_worker.cpp ../packrat_cell/temp_cell.h)
+               ../packrat_cell/elastic_cell.h ../packrat_cell/elastic_cell.h conc_elastic_base.cpp conc_elastic_base.h
+               conc_elastic_packrat.cpp conc_elastic_packrat.h conc_elastic_worker.cpp conc_elastic_worker.h)
 
 target_link_libraries(elastic_conc tbb ${CMAKE_THREAD_LIBS_INIT})

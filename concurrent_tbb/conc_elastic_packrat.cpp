@@ -6,6 +6,8 @@
 #include <mutex>
 #include <thread>
 
+#include "tbb/task_group.h"
+
 #include "conc_elastic_packrat.h"
 #include "conc_elastic_worker.h"
 
@@ -21,7 +23,9 @@ ConcurrentElasticPackrat::ConcurrentElasticPackrat(std::string input, const PEG&
 
     shift = ceil(log2(nt_num));
 
-    nt_elapsed = nt_utilized = nt_activated = new int[nt_num];
+    nt_elapsed = new int[nt_num];
+    nt_utilized = new int[nt_num];
+    nt_activated = new int[nt_num];
     for (auto i = 0; i < nt_num; ++i) {
         nt_elapsed[i] = thres;
         nt_utilized[i] = false;
@@ -55,30 +59,30 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
             std::vector<bool> results;
             std::vector<int> positions;
             std::vector<ConcurrentElasticWorker*> workers;
-            std::vector<std::thread> threads;
+
+            tbb::task_group g;
 
             for (auto& expr : exprs) {
                 workers.emplace_back(new ConcurrentElasticWorker(in, pos, peg, width, thres,
                         nt_elapsed, nt_utilized, nt_activated, table));
-                threads.emplace_back([&, expr, i, this]()
+                g.run_and_wait([&, expr, i, this]()
                                      {
                                          results.push_back(expr->accept(*workers[i]));
                                          positions.push_back((*workers[i]).cur_pos());
                                      }
                 );
                 i++;
-        }
+            }
 
+            g.wait();
             auto j = 0;
             for (auto w : workers) {
-                threads[j].join();
                 delete workers[j];
                 if (results[j]) {
                     pos = positions[j];
                     for (auto k = j + 1; k < workers.size(); ++k) {
 //                        workers[k]->stop();
                         delete workers[k];
-                        threads[k].join();
                     }
                     return true;
                 }

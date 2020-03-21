@@ -2,15 +2,18 @@
 // Created by blackgeorge on 18/3/20.
 //
 
+#include <thread>
 #include "conc_elastic_base.h"
 
-void ConcurrentElasticBase::print_active() const
+std::atomic<int> finished_rank;
+
+void ConcurrentElasticBase::print_active()
 {
     auto N = peg.get_rules().size();
 
     std::cout << std::endl;
     for(int i = 0; i < N; ++i) {
-        std::cout << nt_activated[i] << " ";
+        std::cout << *(peg.get_non_term(i)) << ": " << nt_activated[i] << " Elapsed? " << nt_elapsed[i] <<  "\n";
     }
     std::cout << std::endl;
 }
@@ -26,6 +29,11 @@ void ConcurrentElasticBase::addData(const long int &key)
 
 bool ConcurrentElasticBase::visit(NonTerminal& nt)
 {
+    auto fr = finished_rank.load();
+    if (fr >= 0 && rank > fr) { // TODO: check print
+//        std::cout << "fr: " << fr << "rank: " << rank << std::endl;
+        return false;
+    }
     int row = nt.index();
 
     if (!nt_activated[row]) {
@@ -59,6 +67,7 @@ bool ConcurrentElasticBase::visit(NonTerminal& nt)
 
         case Result::success:
         {
+            finished_rank.store(rank);
             if (nt_elapsed[row] > 0)
                 nt_utilized[row] = true;
             pos = cur_cell->pos();
@@ -72,7 +81,7 @@ bool ConcurrentElasticBase::visit(NonTerminal& nt)
         }
         case Result::unknown:
         {
-            if (nt_elapsed[row] == 0)
+            if (nt_elapsed[row] <= 0)
                 if (!nt_utilized[row])
                     nt_activated[row] = false;
 
@@ -81,6 +90,7 @@ bool ConcurrentElasticBase::visit(NonTerminal& nt)
 
             cur_cell->set_key(key);
             if (res) {
+                finished_rank.store(rank);
                 cur_cell->set_res(Result::success);
                 cur_cell->set_pos(pos); // pos has changed
                 return true;

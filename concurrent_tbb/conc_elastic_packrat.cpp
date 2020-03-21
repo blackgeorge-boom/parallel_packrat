@@ -6,6 +6,7 @@
 #include <mutex>
 #include <thread>
 
+#include <tbb/task_scheduler_init.h>
 #include "tbb/task_group.h"
 
 #include "conc_elastic_packrat.h"
@@ -22,6 +23,8 @@ ConcurrentElasticPackrat::ConcurrentElasticPackrat(std::string input, const PEG&
     thres= threshold;
 
     shift = ceil(log2(nt_num));
+
+    rank = -1;
 
     nt_elapsed = new int[nt_num];
     nt_utilized = new int[nt_num];
@@ -54,18 +57,20 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
         }
         case '/':   // ordered choice
         {
-            auto i = 0;
-
             std::vector<bool> results;
             std::vector<int> positions;
             std::vector<ConcurrentElasticWorker*> workers;
 
+//            tbb::task_scheduler_init tbb_init{4};
             tbb::task_group g;
 
-            for (auto& expr : exprs) {
-                workers.emplace_back(new ConcurrentElasticWorker(in, pos, peg, width, thres,
+            finished_rank.store(-1);
+
+            auto i = 0;
+            for (auto& expr : exprs) { // TODO: maybe add restriction when expr.size > 4. also pht table
+                workers.emplace_back(new ConcurrentElasticWorker(in, pos, peg, width, thres, i,
                         nt_elapsed, nt_utilized, nt_activated, table));
-                g.run_and_wait([&, expr, i, this]()
+                g.run([&, expr, i, this]()
                                      {
                                          results.push_back(expr->accept(*workers[i]));
                                          positions.push_back((*workers[i]).cur_pos());

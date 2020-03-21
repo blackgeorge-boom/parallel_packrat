@@ -5,6 +5,8 @@
 #ifndef PARALLEL_PACKRAT_CONC_ELASTIC_BASE_H
 #define PARALLEL_PACKRAT_CONC_ELASTIC_BASE_H
 
+#include <atomic>
+
 #include "../packrat_cell/elastic_cell.h"
 #include "../serial/serial_packrat.h"
 
@@ -28,6 +30,8 @@ struct MyHashCompare {
 
 typedef tbb::concurrent_hash_map<long int, ElasticCell, MyHashCompare> ElasticTable;
 
+extern std::atomic<int> finished_rank;
+
 // An abstract class for concurrent elastic packrat parsing.
 class ConcurrentElasticBase: public SerialPackrat {
 protected:
@@ -36,11 +40,12 @@ protected:
     int* nt_elapsed;
     int* nt_utilized;
     int* nt_activated;
+    int rank;
     ElasticTable* table;
 public:
     void addData(const long int& key);
 
-    void print_active() const;
+    void print_active();
 
     bool visit(NonTerminal& nt) override;
 };

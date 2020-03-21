@@ -6,7 +6,7 @@
 
 #include "conc_elastic_worker.h"
 
-ConcurrentElasticWorker::ConcurrentElasticWorker(std::string input, int p, const PEG& g, int window_size, int threshold,
+ConcurrentElasticWorker::ConcurrentElasticWorker(std::string input, int p, const PEG& g, int window_size, int threshold, int i,
                                                  int* elapsed, int* utilized, int* activated, ElasticTable* et)
 {
     in = std::move(input);
@@ -18,6 +18,8 @@ ConcurrentElasticWorker::ConcurrentElasticWorker(std::string input, int p, const
     thres= threshold;
 
     shift = ceil(log2(nt_num));
+
+    rank = i;
 
     nt_elapsed = elapsed;
     nt_utilized = utilized;

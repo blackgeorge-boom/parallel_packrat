@@ -9,6 +9,8 @@
 #include "../peg/peg_elements.h"
 #include "../peg/peg.h"
 
+extern std::map<Expression*, bool> pht;
+
 class PEGFactory {
     std::map<std::string, NonTerminal*> nt_map;
 public:

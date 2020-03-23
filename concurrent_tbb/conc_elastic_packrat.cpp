@@ -59,18 +59,25 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
         {
             std::vector<bool> results;
             std::vector<int> positions;
+            std::vector<std::thread> threads;
             std::vector<ConcurrentElasticWorker*> workers;
-
-//            tbb::task_scheduler_init tbb_init{4};
-            tbb::task_group g;
 
             finished_rank.store(-1);
 
+            if (exprs.size() > 8 ) {    // Parse without spawning threads
+                for (auto expr : exprs) {
+                    pos = orig_pos;
+                    if (expr->accept(*this))
+                        return true;
+                }
+                pos = orig_pos;
+                return false;
+            }
             auto i = 0;
             for (auto& expr : exprs) { // TODO: maybe add restriction when expr.size > 4. also pht table
                 workers.emplace_back(new ConcurrentElasticWorker(in, pos, peg, width, thres, i,
                         nt_elapsed, nt_utilized, nt_activated, table));
-                g.run([&, expr, i, this]()
+                threads.emplace_back([&, expr, i, this]()
                                      {
                                          results.push_back(expr->accept(*workers[i]));
                                          positions.push_back((*workers[i]).cur_pos());
@@ -79,13 +86,14 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
                 i++;
             }
 
-            g.wait();
             auto j = 0;
             for (auto w : workers) {
+                threads[j].join();
                 delete workers[j];
                 if (results[j]) {
                     pos = positions[j];
                     for (auto k = j + 1; k < workers.size(); ++k) {
+                        threads[k].join();
 //                        workers[k]->stop();
                         delete workers[k];
                     }
@@ -135,7 +143,7 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
 
 bool ConcurrentElasticPackrat::visit(PEG& peg)
 {
-    std::cout << "Parsing..." << std::endl;
+//    std::cout << "Parsing..." << std::endl;
     NonTerminal* nt;
 
     nt = peg.get_start();

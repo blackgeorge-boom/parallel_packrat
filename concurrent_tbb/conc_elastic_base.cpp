@@ -3,17 +3,20 @@
 //
 
 #include <thread>
+#include <iomanip>
 #include "conc_elastic_base.h"
 
 std::atomic<int> finished_rank;
 
 void ConcurrentElasticBase::print_active()
 {
+    const int nt_width = 35;
+
     auto N = peg.get_rules().size();
 
     std::cout << std::endl;
     for(int i = 0; i < N; ++i) {
-        std::cout << *(peg.get_non_term(i)) << ": " << nt_activated[i] << " Elapsed? " << nt_elapsed[i] <<  "\n";
+        std::cout << std::setw(nt_width) << *(peg.get_non_term(i)) << ": " << nt_activated[i] << " Elapsed: " << nt_elapsed[i] <<  "\n";
     }
     std::cout << std::endl;
 }
@@ -29,6 +32,7 @@ void ConcurrentElasticBase::addData(const long int &key)
 
 bool ConcurrentElasticBase::visit(NonTerminal& nt)
 {
+//    std::cout << std::this_thread::get_id() << std::endl;
     auto fr = finished_rank.load();
     if (fr >= 0 && rank > fr) { // TODO: check print
 //        std::cout << "fr: " << fr << "rank: " << rank << std::endl;

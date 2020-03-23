@@ -27,7 +27,7 @@ Elastic::Elastic(std::string input, const PEG &g, int window_size, int threshold
         nt_activated[i] = true;
     }
 
-    std::cout << "Array size: " << n * w << "\n";
+//    std::cout << "Array size: " << n * w << "\n";
     elastic_cells = new ElasticCell[n * w];
 }
 
@@ -102,7 +102,7 @@ bool Elastic::visit(NonTerminal& nt)
 
 bool Elastic::visit(PEG& peg)
 {
-    std::cout << "Parsing..." << std::endl;
+//    std::cout << "Parsing..." << std::endl;
     NonTerminal* nt;
 
     nt = peg.get_start();

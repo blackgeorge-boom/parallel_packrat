@@ -44,7 +44,6 @@ bool Elastic::visit(NonTerminal& nt)
         nt_elapsed[row] = nt_elapsed[row] - 1;
 
     long int key = (pos << shift) | row;
-//    unsigned int index = key % (w * n);   // TODO
     unsigned int index = hash(key) % (w * n);
 
     ElasticCell* cur_cell = &elastic_cells[index];

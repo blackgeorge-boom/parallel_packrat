@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.12)
 
 set(CMAKE_CXX_STANDARD 14)
 
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+
 list(APPEND CMAKE_MODULE_PATH "/home/blackgeorge/CLionProjects/FindTBB")
 
 find_package(TBB COMPONENTS tbbmalloc tbbmalloc_proxy tbb_preview)

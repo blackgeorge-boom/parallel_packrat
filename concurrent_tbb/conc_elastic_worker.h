@@ -10,6 +10,9 @@
 class ConcurrentElasticWorker: public ConcurrentElasticBase {
 public:
     ConcurrentElasticWorker(std::string input, int p, const PEG& g, int window_size, int threshold, int i,
-                            int* elapsed, int* utilized, int* activated, ElasticTable* et);
+                            int* elapsed, int* utilized, int* activated, ElasticCell* ec);
+
+    bool visit(NonTerminal& nt) override;
+    bool visit(CompositeExpression& ce) override;
 };
 #endif //PARALLEL_PACKRAT_CONC_ELASTIC_WORKER_H

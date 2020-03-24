@@ -35,7 +35,76 @@ ConcurrentElasticPackrat::ConcurrentElasticPackrat(std::string input, const PEG&
         nt_activated[i] = true;
     }
 
-    table = new ElasticTable();
+    elastic_cells = new ElasticCell[width * nt_num];
+}
+
+bool ConcurrentElasticPackrat::visit(NonTerminal& nt)
+{
+    int row = nt.index();
+
+    if (!nt_activated[row]) {
+        Expression* e = peg.get_expr(&nt);
+        return e->accept(*this);
+    }
+
+    if (nt_elapsed[row] >= 0)
+        nt_elapsed[row] = nt_elapsed[row] - 1;
+
+    long int key = (pos << shift) | row;
+    unsigned int index = hash(key) % (width * nt_num);
+
+    ElasticCell* cur_cell = &elastic_cells[index];
+    Result cur_res = cur_cell->res();
+
+    if (cur_cell->get_key() != key) {
+        cur_res = Result::unknown;
+//        std::cout << "conflict\n";
+    }
+//    else
+//        std::cout << "no conflict\n";   // TODO: benchmark
+
+    switch (cur_res) {
+
+        case Result::success:
+        {
+            if (nt_elapsed[row] > 0)
+                nt_utilized[row] = true;
+            pos = cur_cell->pos();
+            return true;
+        }
+        case Result::fail:
+        {
+            if (nt_elapsed[row] > 0)
+                nt_utilized[row] = true;
+            return false;
+        }
+        case Result::unknown:
+        {
+            if (nt_elapsed[row] == 0)
+                if (!nt_utilized[row])
+                    nt_activated[row] = false;
+
+            Expression* e = peg.get_expr(&nt);
+
+            cur_cell->set_key(key);
+
+            auto res = e->accept(*this);
+            if (res) {
+                cur_cell->set_res(Result::success);
+                cur_cell->set_pos(pos); // pos has changed
+                return true;
+            } else {
+                cur_cell->set_res(Result::fail);
+                return false;
+            }
+        }
+        case Result::pending:
+        {
+            std::cout << "Pending!?!" << std::endl;
+            break;
+        }
+    }
+    return false;
 }
 
 bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
@@ -57,14 +126,7 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
         }
         case '/':   // ordered choice
         {
-            std::vector<bool> results;
-            std::vector<int> positions;
-            std::vector<std::thread> threads;
-            std::vector<ConcurrentElasticWorker*> workers;
-
-            finished_rank.store(-1);
-
-            if (exprs.size() > 8 ) {    // Parse without spawning threads
+            if (exprs.size() > 8) {    // Parse without spawning threads
                 for (auto expr : exprs) {
                     pos = orig_pos;
                     if (expr->accept(*this))
@@ -73,10 +135,18 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
                 pos = orig_pos;
                 return false;
             }
+
+            std::vector<bool> results;
+            std::vector<int> positions;
+            std::vector<std::thread> threads;
+            std::vector<ConcurrentElasticWorker*> workers;
+
+            finished_rank.store(0);
+
             auto i = 0;
             for (auto& expr : exprs) { // TODO: maybe add restriction when expr.size > 4. also pht table
                 workers.emplace_back(new ConcurrentElasticWorker(in, pos, peg, width, thres, i,
-                        nt_elapsed, nt_utilized, nt_activated, table));
+                        nt_elapsed, nt_utilized, nt_activated, elastic_cells));
                 threads.emplace_back([&, expr, i, this]()
                                      {
                                          results.push_back(expr->accept(*workers[i]));
@@ -88,9 +158,10 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
 
             auto j = 0;
             for (auto w : workers) {
-                threads[j].join();
+                threads[j].join(); // TODO: Reverse with I by compiler?
                 delete workers[j];
-                if (results[j]) {
+                if (results[j]) { // TODO: I?
+                    finished_rank.store(1);
                     pos = positions[j];
                     for (auto k = j + 1; k < workers.size(); ++k) {
                         threads[k].join();

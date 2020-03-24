@@ -16,6 +16,7 @@ protected:
     Result r;
     int p;
     long int key;
+    std::mutex m;
 public:
     ElasticCell() :r{Result::unknown}, p{-1}, key{-1} {}
     ~ElasticCell() = default;
@@ -26,6 +27,9 @@ public:
     void set_pos(int position) { p = position; }
     int get_key() { return key; }
     void set_key(long int k) { key = k; }
+
+    void lock() { m.lock(); }
+    void unlock() { m.unlock(); }
 };
 
 #endif //PARALLEL_PACKRAT_ELASTIC_CELL_H

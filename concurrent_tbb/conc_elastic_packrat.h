@@ -11,6 +11,7 @@ class ConcurrentElasticPackrat: public ConcurrentElasticBase {
 public:
     ConcurrentElasticPackrat(std::string input, const PEG& g, int window_size, int threshold);
 
+    bool visit(NonTerminal& nt) override;
     bool visit(CompositeExpression& ce) override;
     bool visit(PEG& peg) override;
 };

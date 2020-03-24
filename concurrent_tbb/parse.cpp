@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    ConcurrentElasticPackrat sp3(input, *grammar, 1024, 0); // TODO: Benchmark
+    ConcurrentElasticPackrat sp3(input, *grammar, 256, 16); // TODO: Benchmark
 
     t0 = high_resolution_clock::now();
     res = sp3.visit(*grammar);
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    sp3.print_active();
+//    sp3.print_active();
 
     return 0;
 }

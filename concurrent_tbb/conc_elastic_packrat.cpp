@@ -6,9 +6,6 @@
 #include <mutex>
 #include <thread>
 
-#include <tbb/task_scheduler_init.h>
-#include "tbb/task_group.h"
-
 #include "conc_elastic_packrat.h"
 #include "conc_elastic_worker.h"
 
@@ -141,7 +138,7 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
             std::vector<std::thread> threads;
             std::vector<ConcurrentElasticWorker*> workers;
 
-            finished_rank.store(0);
+            finished_rank.store(-1);
 
             auto i = 0;
             for (auto& expr : exprs) { // TODO: maybe add restriction when expr.size > 4. also pht table
@@ -161,7 +158,7 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
                 threads[j].join(); // TODO: Reverse with I by compiler?
                 delete workers[j];
                 if (results[j]) { // TODO: I?
-                    finished_rank.store(1);
+                    finished_rank.store(j);
                     pos = positions[j];
                     for (auto k = j + 1; k < workers.size(); ++k) {
                         threads[k].join();

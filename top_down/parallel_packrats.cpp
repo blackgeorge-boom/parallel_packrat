@@ -11,8 +11,6 @@
 #include "parallel_packrats.h"
 #include "simple_worker.h"
 
-std::mutex cout_mutex;
-
 bool TableParallel::visit(CompositeExpression& ce)
 {
     char op = ce.op_name();
@@ -32,54 +30,47 @@ bool TableParallel::visit(CompositeExpression& ce)
         }
         case '/':   // ordered choice
         {
-            auto i = 0;
+            if (exprs.size() > 8) {    // Parse without spawning threads
+                for (auto expr : exprs) {
+                    pos = orig_pos;
+                    if (expr->accept(*this))
+                        return true;
+                }
+                pos = orig_pos;
+                return false;
+            }
 
             std::vector<bool> results;
             std::vector<int> positions;
-            std::vector<SimpleWorker*> workers;
             std::vector<std::thread> threads;
-            std::vector<Expression*> other_exprs;
+            std::vector<SimpleWorker*> workers;
 
-            for (auto& expr : exprs) {
-                if (!peg.get_history(expr)) { // TODO: better with negation
-                    workers.emplace_back(new SimpleWorker(in, peg, cells, pos));
-                    threads.emplace_back([&, expr, i, this]()
-                                        {
-                                            results.push_back(expr->accept(*workers[i]));
-                                            positions.push_back((*workers[i]).cur_pos());
-                                            other_exprs.push_back(expr);
-                                        }
-                    );
-                    i++;
-                }
-                else {
-                    if (expr->accept(*this)) {
-                        for (auto w : workers) {
-                            w->stop();
-                            delete w;
-                        }
-                        for (auto& t : threads)
-                            t.join();
-                        pos = this->cur_pos();
-                        peg.push_history(expr, true);
-                        return true;
-                    }
-                }
-                peg.push_history(expr, false);
+            finished_rank.store(-1);
+
+            auto i = 0;
+            for (auto& expr : exprs) { // TODO: maybe add restriction when expr.size > 4. also pht table
+                workers.emplace_back(new SimpleWorker(in, peg, cells, pos, i));
+                threads.emplace_back([&, expr, i, this]()
+                                     {
+                                         results.push_back(expr->accept(*workers[i]));
+                                         positions.push_back((*workers[i]).cur_pos());
+                                     }
+                );
+                i++;
             }
 
             auto j = 0;
             for (auto w : workers) {
-                threads[j].join();
+                threads[j].join(); // TODO: Reverse with I by compiler?
                 delete workers[j];
-                if (results[j]) {
+                if (results[j]) { // TODO: I?
+                    finished_rank.store(j);
                     pos = positions[j];
                     for (auto k = j + 1; k < workers.size(); ++k) {
-                        workers[k]->stop();
-                        delete workers[k];
                         threads[k].join();
+//                        workers[k]->stop();
+                        delete workers[k];
                     }
-                    peg.push_history(other_exprs[j], true);
                     return true;
                 }
                 j++;
@@ -87,6 +78,7 @@ bool TableParallel::visit(CompositeExpression& ce)
             pos = orig_pos;
             return false;
         }
+
         case '&':   // followed by
         {
             auto res = exprs[0]->accept(*this);
@@ -120,53 +112,6 @@ bool TableParallel::visit(CompositeExpression& ce)
         {
             std::cout << "Visiting not handled!";
             return false;
-        }
-    }
-}
-
-bool TableParallel::visit(NonTerminal &nt)
-{
-    int row = nt.index();
-    Cell* cur_cell = &cells[row][pos];
-    Result cur_res = cur_cell->res();
-
-    switch (cur_res) {
-        case Result::success:
-        {
-            pos = cur_cell->pos();
-            return true;
-        }
-        case Result::fail:
-        {
-            return false;
-        }
-        case Result::pending:
-        {
-            while (cur_cell->res() == Result::pending) {
-                std::cout << "Stuck: " << std::this_thread::get_id() <<
-                          " " << row << ", " << pos << " " << nt << std::endl;
-                std::this_thread::sleep_for(std::chrono::milliseconds(5));
-            }
-            if (cur_cell->res() == Result::pending)
-                std::cout << "wuuut" << std::endl;
-            return cur_cell->res() == Result::success;
-        }
-        case Result::unknown:
-        {
-            cur_cell->lock();
-            cur_cell->set_res(Result::pending);
-            cur_cell->unlock();
-            Expression* e = peg.get_expr(&nt);
-            auto res = e->accept(*this); // TODO: check
-
-            if (res) {
-                cur_cell->set_res(Result::success);
-                cur_cell->set_pos(pos); // pos has changed
-                return true;
-            } else {
-                cur_cell->set_res(Result::fail);
-                return false;
-            }
         }
     }
 }

@@ -15,7 +15,6 @@ public:
     TableParallel(std::string input, const PEG& g)
             : SerialPackrat{std::move(input), g} {}
 
-    bool visit(NonTerminal& nt) override;
     bool visit(CompositeExpression& ce) override;
     bool visit(PEG& peg) override;
 };

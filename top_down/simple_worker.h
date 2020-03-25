@@ -5,12 +5,16 @@
 #ifndef PARALLEL_PACKRAT_SIMPLE_WORKER_H
 #define PARALLEL_PACKRAT_SIMPLE_WORKER_H
 
-#include "../serial/serial_packrat.h"
-#include "stoppable.h"
+#include <atomic>
 
-class SimpleWorker: public SerialPackrat, public Stoppable {
+#include "../serial/serial_packrat.h"
+
+extern std::atomic<int> finished_rank;
+
+class SimpleWorker: public SerialPackrat {
+    int rank;
 public:
-    SimpleWorker(std::string input, const PEG& g, Cell** c, int p);
+    SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int r);
 //    ~SimpleWorker() override {"destroy simple worker\n";}
 
     bool visit(CompositeExpression& ce) override;

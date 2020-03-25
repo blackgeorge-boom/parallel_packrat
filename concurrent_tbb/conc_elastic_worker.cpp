@@ -33,8 +33,8 @@ bool ConcurrentElasticWorker::visit(NonTerminal& nt)
 {
 //    std::cout << std::this_thread::get_id() << std::endl;
     auto fr = finished_rank.load();
-    if (fr > 0) { // TODO: check print
-        std::cout << "rank: " << rank << std::endl;
+    if (fr >= 0 && fr < rank) { // TODO: check print
+//        std::cout << "rank: " << rank << std::endl;
         return false;
     }
     int row = nt.index();
@@ -61,6 +61,11 @@ bool ConcurrentElasticWorker::visit(NonTerminal& nt)
 
         case Result::success:
         {
+            fr = finished_rank.load();
+            if (fr < 0 || fr > rank) { // TODO: check print
+                finished_rank.store(rank);
+            }
+
             if (nt_elapsed[row] > 0)
                 nt_utilized[row] = true;
             pos = cur_cell->pos();
@@ -86,6 +91,11 @@ bool ConcurrentElasticWorker::visit(NonTerminal& nt)
 
             cur_cell->set_key(key);
             if (res) {
+
+                fr = finished_rank.load();
+                if (fr < 0 || fr > rank) { // TODO: check print
+                    finished_rank.store(rank);
+                }
 
                 cur_cell->set_res(Result::success);
                 cur_cell->set_pos(pos); // pos has changed
@@ -114,7 +124,7 @@ bool ConcurrentElasticWorker::visit(CompositeExpression &ce)
 {
 
     auto fr = finished_rank.load();
-    if (fr > 0) { // TODO: check print
+    if (fr >= 0 && fr < rank) { // TODO: check print
         std::cout << "-rank: " << rank << std::endl;
         return false;
     }

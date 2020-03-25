@@ -7,18 +7,23 @@
 
 #include "simple_worker.h"
 
-SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p)
+std::atomic<int> finished_rank;
+
+SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int r)
 {
     in = std::move(input);
     peg = PEG(g);
     cells = c;
     pos = p;
+    rank = r;
 }
 
 bool SimpleWorker::visit(NonTerminal &nt)
 {
-    if (stopRequested()) {  // TODO: does not provide efficiency with positive pht
-        std::cout << "stopped\n";
+//    std::cout << std::this_thread::get_id() << std::endl;
+    auto fr = finished_rank.load();
+    if (fr >= 0 && fr < rank) { // TODO: check print
+        std::cout << "rank: " << rank << std::endl;
         return false;
     }
 
@@ -69,11 +74,11 @@ bool SimpleWorker::visit(NonTerminal &nt)
 
 bool SimpleWorker::visit(CompositeExpression &ce)
 {
-
-//    if (stopRequested()) {//TODO:
-//        std::cout << "Stopped\n";
-//        return false;
-//    }
+    auto fr = finished_rank.load();
+    if (fr >= 0 && fr < rank) { // TODO: check print
+        std::cout << "-rank: " << rank << std::endl;
+        return false;
+    }
 
     char op = ce.op_name();
     std::vector<Expression*> exprs = ce.expr_list();
@@ -139,10 +144,11 @@ bool SimpleWorker::visit(CompositeExpression &ce)
 
 bool SimpleWorker::visit(Terminal& t)
 {
-//    if (stopRequested()) {//TODO:
-//        std::cout << "Stopped\n";
-//        return false;
-//    }
+    auto fr = finished_rank.load();
+    if (fr >= 0 && fr < rank) { // TODO: check print
+        std::cout << "-rank: " << rank << std::endl;
+        return false;
+    }
 
     int terminal_char = t.name()[0];
 

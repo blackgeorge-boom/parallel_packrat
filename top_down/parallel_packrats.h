@@ -11,9 +11,10 @@
 #include "stoppable.h"
 
 class TableParallel: public SerialPackrat {
+    int expr_limit;
 public:
-    TableParallel(std::string input, const PEG& g)
-            : SerialPackrat{std::move(input), g} {}
+    TableParallel(std::string input, const PEG& g, int lim)
+            : SerialPackrat{std::move(input), g}, expr_limit{lim} {}
 
     bool visit(CompositeExpression& ce) override;
     bool visit(PEG& peg) override;

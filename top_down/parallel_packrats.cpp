@@ -30,7 +30,7 @@ bool TableParallel::visit(CompositeExpression& ce)
         }
         case '/':   // ordered choice
         {
-            if (exprs.size() > 8) {    // Parse without spawning threads
+            if (exprs.size() > expr_limit) {    // Parse without spawning threads
                 for (auto expr : exprs) {
                     pos = orig_pos;
                     if (expr->accept(*this))
@@ -64,6 +64,7 @@ bool TableParallel::visit(CompositeExpression& ce)
                 threads[j].join(); // TODO: Reverse with I by compiler?
                 delete workers[j];
                 if (results[j]) { // TODO: I?
+//                    std::cout << "I is: " << i << " and J is: " << j << std::endl;
                     finished_rank.store(j);
                     pos = positions[j];
                     for (auto k = j + 1; k < workers.size(); ++k) {

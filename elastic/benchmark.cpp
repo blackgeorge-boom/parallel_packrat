@@ -66,8 +66,8 @@ static void BM_Packrat(benchmark::State& state) {
 // 16/32 seems a good choice for threshold
 // 256/512/1024 for window size
 static void CustomArguments(benchmark::internal::Benchmark* b) {
-    for (int i = 1; i <= 1024; i *= 2)
-        for (int j = 32; j <= 32; j *= 2)
+    for (int i = 256; i <= 1024; i *= 2)
+        for (int j = 16; j <= 32; j *= 2)
             b->Args({i, j});
 }
 

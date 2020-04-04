@@ -8,8 +8,9 @@
 #include "conc_elastic_base.h"
 
 class ConcurrentElasticPackrat: public ConcurrentElasticBase {
+    int expr_limit;
 public:
-    ConcurrentElasticPackrat(std::string input, const PEG& g, int window_size, int threshold);
+    ConcurrentElasticPackrat(std::string input, const PEG& g, int window_size, int threshold, int lim);
 
     bool visit(NonTerminal& nt) override;
     bool visit(CompositeExpression& ce) override;

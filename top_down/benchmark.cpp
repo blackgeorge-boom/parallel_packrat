@@ -14,8 +14,7 @@
 #include "../meta_grammar/meta_grammar.h"
 #include "../peg_factory/peg_factory.h"
 #include "../serial/serial_tree_packrat.h"
-#include "conc_elastic_packrat.h"
-#include "../elastic/elastic_packrat.h"
+#include "parallel_packrats.h"
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
@@ -62,17 +61,15 @@ static void BM_Packrat(benchmark::State& state) {
 
     for (auto _ : state) {
         state.PauseTiming();
-        ConcurrentElasticPackrat sp2(input, *grammar, state.range(0), state.range(1), state.range(2));
+        TableParallel sp2(input, *grammar, state.range(0));
         state.ResumeTiming();
         sp2.visit(*grammar);
     }
 }
 
 static void CustomArguments(benchmark::internal::Benchmark* b) {
-    for (int i = 512; i <= 1024; i *= 2)
-        for (int j = 16; j <= 32; j += 16)
-            for (int k = 0; k <= 4; k++)
-            b->Args({i, j, k});
+            for (int i = 0; i <= 4; i++)
+                b->Args({i});
 }
 
 // Register the function as a benchmark

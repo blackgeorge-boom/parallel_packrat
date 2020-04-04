@@ -9,7 +9,7 @@
 #include "conc_elastic_packrat.h"
 #include "conc_elastic_worker.h"
 
-ConcurrentElasticPackrat::ConcurrentElasticPackrat(std::string input, const PEG& g, int window_size, int threshold)
+ConcurrentElasticPackrat::ConcurrentElasticPackrat(std::string input, const PEG& g, int window_size, int threshold, int lim)
 {
     in = std::move(input);
     pos = 0;
@@ -18,6 +18,7 @@ ConcurrentElasticPackrat::ConcurrentElasticPackrat(std::string input, const PEG&
     width = window_size;
     nt_num = peg.get_rules().size();
     thres= threshold;
+    expr_limit = lim;
 
     shift = ceil(log2(nt_num));
 
@@ -123,7 +124,7 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
         }
         case '/':   // ordered choice
         {
-            if (exprs.size() > 8) {    // Parse without spawning threads
+            if (exprs.size() > expr_limit) {    // Parse without spawning threads
                 for (auto expr : exprs) {
                     pos = orig_pos;
                     if (expr->accept(*this))
@@ -158,6 +159,7 @@ bool ConcurrentElasticPackrat::visit(CompositeExpression& ce)
                 threads[j].join(); // TODO: Reverse with I by compiler?
                 delete workers[j];
                 if (results[j]) { // TODO: I?
+//                    std::cout << "I is: " << i << " and J is: " << j << std::endl;
                     finished_rank.store(j);
                     pos = positions[j];
                     for (auto k = j + 1; k < workers.size(); ++k) {

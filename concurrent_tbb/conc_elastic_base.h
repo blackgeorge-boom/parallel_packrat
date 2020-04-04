@@ -16,7 +16,7 @@ extern std::atomic<int> finished_rank;
 class ConcurrentElasticBase: public SerialPackrat {
 protected:
     int width, nt_num, shift;
-    int thres;
+    int thres;  // for dynamic non terminal deactivation
     int* nt_elapsed;
     int* nt_utilized;
     int* nt_activated;

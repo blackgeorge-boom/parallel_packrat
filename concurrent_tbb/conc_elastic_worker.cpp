@@ -54,6 +54,7 @@ bool ConcurrentElasticWorker::visit(NonTerminal& nt)
     Result cur_res = cur_cell->res();
 
     if (cur_cell->get_key() != key) {
+//        std::cout << "colision\n";
         cur_res = Result::unknown;
     }
 
@@ -125,7 +126,7 @@ bool ConcurrentElasticWorker::visit(CompositeExpression &ce)
 
     auto fr = finished_rank.load();
     if (fr >= 0 && fr < rank) { // TODO: check print
-        std::cout << "-rank: " << rank << std::endl;
+//        std::cout << "-rank: " << rank << std::endl;
         return false;
     }
 

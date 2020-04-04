@@ -146,7 +146,7 @@ bool SimpleWorker::visit(Terminal& t)
 {
     auto fr = finished_rank.load();
     if (fr >= 0 && fr < rank) { // TODO: check print
-        std::cout << "-rank: " << rank << std::endl;
+        std::cout << "--rank: " << rank << std::endl;
         return false;
     }
 

@@ -14,7 +14,7 @@
 \usepackage{tikz}
 \usepackage{tikz-qtree}
 \usepackage{url}
-\includeonly{intro, parallel}
+%\includeonly{intro}
 \usetikzlibrary{calc}
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{positioning}
@@ -154,54 +154,15 @@
 
 \include{packrat_gen}
 
-\include{parallel}
-
 \include{elastic}
 
-\chapter{ Παράλληλο Packrat Parsing με Υπομνηματισμό }
-
-\chapter{ Seith Fowler}
-
-\chapter{ Παράλληλο Ordered Choice }
-
-\chapter{ Παράλληλo Elastic Packrat Parsing }
+\include{parallel}
 
 \chapter{ Πειραματικά Αποτελέσματα }
 
 \chapter{ Συμπεράσματα - Μελλοντική Δουλειά }
 
-\englishtext
-
-\chapter{Introduction}
-
-\section{The Goal of this Project}
-
-\section{The C++ Programming Language}
-
-
-\begin{figure}[t]
-\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
-\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
-#include <iostream>
-int main() {
-  std::cout << "Hello world!" << std::endl;
-}
-\end{minted}
-\caption{Filled with joy, the Agha decides to write some code.%
-  \label{fig:hello-english}}
-\end{figure}
-
-
-\section{The Structure of this Thesis}
-
-\chapter{Theoretical Background}
-
-\section{Programming Language Semantics}
-
-\section{Domain Theory}
-
 \selectlanguage{greek}
-
 
 %%%  Bibliography
 
@@ -279,24 +240,6 @@ Space      <- ' ' / '\t' / EndOfLine                            # Type 22
 EndOfLine  <- '\r\n' / '\n' / '\r'                              # Type 23
 EndOfFile  <- !.                                                # Type 24
 \end{Verbatim}
-
-\chapter{Ευρετήριο γλωσσών}
-
-\begin{description}
-\item[C++:] πώς θα βγάλω λεφτά...
-\item[Haskell:] η γλώσσα της ζωής μου αλλά πάνε οι μπύρες...
-\item[Javascript:] χα, χα, χα...
-\item[Python:] πώς θα τελειώνω για να πάω για μπύρες...
-\end{description}
-
-
-\chapter{Ευρετήριο αριθμών}
-
-\begin{description}
-\item[17:] ask Zachos.
-\item[42:] life, the universe and everything --- ask Douglas.
-\end{description}
-
 
 %%%  End of document
 

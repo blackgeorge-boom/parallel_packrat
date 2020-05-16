@@ -2,10 +2,13 @@
 // Created by blackgeorge on 11/7/2019.
 //
 
+#include <assert.h>
+
 #include <mutex>
 #include <thread>
 
 #include "simple_worker.h"
+
 
 std::atomic<int> finished_rank;
 
@@ -29,7 +32,10 @@ bool SimpleWorker::visit(NonTerminal &nt)
 
     int row = nt.index();
     Cell* cur_cell = &cells[row][pos];
+
+    cur_cell->lock();
     Result cur_res = cur_cell->res();
+    cur_cell->unlock();
 
     switch (cur_res) {
         case Result::success:
@@ -44,12 +50,11 @@ bool SimpleWorker::visit(NonTerminal &nt)
         case Result::pending:
         {
             while (cur_cell->res() == Result::pending) {
-                std::cout << "Stuck: " << std::this_thread::get_id() <<
-                " " << row << ", " << pos << " " << nt << std::endl;
+//                std::cout << "Thread " << std::this_thread::get_id() <<
+//                " of " << nt << " stuck at " << pos << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
-            if (cur_cell->res() == Result::pending)
-                std::cout << "wuuut" << std::endl;
+            assert (cur_cell->res() != Result::pending);
             return cur_cell->res() == Result::success;
         }
         case Result::unknown:
@@ -61,8 +66,8 @@ bool SimpleWorker::visit(NonTerminal &nt)
             auto res = e->accept(*this); // TODO: check
 
             if (res) {
-                cur_cell->set_res(Result::success);
                 cur_cell->set_pos(pos); // pos has changed
+                cur_cell->set_res(Result::success);
                 return true;
             } else {
                 cur_cell->set_res(Result::fail);
@@ -97,10 +102,45 @@ bool SimpleWorker::visit(CompositeExpression &ce)
         }
         case '/':   // ordered choice
         {
-            for (auto expr : exprs) {
+            if (exprs.size() > 2) {    // Parse without spawning threads
+                for (auto expr : exprs) {
+                    pos = orig_pos;
+                    if (expr->accept(*this))
+                        return true;
+                }
                 pos = orig_pos;
-                if (expr->accept(*this))
+                return false;
+            }
+
+            bool results[exprs.size()];
+            int positions[exprs.size()];
+            std::vector<std::thread> threads;
+
+//            finished_rank.store(-1);
+
+            auto i = 0;
+            for (auto& expr : exprs) {
+                threads.emplace_back([&, expr, i]()
+                                     {
+                                         SimpleWorker sw {in, peg, cells, pos, i};
+                                         bool res = expr->accept(sw);
+                                         *(results + i) = res;
+                                         *(positions + i) = sw.cur_pos();
+                                     }
+                );
+                i++;
+            }
+
+            for (auto j = 0; j < i; ++j) {
+                threads[j].join();
+                if (results[j]) {
+//                    finished_rank.store(j);
+                    pos = positions[j];
+                    for (auto k = j + 1; k < i; ++k) {
+                        threads[k].join();
+                    }
                     return true;
+                }
             }
             pos = orig_pos;
             return false;

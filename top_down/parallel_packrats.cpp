@@ -40,41 +40,35 @@ bool TableParallel::visit(CompositeExpression& ce)
                 return false;
             }
 
-            std::vector<bool> results;
-            std::vector<int> positions;
+            bool results[exprs.size()];
+            int positions[exprs.size()];
             std::vector<std::thread> threads;
-            std::vector<SimpleWorker*> workers;
 
             finished_rank.store(-1);
 
             auto i = 0;
-            for (auto& expr : exprs) { // TODO: maybe add restriction when expr.size > 4. also pht table
-                workers.emplace_back(new SimpleWorker(in, peg, cells, pos, i));
-                threads.emplace_back([&, expr, i, this]()
+            for (auto& expr : exprs) {
+                threads.emplace_back([&, expr, i]()
                                      {
-                                         results.push_back(expr->accept(*workers[i]));
-                                         positions.push_back((*workers[i]).cur_pos());
+                                         SimpleWorker sw {in, peg, cells, pos, i};
+                                         bool res = expr->accept(sw);
+                                         *(results + i) = res;
+                                         *(positions + i) = sw.cur_pos();
                                      }
                 );
                 i++;
             }
 
-            auto j = 0;
-            for (auto w : workers) {
-                threads[j].join(); // TODO: Reverse with I by compiler?
-                delete workers[j];
-                if (results[j]) { // TODO: I?
-//                    std::cout << "I is: " << i << " and J is: " << j << std::endl;
-                    finished_rank.store(j);
+            for (auto j = 0; j < i; ++j) {
+                threads[j].join(); // TODO: Reverse with 'I' by compiler?
+                if (results[j]) { // TODO: 'I'
+//                    finished_rank.store(j);
                     pos = positions[j];
-                    for (auto k = j + 1; k < workers.size(); ++k) {
+                    for (auto k = j + 1; k < i; ++k) {
                         threads[k].join();
-//                        workers[k]->stop();
-                        delete workers[k];
                     }
                     return true;
                 }
-                j++;
             }
             pos = orig_pos;
             return false;

@@ -62,11 +62,11 @@ int main(int argc, char** argv)
     std::string input( (std::istreambuf_iterator<char>(ifs2) ),
                            (std::istreambuf_iterator<char>()     ) );
 
-//    SerialPackrat sp2(input, *grammar);
+    SerialPackrat sp2(input, *grammar);
 
     using namespace std::chrono;
     auto t0 = high_resolution_clock::now();
-//    res = sp2.visit(*grammar);
+    res = sp2.visit(*grammar);
     auto tf = high_resolution_clock::now();
 
     if (res)
@@ -88,6 +88,8 @@ int main(int argc, char** argv)
         std::cout << "Syntax Error..." << std::endl;
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
+
+    sp3.print_cells();
 
     return 0;
 }

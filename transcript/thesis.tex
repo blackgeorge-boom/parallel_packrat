@@ -1,0 +1,246 @@
+\documentclass[diploma]{softlab-thesis}
+
+%%%
+%%%  Add and configure the packages that you need for your thesis
+%%%
+
+\usepackage{color, colortbl}
+\usepackage{minted}
+\usepackage{amsmath}
+\usepackage{amssymb,longtable}
+\usepackage{enumitem}
+\usepackage{bm}
+\usepackage{changepage}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{url}
+%\includeonly{intro}
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+%% I define a "style" for the "cells"
+\tikzset{
+  my cell/.style={
+    draw,
+    minimum size=5ex,
+    node distance=0pt,
+  }}
+%% to make changing appearances for various aspects of
+%% the diagram easier, I define several macros which need
+%% only be changed here.  Even though two of these macros
+%% have the same definition, I use two to allow the possibility
+%% that these styles could be diffferent.
+\newcommand\mynodestyle{\sffamily}
+\newcommand\myrelocatestyle{\sffamily\bfseries}
+\newcommand\mynumberstyle{\sffamily}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+   \node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
+
+\DeclareMathSymbol{\mlq}{\mathord}{operators}{``}
+\DeclareMathSymbol{\mrq}{\mathord}{operators}{`'}
+\newcommand\fnurl[2]{%
+  \href{#2}{#1}\footnote{\url{#2}}%
+}
+\tikzset{%
+	>={Latex[width=2mm,length=2mm]},
+  	% Specifications for style of nodes:
+	base/.style = {rectangle, rounded corners, draw=black,
+				   minimum width=4cm, minimum height=1cm,
+				   text centered, font=\sffamily},
+	factory/.style = {base, fill=blue!30},
+	parser/.style = {base, fill=red!30},
+	ast/.style = {base, fill=green!30},
+	process/.style = {base, minimum width=2.5cm, fill=orange!15,
+					  font=\ttfamily},
+}
+%%%
+%%%  The document
+%%%
+
+\begin{document}
+
+%%%  Title page
+
+\frontmatter
+
+\title{Παράλληλο Packrat Parsing}
+\author{Νίκος Μαυρογεώργης}
+\authoren{Nikos Mavrogeorgis}
+\date{Αύγουστος 2019}
+\datedefense{26}{8}{2019}
+
+\supervisor{Νικόλαος Σ. Παπασπύρου}
+\supervisorpos{Καθηγητής Ε.Μ.Π.}
+
+\committeeone{Νικόλαος Σ. Παπασπύρου}
+\committeeonepos{Καθηγητής Ε.Μ.Π.}
+\committeetwo{Πέτρος Παπαδόπουλος}
+\committeetwopos{Επίκ. Καθηγητής Ε.Μ.Π.}
+\committeethree{Γεώργιος Νικολάου}
+\committeethreepos{Αν. Καθηγητής Ε.Κ.Π.Α.}
+
+\TRnumber{CSD-SW-TR-42-17}  % number-year, ask nickie for the number
+\department{Τομέας Τεχνολογίας Πληροφορικής και Υπολογιστών}
+
+\maketitle
+
+
+%%%  Abstract, in Greek
+
+\begin{abstractgr}%
+  Σκοπός της παρούσας εργασίας είναι αφενός η σχεδίαση μίας απλής
+  γλώσσας υψηλού επιπέδου με υποστήριξη για προγραμματισμό με
+  αποδείξεις, αφετέρου η υλοποίηση ενός μεταγλωττιστή για τη γλώσσα
+  αυτή που θα παράγει κώδικα για μία γλώσσα ενδιάμεσου επιπέδου
+  κατάλληλη για δημιουργία πιστοποιημένων εκτελέσιμων.
+
+\begin{keywordsgr}
+  Γλώσσες προγραμματισμού,
+  Προγραμματισμός με αποδείξεις,
+  Ασφαλείς γλώσσες προγραμματισμού,
+  Πιστοποιημένος κώδικας.
+\end{keywordsgr}
+\end{abstractgr}
+
+
+%%%  Abstract, in English
+
+\begin{abstracten}%
+  The purpose of this diploma dissertation is on one hand the design
+  of a simple high-level language that supports programming with
+  proofs, and on the other hand the implementation of a compiler for
+  this language. This compiler will produce code for an
+  intermediate-level language suitable for creating certified
+  binaries.
+
+  \begin{keywordsen}
+  Programming languages,
+  Programming with proofs,
+  Secure programming languages,
+  Certified code.
+\end{keywordsen}
+\end{abstracten}
+
+
+%%%  Acknowledgements
+
+\begin{acknowledgementsgr}
+  Ευχαριστώ θερμά τον επιβλέποντα καθηγητή αυτής της διατριβής,
+  κ.~Νίκο Παπασπύρου
+\end{acknowledgementsgr}
+
+\begin{acknowledgementsen}
+  I would like to thank all the people who supported my work and helped me get
+  results of better quality.  
+\end{acknowledgementsen}
+
+
+%%%  Various tables
+
+\tableofcontents
+%\listoftables
+\listoffigures
+%\listofalgorithms
+
+%%%  Main part of the book
+
+\mainmatter
+
+\include{intro}
+
+\include{peg}
+
+\include{packrat}
+
+\include{packrat_gen}
+
+\include{elastic}
+
+\include{parallel}
+
+\chapter{ Πειραματικά Αποτελέσματα }
+
+\chapter{ Συμπεράσματα - Μελλοντική Δουλειά }
+
+\selectlanguage{greek}
+
+%%%  Bibliography
+
+% You shouldn't want to include all the contents of thesis.bib
+% in your bibliography (do you?)
+\nocite{*}
+
+\bibliographystyle{softlab-thesis}
+\bibliography{thesis}
+
+
+%%%  Appendices
+
+\backmatter
+
+\appendix
+
+\chapter{Μία PEG περιγράφει τυπικά την ίδια τη σύνταξη της}
+
+\begin{Verbatim}
+# Hierarchical syntax
+
+Grammar    <- Spacing Definition+ EndOfFile                     # Type 0
+Definition <- Identifier LEFTARROW Expression                   # Type 1
+Expression <- Sequence (SLASH Sequence)*                        # Type 2
+Sequence   <- Prefix*                                           # Type 3
+Prefix     <- (AND / NOT)? Suffix                               # Type 4
+Suffix     <- Primary (QUESTION / STAR / PLUS)?                 # Type 5
+Primary    <- Identifier !LEFTARROW                             # Type 6
+            / OPEN Expression CLOSE
+            / Literal / DOT
+
+# Lexical syntax
+
+Identifier <- IdentifierStart IdentifierRest* Spacing
+IdentifierStart <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 'g' / 'h' / 
+		   'i' / 'j' / 'k' / 'l' / 'm' / 'n' / 'o' / 'p' / 
+		   'q' / 'r' / 's' / 't' / 'u' / 'v' / 'w' / 'x' / 'y' / 'z' / 
+		   ᾽A' / 'B' / 'C' / 'D' / 'E' / 'F' / 'G' / 'H' / 
+		   'I' / 'J' / 'K' / 'L' / 'M' / 'N' / 'O' / 'P' / 
+		   'Q' / 'R' / 'S' / 'T' / 'U' / 'V' / 'W' / 'X' / 'Y' / 'Z' / '_'
+
+IdentifierRest <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 'g' / 'h' / 
+		  'i' / 'j' / 'k' / 'l' / 'm' / 'n' / 'o' / 'p' / 
+		  'q' / 'r' / 's' / 't' / 'u' / 'v' / 'w' / 'x' / 'y' / 'z' / 
+		  'A' / 'B' / 'C' / 'D' / 'E' / 'F' / 'G' / 'H' / 
+		  'I' / 'J' / 'K' / 'L' / 'M' / 'N' / 'O' / 'P' / 
+		  'Q' / 'R' / 'S' / 'T' / 'U' / 'V' / 'W' / 'X' / 'Y' / 'Z' / '_' / 
+		  '0' / '1' / '2' / '3' / '4' / '5' / '6' / '7' / '8' / '9'
+
+Literal    <- "'" (!"'" Character)* "'" Spacing                 # Type 8
+            / '"' (!'"' Character)* '"' Spacing
+
+Character  <- ('\\' ('n' / 'r' / 't' / '\\' / "'" / '"' / UnicodeEscape)) / (!'\\' .)
+
+UnicodeEscape <- 'u' UnicodeElement UnicodeElement UnicodeElement UnicodeElement
+
+UnicodeElement <- '0' / '1' / '2'/ '3' / '4' / '5' / '6' / '7' / '8' / '9' / 
+		  'A' / 'B' / 'C' / 'D'/ 'E' / 'F' / 'a' / 'b' / 'c' / 'd'/ 'e' / 'f'
+
+
+LEFTARROW  <- '<-' Spacing                                      # Type 10
+SLASH      <- '/' Spacing                                       # Type 11
+AND        <- '&' Spacing                                       # Type 12
+NOT        <- '!' Spacing                                       # Type 13
+QUESTION   <- '?' Spacing                                       # Type 14
+STAR       <- '*' Spacing                                       # Type 15
+PLUS       <- '+' Spacing                                       # Type 16
+OPEN       <- '(' Spacing                                       # Type 17
+CLOSE      <- ')' Spacing                                       # Type 18
+DOT        <- '.' Spacing                                       # Type 19
+Spacing    <- (Space / Comment)*                                # Type 20
+Comment    <- '#' (!EndOfLine .)* EndOfLine                     # Type 21
+Space      <- ' ' / '\t' / EndOfLine                            # Type 22
+EndOfLine  <- '\r\n' / '\n' / '\r'                              # Type 23
+EndOfFile  <- !.                                                # Type 24
+\end{Verbatim}
+
+%%%  End of document
+
+\end{document}

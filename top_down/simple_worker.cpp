@@ -2,7 +2,7 @@
 // Created by blackgeorge on 11/7/2019.
 //
 
-#include <assert.h>
+#include <cassert>
 
 #include <mutex>
 #include <thread>
@@ -12,23 +12,23 @@
 
 std::atomic<int> finished_rank;
 
-SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int r)
+SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int lim, int depth)
 {
     in = std::move(input);
     peg = PEG(g);
     cells = c;
     pos = p;
-    rank = r;
+    expr_limit = lim;
+    cur_tree_depth = depth;
 }
 
 bool SimpleWorker::visit(NonTerminal &nt)
 {
 //    std::cout << std::this_thread::get_id() << std::endl;
-    auto fr = finished_rank.load();
-    if (fr >= 0 && fr < rank) { // TODO: check print
-        std::cout << "rank: " << rank << std::endl;
-        return false;
-    }
+//    if (this->stopRequested()) {
+//        std::cout << "Stopped\n";
+//        return false;
+//    }
 
     int row = nt.index();
     Cell* cur_cell = &cells[row][pos];
@@ -55,7 +55,11 @@ bool SimpleWorker::visit(NonTerminal &nt)
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
             assert (cur_cell->res() != Result::pending);
-            return cur_cell->res() == Result::success;
+            if (cur_cell->res() == Result::success) {
+                pos = cur_cell->pos();
+                return true;
+            }
+            return false;
         }
         case Result::unknown:
         {
@@ -79,11 +83,10 @@ bool SimpleWorker::visit(NonTerminal &nt)
 
 bool SimpleWorker::visit(CompositeExpression &ce)
 {
-    auto fr = finished_rank.load();
-    if (fr >= 0 && fr < rank) { // TODO: check print
-        std::cout << "-rank: " << rank << std::endl;
-        return false;
-    }
+//    if (this->stopRequested()) {
+//        std::cout << "Stopped\n";
+//        return false;
+//    }
 
     char op = ce.op_name();
     std::vector<Expression*> exprs = ce.expr_list();
@@ -102,7 +105,7 @@ bool SimpleWorker::visit(CompositeExpression &ce)
         }
         case '/':   // ordered choice
         {
-            if (exprs.size() > 2) {    // Parse without spawning threads
+            if (exprs.size() > expr_limit || cur_tree_depth > 4) {    // Parse without spawning threads
                 for (auto expr : exprs) {
                     pos = orig_pos;
                     if (expr->accept(*this))
@@ -112,20 +115,19 @@ bool SimpleWorker::visit(CompositeExpression &ce)
                 return false;
             }
 
-            bool results[exprs.size()];
+            int results[exprs.size()];
             int positions[exprs.size()];
             std::vector<std::thread> threads;
-
-//            finished_rank.store(-1);
+            std::vector<std::shared_ptr<SimpleWorker>> workers;
 
             auto i = 0;
             for (auto& expr : exprs) {
+                workers.emplace_back(new SimpleWorker{in, peg, cells, pos, expr_limit, cur_tree_depth + 1});
                 threads.emplace_back([&, expr, i]()
                                      {
-                                         SimpleWorker sw {in, peg, cells, pos, i};
-                                         bool res = expr->accept(sw);
-                                         *(results + i) = res;
-                                         *(positions + i) = sw.cur_pos();
+                                         bool res = expr->accept(*workers[i]);
+                                         results[i] = res;
+                                         positions[i] = workers[i]->cur_pos();
                                      }
                 );
                 i++;
@@ -137,6 +139,7 @@ bool SimpleWorker::visit(CompositeExpression &ce)
 //                    finished_rank.store(j);
                     pos = positions[j];
                     for (auto k = j + 1; k < i; ++k) {
+                        workers[k]->stop();
                         threads[k].join();
                     }
                     return true;
@@ -184,11 +187,10 @@ bool SimpleWorker::visit(CompositeExpression &ce)
 
 bool SimpleWorker::visit(Terminal& t)
 {
-    auto fr = finished_rank.load();
-    if (fr >= 0 && fr < rank) { // TODO: check print
-        std::cout << "--rank: " << rank << std::endl;
-        return false;
-    }
+//    if (this->stopRequested()) {
+//        std::cout << "Stopped\n";
+//        return false;
+//    }
 
     int terminal_char = t.name()[0];
 

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <cmath>
 
 #include "../packrat_cell/cell.h"
 #include "../peg/peg.h"
@@ -13,6 +14,10 @@
 #include "../peg_factory/peg_factory.h"
 #include "../serial/serial_tree_packrat.h"
 #include "parallel_packrats.h"
+
+const int CHILDREN_LIMIT = 2;
+const int TREE_HEIGHT = 2;
+std::vector<int> flags(3, 0);
 
 int NonTerminal::num = 0;
 int TreeNode::num = 0;
@@ -89,7 +94,7 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    sp3.print_cells();
+//    sp3.print_cells();
 
     return 0;
 }

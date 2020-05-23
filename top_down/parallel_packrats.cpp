@@ -40,20 +40,19 @@ bool TableParallel::visit(CompositeExpression& ce)
                 return false;
             }
 
-            bool results[exprs.size()];
+            int results[exprs.size()];
             int positions[exprs.size()];
             std::vector<std::thread> threads;
-
-            finished_rank.store(-1);
+            std::vector<std::shared_ptr<SimpleWorker>> workers;
 
             auto i = 0;
             for (auto& expr : exprs) {
+                workers.emplace_back(new SimpleWorker{in, peg, cells, pos, 0, 0});
                 threads.emplace_back([&, expr, i]()
                                      {
-                                         SimpleWorker sw {in, peg, cells, pos, i};
-                                         bool res = expr->accept(sw);
-                                         *(results + i) = res;
-                                         *(positions + i) = sw.cur_pos();
+                                         bool res = expr->accept(*workers[i]);
+                                         results[i] = res;
+                                         positions[i] = workers[i]->cur_pos();
                                      }
                 );
                 i++;
@@ -65,6 +64,7 @@ bool TableParallel::visit(CompositeExpression& ce)
 //                    finished_rank.store(j);
                     pos = positions[j];
                     for (auto k = j + 1; k < i; ++k) {
+                        workers[k]->stop();
                         threads[k].join();
                     }
                     return true;

@@ -11,6 +11,8 @@
 #include "parallel_packrats.h"
 #include "simple_worker.h"
 
+std::atomic<int> finished_rank;
+
 bool TableParallel::visit(CompositeExpression& ce)
 {
     char op = ce.op_name();
@@ -43,16 +45,17 @@ bool TableParallel::visit(CompositeExpression& ce)
             int results[exprs.size()];
             int positions[exprs.size()];
             std::vector<std::thread> threads;
-            std::vector<std::shared_ptr<SimpleWorker>> workers;
+
+            finished_rank.store(-1);
 
             auto i = 0;
             for (auto& expr : exprs) {
-                workers.emplace_back(new SimpleWorker{in, peg, cells, pos, 0, 0});
                 threads.emplace_back([&, expr, i]()
                                      {
-                                         bool res = expr->accept(*workers[i]);
+                                         SimpleWorker sw{in, peg, cells, pos, i, expr_limit, 8};
+                                         int res = expr->accept(sw);
                                          results[i] = res;
-                                         positions[i] = workers[i]->cur_pos();
+                                         positions[i] = sw.cur_pos();
                                      }
                 );
                 i++;
@@ -61,10 +64,9 @@ bool TableParallel::visit(CompositeExpression& ce)
             for (auto j = 0; j < i; ++j) {
                 threads[j].join(); // TODO: Reverse with 'I' by compiler?
                 if (results[j]) { // TODO: 'I'
-//                    finished_rank.store(j);
+                    finished_rank.store(j);
                     pos = positions[j];
                     for (auto k = j + 1; k < i; ++k) {
-                        workers[k]->stop();
                         threads[k].join();
                     }
                     return true;

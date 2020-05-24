@@ -81,7 +81,7 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    TableParallel sp3(input, *grammar, 4);
+    TableParallel sp3(input, *grammar, 4, 4);
 
     t0 = high_resolution_clock::now();
     res = sp3.visit(*grammar);
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-//    sp3.print_cells();
+    sp3.print_cells();
 
     return 0;
 }

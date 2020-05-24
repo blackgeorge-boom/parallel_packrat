@@ -10,25 +10,24 @@
 #include "simple_worker.h"
 
 
-std::atomic<int> finished_rank;
-
-SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int lim, int depth)
+SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int r, int lim, int depth)
 {
     in = std::move(input);
     peg = PEG(g);
     cells = c;
     pos = p;
+    rank = r;
     expr_limit = lim;
     cur_tree_depth = depth;
 }
 
 bool SimpleWorker::visit(NonTerminal &nt)
 {
-//    std::cout << std::this_thread::get_id() << std::endl;
-//    if (this->stopRequested()) {
-//        std::cout << "Stopped\n";
-//        return false;
-//    }
+    auto fr = finished_rank.load();
+    if (fr >= 0 && fr < rank) {
+//        std::cout << "Stopped at " << nt << " with rank: " << rank << " and fr is " << fr << "\n";
+        return false;
+    }
 
     int row = nt.index();
     Cell* cur_cell = &cells[row][pos];
@@ -70,10 +69,16 @@ bool SimpleWorker::visit(NonTerminal &nt)
             auto res = e->accept(*this); // TODO: check
 
             if (res) {
+//                fr = finished_rank.load();
+//                if (fr < 0 || fr > rank) {
+//                    finished_rank.store(rank);
+//                }
+
                 cur_cell->set_pos(pos); // pos has changed
                 cur_cell->set_res(Result::success);
                 return true;
-            } else {
+            }
+            else {
                 cur_cell->set_res(Result::fail);
                 return false;
             }
@@ -118,28 +123,29 @@ bool SimpleWorker::visit(CompositeExpression &ce)
             int results[exprs.size()];
             int positions[exprs.size()];
             std::vector<std::thread> threads;
-            std::vector<std::shared_ptr<SimpleWorker>> workers;
 
             auto i = 0;
             for (auto& expr : exprs) {
-                workers.emplace_back(new SimpleWorker{in, peg, cells, pos, expr_limit, cur_tree_depth + 1});
                 threads.emplace_back([&, expr, i]()
                                      {
-                                         bool res = expr->accept(*workers[i]);
+                                         int child_rank = (rank + 1) * expr_limit + i;
+                                         SimpleWorker sw{in, peg, cells, pos, child_rank, expr_limit, cur_tree_depth + 1};
+                                         int res = expr->accept(sw);
                                          results[i] = res;
-                                         positions[i] = workers[i]->cur_pos();
+                                         positions[i] = sw.cur_pos();
                                      }
                 );
                 i++;
             }
 
+            int child_rank;
             for (auto j = 0; j < i; ++j) {
                 threads[j].join();
                 if (results[j]) {
-//                    finished_rank.store(j);
+                    child_rank = rank * expr_limit + j;
+                    finished_rank.store(child_rank);
                     pos = positions[j];
                     for (auto k = j + 1; k < i; ++k) {
-                        workers[k]->stop();
                         threads[k].join();
                     }
                     return true;

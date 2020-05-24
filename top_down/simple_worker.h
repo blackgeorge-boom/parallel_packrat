@@ -8,15 +8,14 @@
 #include <atomic>
 
 #include "../serial/serial_packrat.h"
-#include "stoppable.h"
+#include "parallel_packrats.h"
 
-extern std::atomic<int> finished_rank;
-
-class SimpleWorker: public SerialPackrat, public Stoppable {
+class SimpleWorker: public SerialPackrat {
+    int rank;
     int expr_limit;
     int cur_tree_depth;
 public:
-    SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int lim, int depth);
+    SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int r, int lim, int depth);
 //    ~SimpleWorker() override {"destroy simple worker\n";}
 
     bool visit(CompositeExpression& ce) override;

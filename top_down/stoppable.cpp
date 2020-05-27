@@ -21,8 +21,7 @@ bool Stoppable::stopRequested()
     std::chrono::milliseconds span {0};
 
     // checks if value in future object is available
-    return !(futureObj.wait_for(span) ==
-             std::future_status::timeout);
+    return !(futureObj.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout);
 }
 
 

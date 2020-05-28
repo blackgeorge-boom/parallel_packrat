@@ -67,11 +67,13 @@ bool TableParallel::visit(CompositeExpression& ce)
 
             for (auto j = 0; j < i; ++j) {
                 threads[j].join(); // TODO: Reverse with 'I' by compiler?
+                monotonic_begin--;
                 if (results[j]) { // TODO: 'I'
-                    pos = positions[j];
                     flags[flag_index].store(j);
+                    pos = positions[j];
                     for (auto k = j + 1; k < i; ++k) {
                         threads[k].join();
+                        monotonic_begin--;
                     }
                     return true;
                 }

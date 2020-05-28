@@ -28,7 +28,7 @@ bool SimpleWorker::visit(NonTerminal &nt)
 {
     auto fr = flags[parent_flag_index].load();
     if (fr >= 0 && fr < rank) { // TODO: check print
-//        std::cout << "rank: " << rank << std::endl;
+//        std::cout << "Stopped at: " << nt << "\n";
         return false;
     }
 
@@ -42,10 +42,10 @@ bool SimpleWorker::visit(NonTerminal &nt)
     switch (cur_res) {
         case Result::success:
         {
-            fr = flags[parent_flag_index].load();
-            if (fr < 0 || fr > rank) {
-                flags[parent_flag_index].store(rank);
-            }
+//            fr = flags[parent_flag_index].load();
+//            if (fr < 0 || fr > rank) {
+//                flags[parent_flag_index].store(rank);
+//            }
             pos = cur_cell->pos();
             return true;
         }
@@ -58,7 +58,7 @@ bool SimpleWorker::visit(NonTerminal &nt)
             while (cur_cell->res() == Result::pending) {
 //                std::cout << "Thread " << std::this_thread::get_id() <<
 //                " of " << nt << " stuck at " << pos << std::endl;
-                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                std::this_thread::sleep_for(std::chrono::milliseconds(0));
             }
             assert (cur_cell->res() != Result::pending);
             if (cur_cell->res() == Result::success) {
@@ -76,10 +76,10 @@ bool SimpleWorker::visit(NonTerminal &nt)
             auto res = e->accept(*this); // TODO: check
 
             if (res) {
-                fr = flags[parent_flag_index].load();
-                if (fr < 0 || fr > rank) {
-                    flags[parent_flag_index].store(rank);
-                }
+//                fr = flags[parent_flag_index].load();
+//                if (fr < 0 || fr > rank) {
+//                    flags[parent_flag_index].store(rank);
+//                }
 
                 cur_cell->set_pos(pos); // pos has changed
                 cur_cell->set_res(Result::success);
@@ -117,7 +117,7 @@ bool SimpleWorker::visit(CompositeExpression &ce)
         }
         case '/':   // ordered choice
         {
-            if (exprs.size() > expr_limit || cur_tree_depth > max_tree_depth) {    // Parse without spawning threads
+            if (exprs.size() > expr_limit || cur_tree_depth >= max_tree_depth) {    // Parse without spawning threads
                 for (auto expr : exprs) {
                     pos = orig_pos;
                     if (expr->accept(*this))
@@ -148,11 +148,13 @@ bool SimpleWorker::visit(CompositeExpression &ce)
 
             for (auto j = 0; j < i; ++j) {
                 threads[j].join();
+                monotonic_begin--;
                 if (results[j]) {
                     flags[flag_index].store(j);
                     pos = positions[j];
                     for (auto k = j + 1; k < i; ++k) {
                         threads[k].join();
+                        monotonic_begin--;
                     }
                     return true;
                 }

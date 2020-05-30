@@ -11,10 +11,6 @@
 #include "parallel_packrats.h"
 #include "simple_worker.h"
 
-const int SPAWNED_NUM = 1000;
-std::atomic<int> monotonic_begin{0};
-std::atomic<int> flags[SPAWNED_NUM];
-
 bool TableParallel::visit(CompositeExpression& ce)
 {
     char op = ce.op_name();
@@ -48,15 +44,13 @@ bool TableParallel::visit(CompositeExpression& ce)
             int positions[exprs.size()];
             std::vector<std::thread> threads;
 
-            monotonic_begin.store(0);
-            flag_index = monotonic_begin.fetch_add(1);
-            flags[flag_index].store(-1);
+            std::atomic<int> finished_rank{-1};
 
             auto i = 0;
             for (auto& expr : exprs) {
                 threads.emplace_back([&, expr, i]()
                                      {
-                                         SimpleWorker sw{in, peg, cells, pos, expr_limit, 1, max_tree_depth, i, flag_index};
+                                         SimpleWorker sw{in, peg, cells, pos, expr_limit, 1, max_tree_depth, i, &finished_rank};
                                          int res = expr->accept(sw);
                                          results[i] = res;
                                          positions[i] = sw.cur_pos();
@@ -67,13 +61,11 @@ bool TableParallel::visit(CompositeExpression& ce)
 
             for (auto j = 0; j < i; ++j) {
                 threads[j].join(); // TODO: Reverse with 'I' by compiler?
-                monotonic_begin--;
                 if (results[j]) { // TODO: 'I'
-                    flags[flag_index].store(j);
+                    finished_rank.store(j);
                     pos = positions[j];
                     for (auto k = j + 1; k < i; ++k) {
                         threads[k].join();
-                        monotonic_begin--;
                     }
                     return true;
                 }

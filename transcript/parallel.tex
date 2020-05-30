@@ -22,35 +22,15 @@ To πρόβλημα εύρεσης παραλληλισμού δεν είναι 
 Η εκδοχή με τον από κάτω προς τα κάτω αναλυτή, μπορεί να παραλληλοποιηθεί εύκολα (embarassingly parallel). 
 Αναθέτοντας σε κάθε νήμα από μία στήλη του πίνακα για υπολογίσει, μπορούμε να σπάσουμε εύκολα το αρχικό πρόβλημα σε επιμέρους υποπροβλήματα.
 
-\definecolor{Gray}{gray}{0.8}
-\newcolumntype{g}{>{\columncolor{Gray}}c}
-\begin{table}[ht]
-\begin{center}
-  \begin{tabular}{|c|c|c|g|g|g|g|c|c|}
-    \hline
-     & & & & & & & &  \\ \hline \hline
-     & & & & & & & &  \\ \hline \hline
-     & & & & & & & &  \\ \hline \hline
-     & & & & & & & &  \\ \hline
-  \end{tabular}
-\end{center}
-\caption{Παραλληλοποίηση ανοδικού Packrat Parser}
-    \label{tab:bottom_up}
-\end{table}
 
-\newcolumntype{g}{>{\columncolor{Gray}}c}
-\begin{table}[ht]
-\centering
-\begin{tabular}{|c|c|c|g|g|g|g|c|c|c|c|}
+\begin{table}
+\begin{tabular}{l | a | b | a | a | a | b | b | b}
 \hline
-1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1\\ \hline
-1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1\\ \hline
-1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1\\ \hline
-1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1\\ \hline
-1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1\\ \hline
-1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1\\ 
-\hline
-	& 	& 	&thr4 &thr3 & thr2 &thr1 & & & & \\ \hline
+1 & a & b & a & b & c & d & c & d\\
+2 & a & b & a & b & c & d & c & d\\ \hline
+2 & a & b & a & b & c & d & c & d\\ \hline
+2 & a & b & a & b & c & d & c & d\\ \hline
+2 & a & b & a & b & c & d & c & d\\ \hline
 \end{tabular}
 \end{table}
 
@@ -163,7 +143,6 @@ return false;
 \begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
     auto fr = finished_rank.load();
     if (fr >= 0 && fr < rank) { 
-        std::cout << "rank: " << rank << std::endl;
         return false;
     }
 \end{minted}
@@ -177,8 +156,10 @@ return false;
 
 \begin{figure}[h]
 \begin{Verbatim}
-HexDigit <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 
-    'A' / 'B' / 'C' / 'D' / 'E' / 'F' / Digit
+
+
+	HexDigit <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 
+   		 'A' / 'B' / 'C' / 'D' / 'E' / 'F' / Digit
 \end{Verbatim}
 \caption{Κανόνας με πολλές εναλλακτικές στη διατεταγμένη επιλογή}
 \label{fig:top_down_4}
@@ -218,13 +199,33 @@ if (exprs.size() > size_limit) {    // Parse without spawning threads
 Αυτό εισάγει δύο (τουλάχιστον) δυσκολίες:
 
 \begin{itemize}
-	\item Πλέον, δύναται να δημιουργηθούν πάρα πολλά νήματα, οπότε πρέπει να καθοριστούν αντίστοιχοι περιορισμοί, που θα φράσσουν την ανεξέλεγκτη δημιουργία νημάτων.
 	\item Μία καθολική μεταβλητή συγχρονισμού δεν αρκεί, αλλά πρέπει να εισαχθεί μία μεταβλητή για κάθε νήμα-εργάτη, ώστε να ελέγχει τα νήματα που δημιουργεί στο επόμενο επίπεδο.
+	\item Πλέον, δύναται να δημιουργηθούν πάρα πολλά νήματα, οπότε πρέπει να καθοριστούν αντίστοιχοι περιορισμοί, που θα φράσσουν την ανεξέλεγκτη δημιουργία νημάτων.
 \end{itemize}
 
 Όπως και πριν, κάθε πατρικό νήμα μόλις καλέσει τα παιδιά-νήματα τα περιμένει ένα ένα να τελειώσουν βάσει ιεραρχίας.
-Ωστόσο, τώρα κάθε νήμα-πατέρας έχει τη δική του $finished\_rank$ ατομική μεταβλητή.
-Το πρώτο παιδί που επιστρέφει επιτυχώς βάζει το $rank$ του στο $finished\_rank$ του πατέρα, οπότε τα επόμενα παιδιά μετά θα διαβάσουν κάποια στιγμή ότι το $finished\_rank$ που αντιστοιχεί σε αυτά  έχει τεθεί με νούμερο μεγαλύτερης ιεραρχίας, και θα επιστρέψουν ανεπιτυχώς. 
+Ωστόσο, τώρα κάθε νήμα-πατέρας έχει τη δική του $finished\_rank$ ατομική μεταβλητή, όπως φαίνεται στο Σχήμα \ref{fig:rec_top_down_worker}.
+Μέσω αυτής ελέγχει τα νήματα-παιδιά.
+Επιπλέον, για να μπορεί να το ελέγχει και αυτό αντίστοιχα ο πατέρας του, διαθέτει ένα δείκτη προς την ατομική μεταβλητή του.
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+class SimpleWorker: public SerialPackrat {
+    int expr_limit;
+    int cur_tree_depth;
+    int max_tree_depth;
+    int rank;
+    std::atomic<int> finished_rank{-1};
+    std::atomic<int>* parent_finished_rank;
+public:
+    ...
+};
+
+\end{minted}
+\caption{Ορισμός της κλάσης του νήματος-εργάτη}
+\label{fig:rec_top_down_worker}
+\end{figure}
 
 Στην προηγούμενη υποενότητα εισάγαμε την παράμετρο $expr\_limit$ για να καθορίζουμε μέχρι πόσα παιδιά θα καλεί το αρχικό νήμα.
 Αν η σύνθετη έκφραση είχε περισσότερα από $expr\_limit$ παιδιά, τότε το νήμα την ανέλυε σειρακά.
@@ -232,10 +233,10 @@ if (exprs.size() > size_limit) {    // Parse without spawning threads
 
 Επιπλέον, τώρα χρειαζόμαστε και μία παράμετρο που θα φράσσει το βάθος του δέντρου (fork-join tree).
 Η μεταβλητή $max\_tree\_depth$, λοιπόν, θα καθορίζεται άπαξ στο αρχικό νήμα, το οποίο θα τη στέλνει στα παιδιά-νήματα.
-Κάθε νήμα θα έχει μία μεταβλητή $cur\_tree\_depth$ που θα δείχνει το τρέχον βάθος.
+Κάθε νήμα θα έχει μία μεταβλητή $cur\_tree\_depth$ που θα δείχνει το τρέχον βάθος, όπως φαίνεται στον ορισμό της κλάσης τους.
 Όταν καλεί ένα νήμα-παιδί, θα του δίνει $cur\_tree\_depth + 1$ ως βάθος.
 
-Τα παραπάνω φαίνονται στο Σχήμα \ref{fig:rec_top_down_1}.
+Τα παραπάνω φαίνονται πιο καθαρά στο Σχήμα \ref{fig:rec_top_down_spawn}.
 \begin{figure}[h]
 \setlength\partopsep{-\topsep}% adjusts vertical space after the listing
 \begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
@@ -256,8 +257,46 @@ for (auto& expr : exprs) {
 }
 \end{minted}
   \caption{Tο νήμα-εργάτης δημιουργεί νήματα-εργάτες}
-\label{fig:rec_top_down_1}
+\label{fig:rec_top_down_spawn}
 \end{figure}
+
+Το νήμα-πατέρας με το πρώτο παιδί που επιστρέφει επιτυχώς βάζει το $rank$ του παιδιού στο $finished\_rank$ του, οπότε τα επόμενα παιδιά μετά θα διαβάσουν κάποια στιγμή ότι το $parent\_finished\_rank$ που αντιστοιχεί σε αυτά  έχει τεθεί με νούμερο μεγαλύτερης ιεραρχίας, και θα επιστρέψουν ανεπιτυχώς (Σχήμα \ref{fig:rec_top_down_join}).
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+for (auto j = 0; j < i; ++j) {
+    threads[j].join();
+    if (results[j]) {
+        finished_rank.store(j);
+        pos = positions[j];
+        for (auto k = j + 1; k < i; ++k) {
+            threads[k].join();
+        }
+        return true;
+    }
+}
+pos = orig_pos;
+return false;
+\end{minted}
+  \caption{Αναμονή και τερματισμός των νημάτων}
+\label{fig:rec_top_down_join}
+\end{figure}
+
+Ο έλεγχος για πρόωρο τερματισμό γίνεται χρησιμοποιώντας το δείκτη προς την ατομική μεταβλητή του γονέα (Σχήμα \ref{fig:rec_top_down_stop}).
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+    auto fr = parent_finished_rank->load();
+    if (fr >= 0 && fr < rank) { 
+        return false;
+    }
+\end{minted}
+\caption{Έλεγχος της μεταβλητής του γονέα για πρόωρο τερματισμό}
+  \label{fig:rec_top_down_stop}
+\end{figure}
+
 
 \section{Παράλληλο Elastic Packrat Parsing}
 Οι ιδέες που περιγράψαμε παραπάνω για την παραλληλοποίηση του κλασσικού αλγορίθμου packrat, εφαρμόζονται άμεσα και στο elastic packrat parsing με ελάχιστες τροποποιήσεις.

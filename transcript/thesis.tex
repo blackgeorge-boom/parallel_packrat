@@ -4,7 +4,7 @@
 %%%  Add and configure the packages that you need for your thesis
 %%%
 
-\usepackage{color, colortbl}
+\usepackage{color, xcolor, colortbl}
 \usepackage{minted}
 \usepackage{amsmath}
 \usepackage{amssymb,longtable}
@@ -53,6 +53,15 @@
 	process/.style = {base, minimum width=2.5cm, fill=orange!15,
 					  font=\ttfamily},
 }
+
+
+\newcommand{\mc}[2]{\multicolumn{#1}{c}{#2}}
+\definecolor{Gray}{gray}{0.85}
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+
+\newcolumntype{a}{>{\columncolor{Gray}}c}
+\newcolumntype{b}{>{\columncolor{white}}c}
+
 %%%
 %%%  The document
 %%%

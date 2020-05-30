@@ -10,7 +10,7 @@
 #include "simple_worker.h"
 
 
-SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int lim, int cur_depth, int max_depth, int r, int pfi)
+SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int lim, int cur_depth, int max_depth, int r, std::atomic<int>* pfr)
 {
     in = std::move(input);
     peg = PEG(g);
@@ -20,13 +20,12 @@ SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int
     cur_tree_depth = cur_depth;
     max_tree_depth = max_depth;
     rank = r;
-    flag_index = monotonic_begin.fetch_add(1);
-    parent_flag_index = pfi;
+    parent_finished_rank = pfr;
 }
 
 bool SimpleWorker::visit(NonTerminal &nt)
 {
-    auto fr = flags[parent_flag_index].load();
+    auto fr = parent_finished_rank->load();
     if (fr >= 0 && fr < rank) {
 //        std::cout << "Stopped at: " << nt << "\n";
         return false;
@@ -42,10 +41,6 @@ bool SimpleWorker::visit(NonTerminal &nt)
     switch (cur_res) {
         case Result::success:
         {
-//            fr = flags[parent_flag_index].load();
-//            if (fr < 0 || fr > rank) {
-//                flags[parent_flag_index].store(rank);
-//            }
             pos = cur_cell->pos();
             return true;
         }
@@ -76,11 +71,6 @@ bool SimpleWorker::visit(NonTerminal &nt)
             auto res = e->accept(*this); // TODO: check
 
             if (res) {
-//                fr = flags[parent_flag_index].load();
-//                if (fr < 0 || fr > rank) {
-//                    flags[parent_flag_index].store(rank);
-//                }
-
                 cur_cell->set_pos(pos); // pos has changed
                 cur_cell->set_res(Result::success);
                 return true;
@@ -95,7 +85,7 @@ bool SimpleWorker::visit(NonTerminal &nt)
 
 bool SimpleWorker::visit(CompositeExpression &ce)
 {
-    auto fr = flags[parent_flag_index].load();
+    auto fr = parent_finished_rank->load();
     if (fr >= 0 && fr < rank) {
 //        std::cout << "Stopped at: " << nt << "\n";
         return false;
@@ -128,8 +118,6 @@ bool SimpleWorker::visit(CompositeExpression &ce)
                 return false;
             }
 
-            flags[flag_index].store(-1);
-
             int results[exprs.size()];
             int positions[exprs.size()];
             std::vector<std::thread> threads;
@@ -138,7 +126,7 @@ bool SimpleWorker::visit(CompositeExpression &ce)
             for (auto& expr : exprs) {
                 threads.emplace_back([&, expr, i]()
                                      {
-                                         SimpleWorker sw{in, peg, cells, pos, expr_limit, cur_tree_depth + 1, max_tree_depth, i, flag_index};
+                                         SimpleWorker sw{in, peg, cells, pos, expr_limit, cur_tree_depth + 1, max_tree_depth, i, &finished_rank};
                                          int res = expr->accept(sw);
                                          results[i] = res;
                                          positions[i] = sw.cur_pos();
@@ -149,13 +137,11 @@ bool SimpleWorker::visit(CompositeExpression &ce)
 
             for (auto j = 0; j < i; ++j) {
                 threads[j].join();
-                monotonic_begin--;
                 if (results[j]) {
-                    flags[flag_index].store(j);
+                    finished_rank.store(j);
                     pos = positions[j];
                     for (auto k = j + 1; k < i; ++k) {
                         threads[k].join();
-                        monotonic_begin--;
                     }
                     return true;
                 }

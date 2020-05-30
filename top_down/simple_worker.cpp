@@ -27,7 +27,7 @@ SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int
 bool SimpleWorker::visit(NonTerminal &nt)
 {
     auto fr = flags[parent_flag_index].load();
-    if (fr >= 0 && fr < rank) { // TODO: check print
+    if (fr >= 0 && fr < rank) {
 //        std::cout << "Stopped at: " << nt << "\n";
         return false;
     }
@@ -95,10 +95,11 @@ bool SimpleWorker::visit(NonTerminal &nt)
 
 bool SimpleWorker::visit(CompositeExpression &ce)
 {
-//    if (this->stopRequested()) {
-//        std::cout << "Stopped\n";
-//        return false;
-//    }
+    auto fr = flags[parent_flag_index].load();
+    if (fr >= 0 && fr < rank) {
+//        std::cout << "Stopped at: " << nt << "\n";
+        return false;
+    }
 
     char op = ce.op_name();
     std::vector<Expression*> exprs = ce.expr_list();
@@ -201,11 +202,6 @@ bool SimpleWorker::visit(CompositeExpression &ce)
 
 bool SimpleWorker::visit(Terminal& t)
 {
-//    if (this->stopRequested()) {
-//        std::cout << "Stopped\n";
-//        return false;
-//    }
-
     int terminal_char = t.name()[0];
 
     if (t.name().length() > 1)

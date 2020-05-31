@@ -87,7 +87,7 @@ bool SimpleWorker::visit(CompositeExpression &ce)
 {
     auto fr = parent_finished_rank->load();
     if (fr >= 0 && fr < rank) {
-//        std::cout << "Stopped at: " << nt << "\n";
+//        std::cout << "Stopped at: " << ce << "\n";
         return false;
     }
 
@@ -117,6 +117,8 @@ bool SimpleWorker::visit(CompositeExpression &ce)
                 pos = orig_pos;
                 return false;
             }
+
+            finished_rank.store(-1);
 
             int results[exprs.size()];
             int positions[exprs.size()];
@@ -188,6 +190,12 @@ bool SimpleWorker::visit(CompositeExpression &ce)
 
 bool SimpleWorker::visit(Terminal& t)
 {
+    auto fr = parent_finished_rank->load();
+    if (fr >= 0 && fr < rank) {
+//        std::cout << "Stopped at: " << t << "\n";
+        return false;
+    }
+
     int terminal_char = t.name()[0];
 
     if (t.name().length() > 1)

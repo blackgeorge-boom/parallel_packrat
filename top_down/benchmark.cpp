@@ -61,7 +61,7 @@ static void BM_Packrat(benchmark::State& state) {
 
     for (auto _ : state) {
         state.PauseTiming();
-        TableParallel sp2(input, *grammar, state.range(0));
+        TableParallel sp2(input, *grammar, state.range(0), state.range(1));
         state.ResumeTiming();
         sp2.visit(*grammar);
     }
@@ -69,7 +69,8 @@ static void BM_Packrat(benchmark::State& state) {
 
 static void CustomArguments(benchmark::internal::Benchmark* b) {
             for (int i = 0; i <= 4; i++)
-                b->Args({i});
+                for (int j = 0; j <= 4; j++)
+                b->Args({i, j});
 }
 
 // Register the function as a benchmark

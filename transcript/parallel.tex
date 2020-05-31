@@ -199,6 +199,37 @@ if (exprs.size() > expr_limit) {
 \label{fig:expr_size}
 \end{figure}
 
+Τέλος, πρέπει να αναφέρουμε ότι ο πίνακας των ενδιάμεσων αποτελεσμάτων είναι, πλέον, κοινόχρηστος από τα νήματα.
+Οπότε, για να αποφευχθούν συνθήκες ανταγωνισμού για τα κελιά του, πρέπει αυτά να προστατεύονται από κλειδώματα.
+Ένας απλός και αποτελεσματικός τρόπος είναι κάθε κελί να έχει το κλειδί του, οπότε για να το υπολογίσει κάποιος θα πρέπει να το κλειδώσει (Σχ. \ref{fig:lock})
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+cur_cell->lock();
+cur_cell->set_res(Result::pending);
+cur_cell->unlock();
+\end{minted}
+  \caption{Κλείδωμα του κελιού}
+\label{fig:lock}
+\end{figure}
+
+Συγκεκριμένα το "μαρκάρει" ως pending, οπότε αν κάποιο άλλο νήμα πάει να ζητήσει το αποτέλεσμά του, θα πρέπει να περιμένει μέχρι η κατάσταση pending να αλλάξει (Σχ. \ref{fig:pending}):
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+case Result::pending:
+{
+    while (cur_cell->res() == Result::pending) 
+        std::this_thread::sleep_for(std::chrono::milliseconds(0));
+    ...
+}
+\end{minted}
+  \caption{Αναμονή για υπολογισμό του κελιού από άλλο νήμα}
+\label{fig:pending}
+\end{figure}
+
 \subsection{Αναδρομική δημιουργία νημάτων}
 
 Στην προηγούμενη υποενότητα εξετάσαμε τη σχετικά απλή περίπτωση όπου ένα νήμα (master) καλούσε επιμέρους νήματα (workers), για να επιταχύνει τη συντακτική ανάλυση στην περίπτωση της διατεταγμένης επιλογής.
@@ -246,9 +277,12 @@ public:
 Κάθε νήμα θα έχει μία μεταβλητή $cur\_tree\_depth$ που θα δείχνει το τρέχον βάθος, όπως φαίνεται στον ορισμό της κλάσης του.
 Όταν καλεί ένα νήμα-παιδί, θα του δίνει $cur\_tree\_depth + 1$ ως βάθος (γρ. 10).
 To νήμα-γονέας δίνει στα παιδιά και ένα δείκτη προς την ατομική μεταβλητή του, ώστε να μπορεί να τα ειδοποιήσει να τερματίσουν (γρ. 10).
+Πάντα το νήμα πρέπει να ξαναθέτει την ατομική μεταβλητή του σε -1, διότι μπορεί να επισκεπτεί πάνω από μία διατεταγμένες επιλογές (γρ. 1).
 \begin{figure}[h]
 \setlength\partopsep{-\topsep}% adjusts vertical space after the listing
 \begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+finished_rank.store(-1);
+
 int results[exprs.size()];
 int positions[exprs.size()];
 std::vector<std::thread> threads;

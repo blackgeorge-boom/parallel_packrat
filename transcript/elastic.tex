@@ -54,8 +54,65 @@ To Σχήμα \ref{fig:slide_window} απεικονίζει έναν buffer πλ
 Θα μπορούσαμε να την κάνουμε αυτή την ανάλυση στατικά, όμως η προσέγγιση που επιλέγεται είναι η δυναμική ανάλυση.
 
 Συγκεκριμένα, ξεκινάμε θεωρώντας ότι όλα τα μητερματικά είναι ενεργά, δηλαδή ότι αποθηκεύουμε ενδιάμεσα αποτελέσμα που τα αφορούν.
-Στη συνέχεια, αν μετά από έναν συγκεκριμένο αριθμό κλήσεων για ένα μη τερματικό δούμε ότι τα ενδιάμεσα αποτελέσματα που το αφορούν δε χρησιμοποιήθηκαν ούτε μία φορά, το "απενεργοποιούμε".
-Δηλαδή, παύουμε να κρατάμε αποτελέσματα για αυτό.
+Δίνουμε σε όλα τα μη τερματικά έναν αριθμό ευκαιριών.
+Στη συνέχεια, αν μετά από έναν συγκεκριμένο αριθμό κλήσεων για ένα μη τερματικό δούμε ότι τα ενδιάμεσα αποτελέσματα που το αφορούν δε χρησιμοποιήθηκαν ούτε μία φορά, το "απενεργοποιούμε" (Σχήμα \ref{fig:elastic_deactivate}).
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+  ...
+if (nt_elapsed[row] >= 0)  // μετράμε αντίστροφα όταν συναντάμε ένα μη τερματικό 
+        nt_elapsed[row] = nt_elapsed[row] - 1;  // χωρίς να το χρησιμοποιήσουμε
+  ...
+if (nt_elapsed[row] == 0)  // αν έληξαν οι ευκαιρίες του
+    if (!nt_utilized[row])  // και δε χρησιμοποιήθηκε ούτε μία φορά
+        nt_activated[row] = false;  // το απενεργοποιούμε μόνιμα
+  ...
+\end{minted}
+  \caption{Απενεργοποιήση μη τερματικού}
+  \label{fig:elastic_deactivate}
+\end{figure}
+
+Αν, ωστόσο, αξιοποιήσομε έστω και ένα ενδιάμεσο αποτέλεσμα του μη τερματικού προτού απενεργοποιηθεί, το κρατάμε μόνιμα απενεργοποιημένο, όπως φαίνεται στο Σχήμα \ref{fig:elastic_keep_active}.
+
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+  ...
+case Result::success:  // έτοιμο αποτέλεσμα αποθηκευμένο 
+{
+    if (nt_elapsed[row] > 0) // αν δεν έχουν περάσει οι ευκαιρίες το κρατάμε μόνιμα ενεργό
+        nt_utilized[row] = true;
+    pos = cur_cell->pos();
+    return true;
+}
+case Result::fail:  // έτοιμο αποτέλεσμα αποθηκευμένο 
+{
+    if (nt_elapsed[row] > 0) // αν δεν έχουν περάσει οι ευκαιρίες το κρατάμε μόνιμα ενεργό
+        nt_utilized[row] = true;
+    return false;
+}
+  ...
+\end{minted}
+  \caption{Aξιοποιήση ενός κελιού για ένα μη τερματικό προτού λήξουν οι ευκαιρίες και μόνιμη ενεργοποίησή του}
+\label{fig:elastic_keep_active}
+\end{figure}
+
+
+Δηλαδή, παύουμε να κρατάμε αποτελέσματα για αυτό, και όταν πρέπει να το αναλύσουμε, χρησιμοποιούμε απευθείας συντακτική ανάλυση αναδρομικής κατάβασης, χωρίς να εμπλακεί ο πίνακας ενδιάμεσων αποτελεσμάτων (Σχήμα \ref{fig:elastic_deactivated}).
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+if (!nt_activated[row]) {
+    Expression* e = peg.get_expr(&nt);
+    return e->accept(*this);
+}
+\end{minted}
+  \caption{Έλεγχος για το αν το κελί είναι απενεργοποιημένο}
+\label{fig:elastic_deactivated}
+\end{figure}
 
 Το ποιο θα είναι αυτό το "κατώφλι", δηλαδή ο αριθμός κλήσεων στο μη τερματικό που δεν αξιοποιεί ούτε ένα ενδιάμεσο αποτέλεσμα, είναι μια παράμετρος που πρέπει να μετρήσουμε.
 

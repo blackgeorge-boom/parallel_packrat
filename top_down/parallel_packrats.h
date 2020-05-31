@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "../serial/serial_packrat.h"
-#include "stoppable.h"
 
 class TableParallel: public SerialPackrat {
     int expr_limit;

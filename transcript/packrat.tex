@@ -245,4 +245,50 @@ IF <- 'i' 'f' !LetterOrDigit Spacing?
 Παρατηρούμε ότι, αντίστοιχα με μία PEG και τα συστατικά της που δέχονται ως "επισκέπτη" έναν συντακτικό αναλυτή, ο Packrat Parser υλοποιεί τις μεθόδους του επισκέπτη (visitor pattern).
 Περισσότερα σχετικά με τα πλεονεκτήματα και μειονεκτήματα του Packrat Parsing, ιδιαίτερα σε σχέση με τις Context Free Grammars μπορούν να βρεθούν στο \cite{Ford2004}.
 
+Ενδεικτικά, η μέθοδος \textit{visit(NonTerminal\& nt)}, φαίνεται στο Σχήμα \ref{fig:visit_nt}:
 
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+bool SerialPackrat::visit(NonTerminal& nt)
+{
+    int row = nt.index();
+    Cell* cur_cell = &cells[row][pos];
+    Result cur_res = cur_cell->res();
+
+    switch (cur_res) {
+
+        case Result::success:
+        {
+            pos = cur_cell->pos();
+            return true;
+        }
+        case Result::fail:
+        {
+            return false;
+        }
+        case Result::unknown:
+        {
+            Expression* e = peg.get_expr(&nt);
+            auto res = e->accept(*this);
+
+            if (res) {
+                cur_cell->set_res(Result::success);
+                cur_cell->set_pos(pos); // pos has changed
+                return true;
+            } else {
+                cur_cell->set_res(Result::fail);
+                return false;
+            }
+        }
+    }
+    return false;
+}
+\end{minted}
+  \caption{Συντακτική ανάλυση ενός μη τερματικού}
+  \label{fig:visit_nt}
+\end{figure}
+
+Αρχικά βρίσκουμε σε ποιο κελί του πίνακα αντιστοιχεί το μη τερματικό, με βάση το μοναδικό αριθμό του τερματικού (για τη γραμμή του πίνακα) και με βάση τη τρέχουσα θέση εισόδου (για τη στήλη του πίνακα) (γραμμές 3-5).
+Στη συνέχεια, αν το ενδιάμεσο αποτέλεσμα είναι ήδη υπολογισμένο, επιστρέφουμε ανάλογα με την περίπτωση είτε επιτυχώς, θέτοντας την αντίστοιχη θέση στην είσοδο (γρ. 9-13), είτε ανεπιτυχώς (γρ. 14-17).
+Αλλιώς, το υπολογίζουμε και αποθηκεύουμε το αντίστοιχο ενδιάμεσο αποτέλεσμα (γρ. 18-31).

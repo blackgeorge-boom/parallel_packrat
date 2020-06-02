@@ -1,9 +1,8 @@
 \chapter{Πειραματικά Αποτελέσματα}
 \label{ch:results}
 
-
-
 \section{Packrat με ελαστικό κυλιόμενο παράθυρο}
+
 \begin{table}[!ht]
 \centering
 \begin{tabular}{ c c c c c c c c} 
@@ -40,10 +39,54 @@
 \toprule
 \diagbox{thres}{w} & \makecell{256}& \makecell{512} & \makecell{1024} \\ 
 \midrule
-0  & 12.3 & 11.8 & 13.8 \\
-16 & 13.6 & 12.4 & 14.3 \\
-32 & 14.3 & 12.6 & 13.8 \\
-48 & 13.6 & 12.6 & 14.0 \\
+0  & 52.6 & 51.4 & 54.9 \\
+16 & 50.2 & 48.2 & 50.8 \\
+32 & 50.5 & 47.4 & 51.4 \\
+48 & 51.7 & 46.8 & 50.8 \\
+\bottomrule
+\end{tabular}
+  \caption{StringCoding.java}
+\end{table}
+
+\section{Παράλληλο packrat parsing}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+\diagbox{max \\ depth}{expr\\limit} & \makecell{2}& \makecell{4} & \makecell{6}\\ 
+\midrule
+0 & 433 & 435 & 437 \\
+1 & 434 & 432 & 430 \\
+2 & 1278 & 451 & 446 \\
+\bottomrule
+\end{tabular}
+  \caption{Arrays.java}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+\diagbox{max\\depth}{expr\\limit} & \makecell{2}& \makecell{4} & \makecell{6} \\ 
+\midrule
+0  & 367 & 367 & 370 \\
+1 & 368 & 369 & 367 \\
+2 & 2570 & 380 & 379 \\
+\bottomrule
+\end{tabular}
+  \caption{BigDecimal.java}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+\diagbox{max\\depth}{expr \\ limit} & \makecell{2}& \makecell{4} & \makecell{6} \\ 
+\midrule
+0  & 59 & 61 & 59 \\
+1 & 94 & 60 & 62 \\
+2 & 324 & 76 & 74 \\
 \bottomrule
 \end{tabular}
   \caption{StringCoding.java}

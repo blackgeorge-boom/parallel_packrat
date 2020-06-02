@@ -23,7 +23,7 @@ Meta meta;
 
 static void BM_Packrat(benchmark::State& state) {
     std::string grammar_def("test/peg_examples/Java1.5.txt");
-    std::string file_to_parse("test/java/StringCoding.java");
+    std::string file_to_parse("test/java/Throwable.java");
 
     std::ifstream ifs(grammar_def, std::ifstream::in);
     if (!ifs) {
@@ -73,7 +73,7 @@ static void BM_Packrat(benchmark::State& state) {
 // 256/512/1024 for window size
 static void CustomArguments(benchmark::internal::Benchmark* b) {
     for (int i = 1024; i <= 1024; i *= 2)
-        for (int j = 32; j <= 48; j += 16)
+        for (int j = 0; j <= 48; j += 16)
             b->Args({i, j});
 }
 

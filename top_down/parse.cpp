@@ -77,7 +77,14 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    TableParallel sp3(input, *grammar, 8, 2);
+    TableParallel sp3(input, *grammar, 6, 2);
+
+    // Global variables.
+    const size_t bigger_than_cachesize = 14 * 1024 * 1024;
+    long *p = new long[bigger_than_cachesize];
+    // When you want to "flush" cache.
+    for(int i = 0; i < bigger_than_cachesize; i++)
+        p[i] = rand();
 
     t0 = high_resolution_clock::now();
     res = sp3.visit(*grammar);

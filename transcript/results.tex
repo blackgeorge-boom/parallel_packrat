@@ -1,16 +1,50 @@
 \chapter{Πειραματικά Αποτελέσματα}
 \label{ch:results}
 
-\begin{figure}
-    \begin{tikzpicture}
-    \begin{axis}
-    [   view={-45}{60},
-    xmin=0,xmax=10,
-    ymin=0,ymax=10,
-    zmin=0, zmax=10,
-    ]
-    \addplot3[scatter, only marks] file{./a.dat};
-    \end{axis}
 
-    \end{tikzpicture}
-\end{figure}
+
+\section{Packrat με ελαστικό κυλιόμενο παράθυρο}
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+\diagbox{thres}{w} & \makecell{256}& \makecell{512} & \makecell{1024} \\ 
+\midrule
+0  & 380 & 573 & 415 \\
+16 & 498 & 378 & 418 \\
+32 & 360 & 401 & 379 \\
+48 & 360 & 373 & 374 \\
+\bottomrule
+\end{tabular}
+  \caption{Arrays.java}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+\diagbox{thres}{w} & \makecell{256}& \makecell{512} & \makecell{1024} \\ 
+\midrule
+0  & 378 & 640 & 394 \\
+16 & 490 & 380 & 410 \\
+32 & 367 & 371 & 558 \\
+48 & 368 & 607 & 381 \\
+\bottomrule
+\end{tabular}
+  \caption{BigDecimal.java}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+\diagbox{thres}{w} & \makecell{256}& \makecell{512} & \makecell{1024} \\ 
+\midrule
+0  & 12.3 & 11.8 & 13.8 \\
+16 & 13.6 & 12.4 & 14.3 \\
+32 & 14.3 & 12.6 & 13.8 \\
+48 & 13.6 & 12.6 & 14.0 \\
+\bottomrule
+\end{tabular}
+  \caption{StringCoding.java}
+\end{table}

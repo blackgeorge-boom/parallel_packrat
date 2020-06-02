@@ -23,7 +23,7 @@ Meta meta;
 
 static void BM_Packrat(benchmark::State& state) {
     std::string grammar_def("test/peg_examples/Java1.5.txt");
-    std::string file_to_parse("test/java/Arrays.java");
+    std::string file_to_parse("test/java/StringCoding.java");
 
     std::ifstream ifs(grammar_def, std::ifstream::in);
     if (!ifs) {
@@ -54,9 +54,15 @@ static void BM_Packrat(benchmark::State& state) {
     std::string input( (std::istreambuf_iterator<char>(ifs2) ),
                        (std::istreambuf_iterator<char>()     ) );
 
+    // Global variables.
+    const size_t bigger_than_cachesize = 14 * 1024 * 1024;
+    long *p = new long[bigger_than_cachesize];
 
     for (auto _ : state) {
         state.PauseTiming();
+        // When you want to "flush" cache.
+        for(int i = 0; i < bigger_than_cachesize; i++)
+            p[i] = rand();
         Elastic sp2(input, *grammar, state.range(0), state.range(1));
         state.ResumeTiming();
         sp2.visit(*grammar);
@@ -66,8 +72,8 @@ static void BM_Packrat(benchmark::State& state) {
 // 16/32 seems a good choice for threshold
 // 256/512/1024 for window size
 static void CustomArguments(benchmark::internal::Benchmark* b) {
-    for (int i = 256; i <= 1024; i *= 2)
-        for (int j = 16; j <= 32; j *= 2)
+    for (int i = 1024; i <= 1024; i *= 2)
+        for (int j = 32; j <= 48; j += 16)
             b->Args({i, j});
 }
 

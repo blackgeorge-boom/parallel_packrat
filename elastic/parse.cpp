@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    Elastic sp3(input, *grammar, 1024, 32); // TODO: Benchmark window size
+    Elastic sp3(input, *grammar, 256, 32); // TODO: Benchmark window size
 
     t0 = high_resolution_clock::now();
     res = sp3.visit(*grammar);

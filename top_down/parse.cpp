@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    TableParallel sp3(input, *grammar, 6, 2);
+    TableParallel sp3(input, *grammar, 8, 0);
 
     // Global variables.
     const size_t bigger_than_cachesize = 14 * 1024 * 1024;

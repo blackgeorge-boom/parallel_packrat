@@ -1,7 +1,22 @@
 \chapter{Πειραματικά Αποτελέσματα}
 \label{ch:results}
 
+Θα αξιολογήσουμε τους αλγορίθμους μας με 3 αρχεία από τον πηγαίο κώδικα της Java \footnote{\url{http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/tip/src/share/classes/java}}.
+Το μέγεθός τους είναι μέτριο προς μεγάλο, ώστε να μπορέσουν να φανούν οι διαφορές στους χρόνους εκτέλεσης των αλγορίθμων.
+Τα μεγέθη τους είναι:
+
+\begin{itemize}
+  \item \textit{Arrays.java} - 116K 
+  \item \textit{BigDecimal.java} - 140K 
+  \item \textit{Throwable.java} - 28K 
+\end{itemize}
+
+Οι μετρήσεις έγιναν με το \textit{std::chrono::high\_resolution\_clock} της STL.
+
 \section{Packrat με ελαστικό κυλιόμενο παράθυρο}
+
+Αρχικά, εκτελούμε διαδοχικά τον αλγόριθμο packrat με ελαστικό κυλιόμενο παράθυρο για διάφορα μήκη παραθύρου (w) και κατώφλια απενεργοποίησης μη τερματικών (thres).
+
 
 \begin{table}[!ht]
 \centering
@@ -9,10 +24,10 @@
 \toprule
 \diagbox{thres}{w} & \makecell{256}& \makecell{512} & \makecell{1024} \\ 
 \midrule
-0  & 380 & 573 & 415 \\
-16 & 498 & 378 & 418 \\
-32 & 360 & 401 & 379 \\
-48 & 360 & 373 & 374 \\
+0  & 396 & 401 & \cellcolor{yellow!45}415 \\
+16 & \cellcolor{green!45}378 & \cellcolor{green!45}378 & \cellcolor{green!45}381 \\
+32 & \cellcolor{green!45}380 & \cellcolor{green!45}381 & \cellcolor{green!45}379 \\
+48 & \cellcolor{green!45}379 & \cellcolor{green!45}379 & \cellcolor{green!45}374 \\
 \bottomrule
 \end{tabular}
   \caption{Arrays.java}
@@ -24,10 +39,10 @@
 \toprule
 \diagbox{thres}{w} & \makecell{256}& \makecell{512} & \makecell{1024} \\ 
 \midrule
-0  & 378 & 640 & 394 \\
-16 & 490 & 380 & 410 \\
-32 & 367 & 371 & 558 \\
-48 & 368 & 607 & 381 \\
+0  & 341 & \cellcolor{yellow!45}356 & \cellcolor{yellow!45}358 \\
+  16 & 334 & 337 & 336 \\
+32 & \cellcolor{green!45}329 & \cellcolor{green!45}329 & \cellcolor{green!45}330 \\
+48 & 333 & 334 & 332 \\
 \bottomrule
 \end{tabular}
   \caption{BigDecimal.java}
@@ -39,13 +54,13 @@
 \toprule
 \diagbox{thres}{w} & \makecell{256}& \makecell{512} & \makecell{1024} \\ 
 \midrule
-0  & 52.6 & 51.4 & 54.9 \\
-16 & 50.2 & 48.2 & 50.8 \\
-32 & 50.5 & 47.4 & 51.4 \\
-48 & 51.7 & 46.8 & 50.8 \\
+0  & 53 & 51 & 55 \\
+16 & 50 & 48 & 51 \\
+32 & 51 & 47 & 51 \\
+48 & 52 & 47 & 51 \\
 \bottomrule
 \end{tabular}
-  \caption{StringCoding.java}
+  \caption{Throwable.java}
 \end{table}
 
 \section{Παράλληλο packrat parsing}
@@ -54,11 +69,10 @@
 \centering
 \begin{tabular}{ c c c c c c c c} 
 \toprule
-\diagbox{max \\ depth}{expr\\limit} & \makecell{2}& \makecell{4} & \makecell{6}\\ 
+  \diagbox{max\\depth}{expr\\limit} & \makecell{2}& \makecell{4} & \makecell{6} & \makecell{8} \\ 
 \midrule
-0 & 433 & 435 & 437 \\
-1 & 434 & 432 & 430 \\
-2 & 1278 & 451 & 446 \\
+1 & \cellcolor{green!45}434 & \cellcolor{green!45}432 & \cellcolor{green!45}430 & 437 \\
+  2 & \cellcolor{red!45}1278 & 451 & 446 & 446\\
 \bottomrule
 \end{tabular}
   \caption{Arrays.java}
@@ -68,11 +82,10 @@
 \centering
 \begin{tabular}{ c c c c c c c c} 
 \toprule
-\diagbox{max\\depth}{expr\\limit} & \makecell{2}& \makecell{4} & \makecell{6} \\ 
+  \diagbox{max\\depth}{expr\\limit} & \makecell{2}& \makecell{4} & \makecell{6} & \makecell{8} \\ 
 \midrule
-0  & 367 & 367 & 370 \\
-1 & 368 & 369 & 367 \\
-2 & 2570 & 380 & 379 \\
+  1 & \cellcolor{green!45}368 & \cellcolor{green!45}369 & \cellcolor{green!45}367 & \cellcolor{green!45}369  \\
+  2 & \cellcolor{red!45}2570 & 380 & 379 & 385\\
 \bottomrule
 \end{tabular}
   \caption{BigDecimal.java}
@@ -82,12 +95,25 @@
 \centering
 \begin{tabular}{ c c c c c c c c} 
 \toprule
-\diagbox{max\\depth}{expr \\ limit} & \makecell{2}& \makecell{4} & \makecell{6} \\ 
+  \diagbox{max\\depth}{expr\\limit} & \makecell{2}& \makecell{4} & \makecell{6} & \makecell{8} \\ 
 \midrule
-0  & 59 & 61 & 59 \\
-1 & 94 & 60 & 62 \\
-2 & 324 & 76 & 74 \\
+  1 & \cellcolor{yellow!45}94 & \cellcolor{green!45}60 & \cellcolor{green!45}62 & \cellcolor{green!45}60 \\
+  2 & \cellcolor{red!45}324 & 76 & 74 & 109 \\
 \bottomrule
 \end{tabular}
-  \caption{StringCoding.java}
+  \caption{Throwable.java}
 \end{table}
+
+\section{Τελικά Αποτελέσματα}
+
+\begin{tabular}{ |p{4cm}||p{3cm}|p{3cm}|p{3cm}|  }
+ \hline
+  \multicolumn{4}{|c|}{Χρόνοι εκτέλεσης (ms)} \\
+ \hline
+  Αλγόριθμος Packrat& Arrays - 116K &BigDecimal - 140K &Throwable - 28K\\
+ \hline
+ Κλασικός & 404 & 350 & \cellcolor{green!45}46\\
+  Elastic (256, 32) & \cellcolor{green!45}380 & \cellcolor{green!45}329 & 51\\
+  Παράλληλος (1, 4) & 432 & 369 & 62\\
+ \hline
+\end{tabular}

@@ -23,7 +23,7 @@ Meta meta;
 
 static void BM_Packrat(benchmark::State& state) {
     std::string grammar_def("test/peg_examples/Java1.5.txt");
-    std::string file_to_parse("test/java/Throwable.java");
+    std::string file_to_parse("test/java/Arrays.java");
 
     std::ifstream ifs(grammar_def, std::ifstream::in);
     if (!ifs) {

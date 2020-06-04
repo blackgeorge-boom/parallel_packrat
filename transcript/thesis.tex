@@ -17,7 +17,7 @@
 \usepackage{url}
 \usepackage{booktabs,makecell}
 \usepackage{diagbox}
-\includeonly{parallel, results, packrat, elastic, conclusions}
+%\includeonly{parallel, results, packrat, elastic, conclusions}
 \usetikzlibrary{calc}
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{positioning}
@@ -78,18 +78,18 @@
 \title{Παράλληλο Packrat Parsing}
 \author{Νίκος Μαυρογεώργης}
 \authoren{Nikos Mavrogeorgis}
-\date{Αύγουστος 2019}
-\datedefense{26}{8}{2019}
+\date{Ιούνιος 2020}
+\datedefense{-}{6}{2020}
 
 \supervisor{Νικόλαος Σ. Παπασπύρου}
 \supervisorpos{Καθηγητής Ε.Μ.Π.}
 
 \committeeone{Νικόλαος Σ. Παπασπύρου}
 \committeeonepos{Καθηγητής Ε.Μ.Π.}
-\committeetwo{Πέτρος Παπαδόπουλος}
-\committeetwopos{Επίκ. Καθηγητής Ε.Μ.Π.}
-\committeethree{Γεώργιος Νικολάου}
-\committeethreepos{Αν. Καθηγητής Ε.Κ.Π.Α.}
+\committeetwo{Δημήτρη Φωτάκης}
+\committeetwopos{Αν. Καθηγητής Ε.Μ.Π.}
+\committeethree{Γεώργιος Γκούμας}
+\committeethreepos{Επικ. Καθηγητής Ε.Μ.Π.}
 
 \TRnumber{CSD-SW-TR-42-17}  % number-year, ask nickie for the number
 \department{Τομέας Τεχνολογίας Πληροφορικής και Υπολογιστών}
@@ -100,17 +100,15 @@
 %%%  Abstract, in Greek
 
 \begin{abstractgr}%
-  Σκοπός της παρούσας εργασίας είναι αφενός η σχεδίαση μίας απλής
-  γλώσσας υψηλού επιπέδου με υποστήριξη για προγραμματισμό με
-  αποδείξεις, αφετέρου η υλοποίηση ενός μεταγλωττιστή για τη γλώσσα
-  αυτή που θα παράγει κώδικα για μία γλώσσα ενδιάμεσου επιπέδου
-  κατάλληλη για δημιουργία πιστοποιημένων εκτελέσιμων.
-
+  Σκοπός της παρούσας εργασίας είναι αφενός η υλοποίηση ενός συντακτικού αναλυτή
+  packrat στη κλασική του μορφή, αφετέρου η βελτίωση της επίδοσής του είτε
+  τροποποιώντας τον αρχικό αλγόριθμο, είτε παραλληλοποιώντας τον ώστε να τρέξει
+  αποδοτικότερα σε ένα πολυπύρηνο σύστημα.
 \begin{keywordsgr}
-  Γλώσσες προγραμματισμού,
-  Προγραμματισμός με αποδείξεις,
-  Ασφαλείς γλώσσες προγραμματισμού,
-  Πιστοποιημένος κώδικας.
+  Συντακτική Ανάλυση Packrat,
+  Parsing Expression Grammars,
+  Γεννήτορες συντακτικών αναλυτών,
+  Πάραλληλη εκτέλεση.
 \end{keywordsgr}
 \end{abstractgr}
 
@@ -118,18 +116,16 @@
 %%%  Abstract, in English
 
 \begin{abstracten}%
-  The purpose of this diploma dissertation is on one hand the design
-  of a simple high-level language that supports programming with
-  proofs, and on the other hand the implementation of a compiler for
-  this language. This compiler will produce code for an
-  intermediate-level language suitable for creating certified
-  binaries.
+  The purpose of this diploma dissertation is on one hand the implementation
+  of a packrat parser in its original version, and on the other hand to improve
+  its performance, either through modifications to the standard version of the algorithm,
+  or through parallelizing it in order to improve execution time in a multicore machine.
 
   \begin{keywordsen}
-  Programming languages,
-  Programming with proofs,
-  Secure programming languages,
-  Certified code.
+	Packrat parsing,
+	Parsing Expression Grammars,
+	Parser generators,
+	Parallel Execution.
 \end{keywordsen}
 \end{abstracten}
 

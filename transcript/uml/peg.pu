@@ -1,0 +1,12 @@
+@startuml
+
+scale 3
+
+class PEG {
+	map<NonTerminal*, Expression*> rules;
+    map<int, NonTerminal*> indexes;
+    NonTerminal* start_symbol;
+	bool accept(PegVisitor)
+}
+
+@enduml

@@ -22,6 +22,7 @@ SerialPackrat::SerialPackrat(const char* input, const PEG& g)
     for (int i = 0; i < N; ++i)
         cells[i] = new Cell[M];
 }
+
 SerialPackrat::SerialPackrat(std::string input, const PEG& g)
 {
     in = std::move(input);
@@ -78,7 +79,7 @@ bool SerialPackrat::visit(NonTerminal& nt)
         }
         case Result::unknown:
         {
-            Expression *e = peg.get_expr(&nt);
+            Expression* e = peg.get_expr(&nt);
             auto res = e->accept(*this);
 
             if (res) {

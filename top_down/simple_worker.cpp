@@ -2,29 +2,41 @@
 // Created by blackgeorge on 11/7/2019.
 //
 
+#include <cassert>
+
 #include <mutex>
 #include <thread>
 
 #include "simple_worker.h"
 
-SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p)
+
+SimpleWorker::SimpleWorker(std::string input, const PEG& g, Cell** c, int p, int lim, int cur_depth, int max_depth, int r, std::atomic<int>* pfr)
 {
     in = std::move(input);
     peg = PEG(g);
     cells = c;
     pos = p;
+    expr_limit = lim;
+    cur_tree_depth = cur_depth;
+    max_tree_depth = max_depth;
+    rank = r;
+    parent_finished_rank = pfr;
 }
 
 bool SimpleWorker::visit(NonTerminal &nt)
 {
-    if (stopRequested()) {  // TODO: does not provide efficiency with positive pht
-        std::cout << "stopped\n";
+    auto fr = parent_finished_rank->load();
+    if (fr >= 0 && fr < rank) {
+//        std::cout << "Stopped at: " << nt << "\n";
         return false;
     }
 
     int row = nt.index();
     Cell* cur_cell = &cells[row][pos];
+
+    cur_cell->lock();
     Result cur_res = cur_cell->res();
+    cur_cell->unlock();
 
     switch (cur_res) {
         case Result::success:
@@ -39,13 +51,16 @@ bool SimpleWorker::visit(NonTerminal &nt)
         case Result::pending:
         {
             while (cur_cell->res() == Result::pending) {
-                std::cout << "Stuck: " << std::this_thread::get_id() <<
-                " " << row << ", " << pos << " " << nt << std::endl;
-                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+//                std::cout << "Thread " << std::this_thread::get_id() <<
+//                " of " << nt << " stuck at " << pos << std::endl;
+                std::this_thread::sleep_for(std::chrono::milliseconds(0));
             }
-            if (cur_cell->res() == Result::pending)
-                std::cout << "wuuut" << std::endl;
-            return cur_cell->res() == Result::success;
+            assert (cur_cell->res() != Result::pending);
+            if (cur_cell->res() == Result::success) {
+                pos = cur_cell->pos();
+                return true;
+            }
+            return false;
         }
         case Result::unknown:
         {
@@ -56,10 +71,11 @@ bool SimpleWorker::visit(NonTerminal &nt)
             auto res = e->accept(*this); // TODO: check
 
             if (res) {
-                cur_cell->set_res(Result::success);
                 cur_cell->set_pos(pos); // pos has changed
+                cur_cell->set_res(Result::success);
                 return true;
-            } else {
+            }
+            else {
                 cur_cell->set_res(Result::fail);
                 return false;
             }
@@ -69,11 +85,11 @@ bool SimpleWorker::visit(NonTerminal &nt)
 
 bool SimpleWorker::visit(CompositeExpression &ce)
 {
-
-//    if (stopRequested()) {//TODO:
-//        std::cout << "Stopped\n";
-//        return false;
-//    }
+    auto fr = parent_finished_rank->load();
+    if (fr >= 0 && fr < rank) {
+//        std::cout << "Stopped at: " << ce << "\n";
+        return false;
+    }
 
     char op = ce.op_name();
     std::vector<Expression*> exprs = ce.expr_list();
@@ -92,10 +108,45 @@ bool SimpleWorker::visit(CompositeExpression &ce)
         }
         case '/':   // ordered choice
         {
-            for (auto expr : exprs) {
+            if (exprs.size() > expr_limit || cur_tree_depth >= max_tree_depth) {    // Parse without spawning threads
+                for (auto expr : exprs) {
+                    pos = orig_pos;
+                    if (expr->accept(*this))
+                        return true;
+                }
                 pos = orig_pos;
-                if (expr->accept(*this))
+                return false;
+            }
+
+            finished_rank.store(-1);
+
+            int results[exprs.size()];
+            int positions[exprs.size()];
+            std::vector<std::thread> threads;
+
+            auto i = 0;
+            for (auto& expr : exprs) {
+                threads.emplace_back([&, expr, i]()
+                                     {
+                                         SimpleWorker sw{in, peg, cells, pos, expr_limit, cur_tree_depth + 1, max_tree_depth, i, &finished_rank};
+                                         int res = expr->accept(sw);
+                                         results[i] = res;
+                                         positions[i] = sw.cur_pos();
+                                     }
+                );
+                i++;
+            }
+
+            for (auto j = 0; j < i; ++j) {
+                threads[j].join();
+                if (results[j]) {
+                    finished_rank.store(j);
+                    pos = positions[j];
+                    for (auto k = j + 1; k < i; ++k) {
+                        threads[k].join();
+                    }
                     return true;
+                }
             }
             pos = orig_pos;
             return false;
@@ -139,10 +190,11 @@ bool SimpleWorker::visit(CompositeExpression &ce)
 
 bool SimpleWorker::visit(Terminal& t)
 {
-//    if (stopRequested()) {//TODO:
-//        std::cout << "Stopped\n";
-//        return false;
-//    }
+    auto fr = parent_finished_rank->load();
+    if (fr >= 0 && fr < rank) {
+//        std::cout << "Stopped at: " << t << "\n";
+        return false;
+    }
 
     int terminal_char = t.name()[0];
 

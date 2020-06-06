@@ -13,6 +13,6 @@ add_executable(hash_serial parse.cpp ../packrat_cell/cell.cpp ../packrat_cell/ce
                ../peg_visitor/peg_visitor.h ../meta_grammar/meta_grammar.h
                ../serial/serial_tree_packrat.cpp ../serial/serial_tree_packrat.h ../syntax_tree/tree_node.cpp
                ../syntax_tree/tree_node.h ../peg_factory/peg_factory.cpp ../peg_factory/peg_factory.h hash_serial.cpp
-               hash_serial.h)
+               ../packrat_cell/elastic_cell.h)
 
 target_link_libraries(hash_serial tbb ${CMAKE_THREAD_LIBS_INIT})

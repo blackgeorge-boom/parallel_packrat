@@ -1,0 +1,208 @@
+\chapter{ Γεννήτορας Συντακτικών Αναλυτών Packrat }
+\label{ch:packrat_gen}
+
+Στο προηγούμενο κεφάλαιο, περιγράψαμε πώς λειτουργεί ένας packrat parser, καθώς και πώς θα μπορούσαμε να τον μοντελοποιήσουμε. 
+Βέβαια, δεν μας ενδιαφέρει απλά να ξέρουμε πώς τον κατασκευάζουμε με το χέρι, αλλά και το πώς θα μπορούσαμε να κατασκευάσουμε ένα εργαλείο που θα παίρνει ως είσοδο μία τυπική περιγραφή της γραμματικής, και θα δίνει ως έξοδο έναν συντακτικό αναλυτή για αυτήν.
+Πρακτικά, θέλουμε έναν \textit{μεταγλωττιστή-μεταγλωττιστή (compiler-compiler)}, όπως το εργαλείο YACC στον κόσμο της C. Δηλαδή, έναν γεννήτορα συντακτικών αναλυτών.
+
+To πλεονέκτημα που θα προσέφερε ένα τέτοιο εργαλείο, είναι πως θα μπορούσε να παίρνει ως είσοδο γραμματικές που έχουν, για παράδειγμα, αριστερή αναδρομή (η οποία δεν υποστηρίζεται από τις κλασικές PEGs), και να τις μετατρέπει εσωτερικά σε δεξιά αναδρομικές \cite{Ford2002a}.
+Ακόμη, επιτρέπει στον σχεδιαστή μίας γλώσσας να επικεντρωθεί στις υψηλού επιπέδου λεπτομέρειες της γραμματικής, χωρίς το φόρτο της διαρκούς υλοποίησης του αναλυτή με το χέρι. 
+Τέλος, δίνει τη δυνατότητα με αυτόματο τρόπο να μπορούμε να επεξεργαζόμαστε τις γραμματικές σε υψηλό επίπεδο (π.χ. να ελέγξουμε με κάποιο εργαλείο ότι οι κανόνες δεν έχουν κάποια κυκλική αναφορά), ενώ επιτρέπει και την εύκολη επαναχρησιμοποίηση κανόνων σε διάφορες γραμματικές.
+
+Αυτό που αλλάζει από γραμματική σε γραμματική για τον parser μας είναι η μοντελοποίηση της γραμματικής που ενθυλακώνει, όπως δείξαμε στο προηγούμενο κεφάλαιο.
+Δηλαδή, για να γεννήσουμε αυτόματα έναν packrat parser, αρκεί να γενήσσουμε τη μοντελοποίση της γραμματικής που θέλουμε να αναλύσει, οπότε είναι σαν να δημιουργήσαμε και τον ίδιο.
+
+Η διαδικασία που θα περιγράψουμε σε αυτό το κεφάλαιο συνοψίζεται στο Σχήμα \ref{fig:peg_factory_pipeline}. 
+
+\begin{figure}[h]
+\begin{tikzpicture}[node distance=2.0cm,
+					every node/.style={fill=white, font=\sffamily}, align=center]
+
+  	% Specification of nodes (position, etc.)
+
+	\node (grammarInput)[base]              			{Java.txt};
+	\node (metaParser)	[parser, below of=grammarInput]	{Meta Grammar Parser};
+	\node (javaAst)		[ast, below of=metaParser]  	{Java.txt AST};
+	\node (pegFactory)	[factory, below of=javaAst]		{PEG Factory};
+	\node (javaParser)	[parser, right of=pegFactory, xshift=4cm, yshift=-2cm]	{Java Parser};
+	\node (javaCodeAst)	[ast, below of=javaParser] 		{Arrays.java AST};
+	\node (javaInput)   [base, above of=javaParser]              			{Arrays.java};
+
+    % Specification of lines between nodes specified above
+    % with aditional nodes for description
+
+	\draw[->]             (grammarInput) -- (metaParser);
+	\draw[->]             (metaParser) --  node {Συντακτική ανάλυση της τυπικής περιγραφής} (javaAst);
+	\draw[->]             (javaAst) -- node {Το AST τροφοδοτείται σε έναν γεννήτορα συντακτικών αναλυτών} (pegFactory);
+	\draw[->]             (pegFactory.south) |- node {Γεννιέται ένας packrat parser για Java}  (javaParser);
+	\draw[->]             (javaInput) -- (javaParser);
+	\draw[->]             (javaParser) -- (javaCodeAst);
+
+
+\end{tikzpicture}
+\caption{Η διαδικασία αυτόματης παραγωγής ενός packrat parser για Java προγράμματα}
+\label{fig:peg_factory_pipeline}
+\end{figure}
+
+Έστω ότι θέλουμε να αναλύσουμε συντακτικά ένα πρόγραμμα Arrays.java. 
+Αρχικά, θεωρούμε ότι διαθέτουμε μία τυπική περιγραφή της γραμματικής Java, εκφρασμένης ως parsing expression grammar, μέσα σε ένα .txt αρχείο.
+Αυτή η περιγραφή αναλύεται από έναν "Meta parser" και κατασκευάζεται το συντακτικό της δέντρο (AST). 
+Ακολούθως, το δέντρο αυτό τροφοδοτείται σε έναν γεννήτορα γραμματικών PEG (PEG Factory), ο οποίος διασχίζει το δέντρο και γεννάει μία PEG για Java προγράμματα.
+Πρακτικά, είναι σαν να γεννάει και έναν packrat parser για Java προγράμματα, αφού είπαμε ότι ο parser ενθυλακώνει τη γραμματική που θα αναλύσει.
+Άρα, αν έχουμε ένα στιγμιότυπο της Java γραμματικής, σε μορφή PEG, μπορούμε να φτιάξουμε και το αντίστοιχο στιγμιότυπο και για τον συντακτικό αναλυτή.
+Πλέον, μπορούμε να τροφοδοτήσουμε το Arrays.java στον νέο packrat parser.
+
+\section{Τυπική Περιγραφή Γραμματικών}
+Είπαμε ότι ως είσοδο στο γεννήτορα συντακτικών αναλυτών θα δίνουμε μία τυπική περιγραφή μίας γραμματικής. 
+Πώς, όμως, ορίζεται μία τέτοια περιγραφή? Στο Σχήμα \ref{fig:peg_specification}, παρουσιάζεται η συντακτική περιγραφή μίας PEG εκφρασμένης σε τυπική περιγραφή PEG \cite{lgi}.
+
+\begin{figure}[h]
+\begin{Verbatim}
+
+Grammar    <- Spacing Definition+ EndOfFile                     # Type 0
+Definition <- Identifier LEFTARROW Expression                   # Type 1
+Expression <- Sequence (SLASH Sequence)*                        # Type 2
+Sequence   <- Prefix*                                           # Type 3
+Prefix     <- (AND / NOT)? Suffix                               # Type 4
+Suffix     <- Primary (QUESTION / STAR / PLUS)?                 # Type 5
+Primary    <- Identifier !LEFTARROW                             # Type 6
+            / OPEN Expression CLOSE
+            / Literal / DOT
+\end{Verbatim}
+\caption{Μία PEG περιγράφει τυπικά τη συντακτική δομή της}
+\label{fig:peg_specification}
+\end{figure}
+
+Δηλαδή, μία PEG (κανόνας $Grammar$) αποτελείται από διαδοχικούς ορισμούς (κανόνας $Definition$). 
+Ο κάθε ορισμός αποτελείται από ένα μη τερματικό (κανόνας $Identifier$), ένα αριστερό βέλος ($LEFTARROW$) και μία έκφραση (κανόνας $Expression$) κ.ό.κ.
+
+Το Σχήμα \ref{fig:peg_specification} περιγράφει μόνο τη συντακτική δομή, και όχι το πώς κατασκευάζονται οι λέξεις (tokens) μίας γραμματικής PEG.
+H πλήρης περιγραφή γίνεται στο Παράρτημα Α.
+
+Η είσοδος στο γεννήτορά μας είναι πλέον έτοιμη. 
+Πρακτικά, είναι ένα αρχείο κειμένου που θα περιγράφει τη γραμματική μίας γλώσσας (Java, XML, κλπ.) σε PEG τυπική μορφή.
+
+\section{Στιγμιότυπο μίας μετα-γραμματικής που περιγράφει Parsing Expresssion Grammars}
+
+Έχοντας έτοιμη την είσοδο της τυπικής περιγραφής, χρειαζόμαστε έναν μετα-αναλυτή για να την αναλύσει, όπως περιγράψαμε στο Σχήμα \ref{fig:peg_factory_pipeline}. 
+Το στιγμιότυπο αυτής της γραμματικής αναγκαστικά πρέπει να φτιαχτεί "με το χέρι".
+Δηλαδή, να δημιουργήσουμε τα κατάλληλα αντικείμενα που απαρτίζουν τις εκφράσεις και τους κανόνες μίας τέτοιας γραμματικής.
+
+Ενδεικτικά, στο Σχήμα \ref{fig:meta_example}, παραθέτουμε τον κώδικα για τη δημιουργία του πρώτου κανόνα της μετα-γραμματικής, που λέει ότι μία PEG αποτελείται από ένα σύνολο διαδοχικών κανόνων (definitions). O τελεστής της "ακολουθίας" θεωρούμε ότι είναι ο χαρακτήρας `$\backslash b$'. 
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+NonTerminal grammar("Grammar");
+NonTerminal spacing("Spacing");
+NonTerminal definition("Definition");
+NonTerminal endOfFile("EndOfFile");
+
+// Grammar <- Spacing Definition+ EndOfFile                     # Type 0
+CompositeExpression grammarExp('\b');
+grammarExp.push_expr(&spacing);
+grammarExp.push_expr(new CompositeExpression('+', {&definition}));
+grammarExp.push_expr(&endOfFile);
+this->push_rule(&grammar, &grammarExp);
+\end{minted}
+\caption{Δημιουργία στιγμιοτύπου του πρώτου κανόνα της μετα-γραμματικής}
+\label{fig:meta_example}
+\end{figure}
+
+\section{Γεννήτορας συντακτικών αναλυτών packrat}
+
+Συνεχίζοντας το σκεπτικό του Σχήματος \ref{fig:peg_factory_pipeline}, έχοντας κατασκευάσει τη μετα-γραμματική, της δίνουμε ως είσοδο μία τυπική περιγραφή της γραμματικής-στόχου (π.χ. ένα .txt αρχείο). 
+Το αποτέλεσμα είναι το Αφηρημένο Συντακτικό Δέντρο (AST). 
+Σε αυτή την ενότητα περιγράφουμε πώς ένας γεννήτορας γραμματικών peg (peg factory), παίρνει ως είσοδο το AST και δίνει ως έξοδο την αντίστοιχη peg.
+
+Η βασική ιδέα είναι ότι οι κόμβοι του AST έχουν ονόματα τα οποία δείχνουν σε ποιο μη τερματικό της μετα-γραμματικής αντιστοιχούν.
+Για παράδειγμα, ένας κόμβος με το όνομα "$Sequence$" αντιλαμβανόμαστε ότι αντιστοιχεί σε κάποια ακολουθία, οπότε τα παιδιά του θα είναι τα μέλη της ακολουθίας.
+Έτσι, θα επισκεπτούμε ένα-ένα τα παιδια του και θα τα βάλουμε σε ένα $CompositeExpression$ ακολουθίας.
+
+Έστω, λοιπόν, ότι μία γραμμή στο Java.txt (που περιέχει την τυπική περιγραφή σε Java), δίνει τον εξής κανόνα:
+
+\begin{equation}
+	Block \; \leftarrow \; LWING \; BlockStatements \; RWING
+\end{equation}
+
+ο οποίος λέει πως ένα block εντολών σε Java αποτελείται από ένα σύνολο εντολών ανάμεσα σε παρενθέσεις.
+Ο meta-parser όταν αναλύσει αυτήν την πρόταση θα δώσει ως εσωτερικό κόμβο του AST το εξής:
+
+\begin{figure}[h]
+	\centering
+\begin{tikzpicture}[%
+  sibling distance=.5cm,
+  empty/.style={draw=none},
+  tlabel/.style={font=\footnotesize\color{red!70!black}}]
+\Tree  [.Block
+         [.LWING ]
+         [.BlockStatements ]
+         [.RWING ]
+       ]
+
+\end{tikzpicture}
+\caption{Ο κόμβος του AST που αφορά το Block}
+\label{fig:block_node}
+\end{figure}
+
+Σκοπός του γεννήτορα είναι να διασχίσει τους διάφορους κόμβους του AST, δημιουργώντας παράλληλα τα αντίστοιχα στιγμιότυπα των εκφράσεων και των κανόνων.
+Τελειώνοντας τη διάσχιση όλου του δέντρου, λοιπόν, θα έχει δημιουργήσει το στιγμιότυπο ολόκληρης της γραμματικής-στόχου (στο παράδειγμά μας, της Java).
+
+Ενδεικτικά, ένας απλοποιημένος κώδικας για τη διάσχιση του κόμβου Block, το οποίο αποτελεί μία ακολουθία από εκφράσεις, θα ήταν όπως στο Σχήμα \ref{fig:factory_seq_example}.
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+Expression* construct_sequence(TreeNode* node)
+{
+    if (node->children_num() > 1) {
+
+        auto ce = new CompositeExpression('\b');
+
+        for (auto child : node->get_children()) {
+                Expression* e = traverse(child);
+                ce->push_expr(e);
+        }
+
+        return ce;
+    }
+    else {
+        return traverse(child);
+    }
+}
+\end{minted}
+\caption{Διάσχιση ακολουθίας και δημιουργία στιγμιοτύπων για τη γραμματική-στόχο}
+\label{fig:factory_seq_example}
+\end{figure}
+
+
+Θεωρούμε ότι η traverse(child) επισκέπτεται το κάθε παιδί-κόμβο και δημιουργεί το αντίστοιχο μη τερματικό, επιστρέφοντάς το.
+Οπότε, ο κώδικας λέει πως αν ο κόμβος έχει πάνω από ένα παιδί, τότε δημιούργησε ένα CompositeExpression ακολουθίας με όλα αυτά τα παιδιά ως μη τερματικά.
+Αλλιώς, επίστρεψε απλά το μη τερματικό του μοναδικού παιδιού.
+
+Τελικά, για το παράδειγμά μας, τα στιγμιότυπα που θα γεννιούνταν θα ήταν όπως στο Σχήμα \ref{fig:objects_seq_example}. 
+
+\begin{figure}[h]
+\setlength\partopsep{-\topsep}% adjusts vertical space after the listing
+\begin{minted}[frame=lines,linenos,numbersep=5pt]{c++}
+NonTerminal parent("Block");
+NonTerminal child1("LWING");
+NonTerminal child2("BlockStatements");
+NonTerminal child3("RWING");
+
+// Block <- LWING BlockStatements RWING
+CompositeExpression grammarExp('\b');
+grammarExp.push_expr(&child1);
+grammarExp.push_expr(&child2);
+grammarExp.push_expr(&child3);
+this->push_rule(&parent, &grammarExp);
+\end{minted}
+\caption{Στιγμιότυπα για τον πρώτο κανόνα της μετα-γραμματικής}
+\label{fig:objects_seq_example}
+\end{figure}
+
+Διασχίζοντας όλο το AST, γεννιέται μία γραμματική Java, εκφρασμένη ως PEG.
+Από αυτήν έχουμε αυτομάτως και τον αντίστοιχο Java packrat parser.
+To τελευταίο βήμα για  τη διαδικασία του Σχήματος \ref{fig:peg_factory_pipeline}, είναι να δώσουμε ως είσοδο στον Java packrat parser ένα αρχείο Java.
+Έτσι, παίρνουμε το AST για το .java αρχείο, οπότε ο στόχος μας επιτεύχθηκε.
+

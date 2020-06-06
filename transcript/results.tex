@@ -1,0 +1,161 @@
+\chapter{Πειραματικά Αποτελέσματα}
+\label{ch:results}
+
+Θα αξιολογήσουμε τους αλγορίθμους μας με 3 αρχεία από τον πηγαίο κώδικα της Java \footnote{\url{http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/tip/src/share/classes/java}}.
+Το μέγεθός τους είναι μέτριο προς μεγάλο, ώστε να μπορέσουν να φανούν οι διαφορές στους χρόνους εκτέλεσης των αλγορίθμων.
+Τα μεγέθη τους σε byte είναι:
+
+\begin{itemize}
+  \item \textit{Arrays.java} - 116K 
+  \item \textit{BigDecimal.java} - 140K 
+  \item \textit{Throwable.java} - 28K 
+\end{itemize}
+
+Για τον παράλληλο αλγόριθμο, επικεντρωνόμαστε στην υλοποίηση με αναδρομική δημιουργία νημάτων της προηγούμενης ενότητας.
+
+Οι μετρήσεις έγιναν με το \textit{std::chrono::high\_resolution\_clock} της STL.
+Το μηχάνημα που χρησιμοποιήθηκε διαθέτει 12 X 2600 MHz CPUs και μνήμες cache: L1 Data 32 KiB (x6), L1 Instruction 32 KiB (x6), L2 Unified 256 KiB (x6) και L3 Unified 12288 KiB (x1).
+
+\section{Packrat με ελαστικό κυλιόμενο παράθυρο}
+
+Αρχικά, εκτελούμε διαδοχικά τον αλγόριθμο packrat με ελαστικό κυλιόμενο παράθυρο για διάφορα μήκη παραθύρου (w) και κατώφλια απενεργοποίησης μη τερματικών (thres).
+Ακολουθούμε ενδεικτικά τα όρια που προτείνονται στο \cite{Kuramitsu2015a}.
+Tα αποτελέσματα που παίρνουμε είναι τα εξής, χρωματίζοντας ενδεικτικά όπου κρίνεται χρήσιμο:
+
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+\diagbox{thres}{w} & \makecell{256}& \makecell{512} & \makecell{1024} \\ 
+\midrule
+0  & 396 & 401 & \cellcolor{yellow!45}415 \\
+16 & \cellcolor{green!45}378 & \cellcolor{green!45}378 & \cellcolor{green!45}381 \\
+32 & \cellcolor{green!45}380 & \cellcolor{green!45}381 & \cellcolor{green!45}379 \\
+48 & \cellcolor{green!45}379 & \cellcolor{green!45}379 & \cellcolor{green!45}374 \\
+\bottomrule
+\end{tabular}
+  \caption{Elastic Packrat - Arrays.java}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+\diagbox{thres}{w} & \makecell{256}& \makecell{512} & \makecell{1024} \\ 
+\midrule
+0  & 341 & \cellcolor{yellow!45}356 & \cellcolor{yellow!45}358 \\
+  16 & 334 & 337 & 336 \\
+32 & \cellcolor{green!45}329 & \cellcolor{green!45}329 & \cellcolor{green!45}330 \\
+48 & 333 & 334 & 332 \\
+\bottomrule
+\end{tabular}
+  \caption{Elastic Packrat - BigDecimal.java}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+\diagbox{thres}{w} & \makecell{256}& \makecell{512} & \makecell{1024} \\ 
+\midrule
+0  & 53 & 51 & 55 \\
+16 & 50 & 48 & 51 \\
+32 & 51 & 47 & 51 \\
+48 & 52 & 47 & 51 \\
+\bottomrule
+\end{tabular}
+  \caption{Elastic Packrat - Throwable.java}
+\end{table}
+
+Όπως αναμενόταν με βάση το \cite{Kuramitsu2015a}, το 32 αποτελεί αποτελεσματικό κατώφλι απενεργοποίησης των μη τερματικών. 
+Επιπλέον, τα παράθυρα 256 και 512 θα έπρεπε να παρουσιάζουν την καλύτερη επίδοση, με μικρή πτώση της απόδοσης στα 1024, όπως επαληθεύεται.
+Στο μικρότερο αρχείο, το Throwable, δεν παρουσιάζονται σημαντικές μεταβολές στους χρόνους εκτέλεσης.
+
+Για τις τελικές συγκρίσεις κρατάμε μήκος παραθύρου 256 και κατώφλι απενεργοποίησης ίσο με 32.
+
+\section{Παράλληλο packrat parsing}
+
+Τώρα, εκτελούμε διαδοχικά τον παράλληλο αλγόριθμο και για τα τρία αρχεία, μεταβάλλοντας τις παραμέτρους: 1) του μέγιστου αριθμού υποεκφράσεων, πάνω από τον οποίο ένα νήμα δεν θα καλέσει άλλα νήματα, αλλά θα εκτελέσει την ανάλυση σειριακά (expr limit) και 2) του μέγιστου βάθους του δέντρου κλήσεων (max depth), για το fork-join tree.
+Κάθε στιγμή, δηλαδή, ο μέγιστος αριθμός νημάτων-εργατών που μπορεί να υπάρχουν είναι:
+
+\begin{equation}
+\frac{expr\_limit^{max\_depth + 1} - 1}{expr\_limit - 1}
+\end{equation}
+
+Τα αποτελέσματα των μετρήσεων είναι τα εξής:
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+  \diagbox{max\\depth}{expr\\limit} & \makecell{2}& \makecell{4} & \makecell{6} & \makecell{8} \\ 
+\midrule
+1 & \cellcolor{green!45}434 & \cellcolor{green!45}432 & \cellcolor{green!45}430 & 437 \\
+  2 & \cellcolor{red!45}1278 & 451 & 446 & 446\\
+\bottomrule
+\end{tabular}
+  \caption{Παράλληλο Packrat - Arrays.java}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+  \diagbox{max\\depth}{expr\\limit} & \makecell{2}& \makecell{4} & \makecell{6} & \makecell{8} \\ 
+\midrule
+  1 & \cellcolor{green!45}368 & \cellcolor{green!45}369 & \cellcolor{green!45}367 & \cellcolor{green!45}369  \\
+  2 & \cellcolor{red!45}2570 & 380 & 379 & 385\\
+\bottomrule
+\end{tabular}
+  \caption{Παράλληλο Packrat - BigDecimal.java}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{ c c c c c c c c} 
+\toprule
+  \diagbox{max\\depth}{expr\\limit} & \makecell{2}& \makecell{4} & \makecell{6} & \makecell{8} \\ 
+\midrule
+  1 & \cellcolor{yellow!45}94 & \cellcolor{green!45}60 & \cellcolor{green!45}62 & \cellcolor{green!45}60 \\
+  2 & \cellcolor{red!45}324 & 76 & 74 & 109 \\
+\bottomrule
+\end{tabular}
+  \caption{Παράλληλο Packrat - Throwable.java}
+\end{table}
+
+Παρατηρούμε ότι οι καλύτεροι χρόνοι προκύπτουν για μέγιστο βάθος ίσο με 1 και για όριο υποεκφράσεων 2 έως 6.
+Πρακτικά, δηλαδή, να υπάρχουν ενεργά 3 έως 7 νήματα κατά μέγιστο.
+Για μέγιστο βάθος 2 τα αποτελέσματα χειροτερεύουν αισθητά, ιδιαίτερα για expr\_limit ίσο με 2.
+Για μεγαλύτερο βάθος τα αποτελέσματα ήταν πολύ χειρότερα, γι' αυτό δεν τα παραθέτουμε.
+
+Σχετικά με τις τελικές συγκρίσεις, κρατάμε μέγιστο βάθος ίσο με 1 και όριο υποεκφράσεων ίσο με 4.
+
+\section{Τελικά Αποτελέσματα}
+
+Για τους συνδυασμούς παραμέτρων που επιλέχθηκαν στις προηγούμενες ενότητες, παρουσιάζουμε τις τελικές συγκρίσεις για τους τρεις αλγορίθμους και στα τρία αρχεία στον Πίνακα \ref{table:results_final}:
+
+\begin{table}[!ht]
+\begin{tabular}{ |p{4cm}||p{3cm}|p{3cm}|p{3cm}|  }
+ \hline
+  \multicolumn{4}{|c|}{Χρόνοι εκτέλεσης (ms)} \\
+ \hline
+  Αλγόριθμος Packrat& Arrays - 116K &BigDecimal - 140K &Throwable - 28K\\
+ \hline
+ Κλασικός & 404 & 350 & \cellcolor{green!45}46\\
+  Elastic (256, 32) & \cellcolor{green!45}380 & \cellcolor{green!45}329 & 51\\
+  Παράλληλος (1, 4) & 432 & 369 & 62\\
+ \hline
+\end{tabular}
+  \caption{Τελικά αποτελέσματα για τους τρεις αλγορίθμους}
+  \label{table:results_final}
+\end{table}
+
+Είναι φανερό ότι ο αδιαφιλονίκητος νικητής στους χρόνους εκτέλεσης είναι ο packrat με ελαστικό κυλιόμενο παράθυρο, δεδομένου ότι στο Throwable οι διαφορές είναι μικρές.
+Μάλιστα, πετυχαίνει και την καλύτερη επίδοση σε μνήμη αφού, όπως είπαμε, καταναλώνει σταθερή μνήμη:
+
+\begin{equation}
+  O(NT * W)
+\end{equation}
+
+ενώ οι άλλοι δύο αλγόριθμοι απαιτούν μνήμη γραμμική ως προς το μήκος της εισόδου.

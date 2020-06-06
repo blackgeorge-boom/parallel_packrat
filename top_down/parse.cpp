@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <cmath>
 
 #include "../packrat_cell/cell.h"
 #include "../peg/peg.h"
@@ -76,7 +77,14 @@ int main(int argc, char** argv)
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
 
-    TableParallel sp3(input, *grammar);
+    TableParallel sp3(input, *grammar, 8, 0);
+
+    // Global variables.
+    const size_t bigger_than_cachesize = 14 * 1024 * 1024;
+    long *p = new long[bigger_than_cachesize];
+    // When you want to "flush" cache.
+    for(int i = 0; i < bigger_than_cachesize; i++)
+        p[i] = rand();
 
     t0 = high_resolution_clock::now();
     res = sp3.visit(*grammar);
@@ -88,6 +96,8 @@ int main(int argc, char** argv)
         std::cout << "Syntax Error..." << std::endl;
 
     std::cout << "  in : " << duration_cast<milliseconds>(tf-t0).count() << " ms" << std::endl;
+
+//    sp3.print_cells();
 
     return 0;
 }

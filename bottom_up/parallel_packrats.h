@@ -22,7 +22,7 @@ class RowParallel: public SerialPackrat {
     bool rec_split;
 public:
     RowParallel(std::string input, const PEG& g, int n, bool recursive_split)
-            : SerialPackrat{input, g}, thread_num{n}, rec_split{recursive_split} {}
+        : SerialPackrat{input, g}, thread_num{n}, rec_split{recursive_split} {}
 
     bool visit(PEG& peg) override;
 };
@@ -33,7 +33,7 @@ class BlockParallel: public SerialPackrat {
     bool rec_split;
 public:
     BlockParallel(std::string input, const PEG& g, int n, int s, bool recursive_split)
-            : SerialPackrat{input, g}, thread_num{n}, block_size{s}, rec_split{recursive_split} {}
+        : SerialPackrat{input, g}, thread_num{n}, block_size{s}, rec_split{recursive_split} {}
 
     bool visit(PEG& peg) override;
 };

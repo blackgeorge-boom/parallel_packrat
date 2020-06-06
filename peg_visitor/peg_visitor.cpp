@@ -5,7 +5,6 @@
 #include "peg_visitor.h"
 #include "../peg/peg_elements.h"
 
-
 bool NonTerminal::accept(PegVisitor& pegv)
 {
     return pegv.visit(*this);

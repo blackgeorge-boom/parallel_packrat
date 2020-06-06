@@ -27,7 +27,7 @@ public:
 
     void print_cells() const;
 
-    int cur_pos() { return pos; }
+    int cur_pos() const { return pos; }
     char cur_tok() { return in[pos]; }
 
     bool visit(NonTerminal& nt) override;

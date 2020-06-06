@@ -18,6 +18,8 @@ public:
     explicit TreeNode(Expression* e) :expr(e), children() {};
     ~TreeNode() = default;
 
+    static void reset_idx() { num = 0; }
+
     Expression* get_expr() const { return expr; }
     std::vector<TreeNode*> get_children() const { return children; }
     TreeNode* get_ith(int i) { return children[i]; }

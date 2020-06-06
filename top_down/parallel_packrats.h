@@ -8,14 +8,14 @@
 #include <utility>
 
 #include "../serial/serial_packrat.h"
-#include "stoppable.h"
 
 class TableParallel: public SerialPackrat {
+    int expr_limit;
+    int max_tree_depth;
 public:
-    TableParallel(std::string input, const PEG& g)
-            : SerialPackrat{std::move(input), g} {}
+    TableParallel(std::string input, const PEG& g, int lim, int depth)
+            : SerialPackrat{std::move(input), g}, expr_limit{lim}, max_tree_depth{depth} {}
 
-    bool visit(NonTerminal& nt) override;
     bool visit(CompositeExpression& ce) override;
     bool visit(PEG& peg) override;
 };

@@ -75,7 +75,7 @@
 }
 
 \date[NTUA 2020] % (optional)
-{Παρουσίαση Διπλωματικής \\ Ιούνιος 2020}
+{Παρουσίαση Διπλωματικής \\ Ιούνιος 2020 \\ Επιβλέπων Καθηγητής: Νίκος Παπασπύρου}
 
 \AtBeginSection[]
 {
@@ -94,6 +94,7 @@
 \tableofcontents
 \end{frame}
 
+\iffalse
 \section{Εισαγωγή}
 
 \begin{frame}
@@ -476,63 +477,164 @@
 \end{columns}
 
 	\begin{itemize}
-	  \item Το μειονέκτημα του hashing-based index είναι οι πιθανές συγκρούσεις (collisions) μεταξύ διαφορετικών κλειδιών, που όμως αντιστοιχίζονται στο ίδιο index. \pause
+	  \item Το μειονέκτημα του hashing-based index είναι οι πιθανές συγκρούσεις (collisions) μεταξύ διαφορετικών κλειδιών, που όμως αντιστοιχίζονται στο ίδιο index \pause
 	  \item Στην πράξη δουλεύει καλά και οδηγεί σε απλή υλοποίηση 
 	  \item Όσο προχωράμε στην είσοδο, τα νέα κελιά "εκτοπίζουν" τα παλιά που προσομοιώνοντας απλά την "κύλιση" του παραθύρου
 	\end{itemize}
 \end{frame}
+\fi
 \section{Παράλληλο Packrat Parsing}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Ιδέα}
+  \begin{itemize}
+	\item Θέλουμε να βρούμε κάποιο κομμάτι του αλγορίθμου που μπορεί να εκτελεστεί από πολλά νήματα ταυτόχρονα, ώστε να μοιραστεί ο φόρτος εργασίας \pause
+	\item Στη διατεταγμένη επιλογή $E \leftarrow E_1 / E_2 /  E_3$ οι υποεκφράσεις αναλύονται ξεκινώντας από το ίδιο σημείο της εισόδου  \pause
+	\item Αν αποτύχει η $E_1$, τότε ξαναπροσπαθεί από το ίδιο σημείο η $E_2$ κλπ\pause
+	\item Θεωρητικά θα μπορούσαμε να τις αναθέσουμε σε ξεχωριστά νήματα\pause
+	\item Αναδρομική κλήση νημάτων: Αν κάποιο νήμα που κληθεί κατά την διατεταγμένη επιλογή πάει να αναλύσει με τη σειρά του διατεταγμένη επιλογή, καλεί και δικά του νήματα
+  \end{itemize}
+
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Λεπτά σημεία}
+  \begin{itemize}
+	\item Τα ενδιάμεσα αποτελέσματα πρέπει να προστατεύονται από ταυτόχρονη χρήση\pause
+	\item Αν το νήμα που ανέλυσε την $E_2$, επιστρέψει επιτυχώς, πρέπει πάλι να περιμένουμε το νήμα που αναλύει την $E_1$, καθώς η υποέκφραση αυτή έχει προτεραιότητα \pause
+	\item Αν το νήμα που ανέλυσε την $E_i$, επιστρέψει επιτυχώς, πρέπει τερματίσουμε τα νήματα που ανέλαβαν τις $E_{i+1}, \dots, E_n$ \pause
+	\item Aν υπάρχουν πολλές εναλλακτικές στην επιλογή, τότε ίσως να μην αξίζει να καλέσουμε πολλά νήματα, καθώς το overhead του fork-join θα είναι μεγάλο \pause
+	\item Αν το βάθος του fork-join tree είναι ήδη μεγάλο, τότε ίσως πάλι να μην αξίζει να καλέσουμε νέα νήματα
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Λεπτά σημεία - Κλειδώματα}
+
+  \begin{itemize}
+	\item Για να αποφευχθούν συνθήκες ανταγωνισμού για τα κελιά πρέπει να προστατεύονται με κλειδώματα
+	\item Ένας απλός και αποτελεσματικός τρόπος είναι κάθε κελί να έχει το κλειδί του οπότε για να το υπολογίσει κάποιος θα πρέπει να το κλειδώσει \pause
+
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.60\textwidth]{pics/lock}
+\end{figure} \pause
+\item Όσο το κελί είναι pending (δηλαδή το υπολογίζει κάποιος) οι υπόλοιποι κάνουν busy-wait
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Λεπτά σημεία - Ιεραρχία}
+
+  \begin{itemize}
+	\item Κάθε νήμα που καλείται λαμβάνει έναν αριθμό $rank$ από το γονέα
+	\item Υψηλότερο $rank$ είναι το $0$ \pause
+
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.60\textwidth]{pics/hierarchy}
+\end{figure} 
+  \end{itemize}
 \end{frame}
 
-\begin{frame}
-  \frametitle{}
-\end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Λεπτά σημεία - Τερματισμός}
+
+  \begin{itemize}
+	\item Περιοδικός έλεγχος για πρόωρο τερματισμό από τον γονέα \pause
+  \end{itemize}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.60\textwidth]{pics/termination}
+\end{figure} 
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Όλα μαζί}
+
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=1.05\textwidth]{pics/spawn}
+\end{figure} 
 \end{frame}
 
 \section{Πειραματικά Αποτελέσματα}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Δοκιμαστικά προγράμματα}
+\begin{itemize}
+  \item 3 αρχεία από τον πηγαίο κώδικα της Java
+\begin{itemize}
+  \item \textit{Arrays.java} - 116K 
+  \item \textit{BigDecimal.java} - 140K 
+  \item \textit{Throwable.java} - 28K 
+\end{itemize}
+\item Mέτριο προς μεγάλο μέγεθος ώστε να φανούν οι διαφορές στους χρόνους εκτέλεσης των αλγορίθμων
+\item 12 νήματα διαθέσιμα
+\item \textit{std::chrono::high\_resolution\_clock} της STL
+\end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Ρύθμιση των παραμέτρων}
+  \begin{itemize}
+	\item Τόσο για το elastic όσο και για το παράλληλο packrat εκτελούμε πειράματα για να βελτιώσουμε τους συνδυασμούς των παραμέτρων \pause
+	\item Για το elastic δοκιμάζουμε παράθυρα μήκους $256$, $512, 1024$ και κατώφλια απενεργοποίησης $0, 16, 32, 48$ \pause
+	  \begin{block}{Καλύτερος Συνδυασμός}
+		$w = 256, thres = 32$
+	  \end{block} \pause
+	\item Για τον παράλληλο δοκιμάζουμε όρια μήκους διατεταγμένης επιλογής $2, 4, 6, 8$ και και μέγιστο βάθος δέντρου $0, 1, 2$ \pause
+	  \begin{block}{Καλύτερος Συνδυασμός}
+		$expr\_limit = 4, max\_depth = 1$. Δηλαδή 5 ενεργά νήματα κατά το μέγιστο.
+	  \end{block} 
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Τελική Σύγκριση}
+
+\begin{table}[!ht]
+\begin{tabular}{ |p{3cm}||p{2cm}|p{2cm}|p{2cm}|  }
+ \hline
+  \multicolumn{4}{|c|}{Χρόνοι εκτέλεσης (ms)} \\
+ \hline
+  Αλγόριθμος Packrat& Arrays ~~~  116K &BigDecimal 140K &Throwable 28K\\
+ \hline
+ Κλασικός & 404 & 350 & \cellcolor{green!45}46\\
+  Elastic (256, 32) & \cellcolor{green!45}380 & \cellcolor{green!45}329 & 51\\
+  Παράλληλος (1, 4) & 432 & 369 & 62\\
+ \hline
+\end{tabular}
+  \caption{Τελικά αποτελέσματα για τους τρεις αλγορίθμους}
+\end{table}
+
 \end{frame}
 
 \section{Συμπεράσματα}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Συμπεράσματα}
+  \begin{itemize}	
+	\item Αδιαφιλονίκητος νικητής: elastic packrat \pause
+	\item Καλύτερος χρόνος στα μεγάλα προγράμματα + σταθερή μνήμη \pause
+	\item Στον παράλληλο δεν παρατηρείται επιτάχυνση (speedup) σε σχέση με τη σειριακή περίπτωση \pause
+	\item H πράξη της διατεταγμένης επιλογής, παρόλο που θεωρητικά αφήνει χώρο για παράλληλη εκτέλεση, δεν συμπεριφέρεται τόσο καλά στην πράξη\pause
+	\item Οverhead από fork-join\pause
+	\item Ίσως πετυχαίνουν συχνά στη γραμματική μας οι πρώτες (αν όχι η πρώτη) επιλογή, οπότε μετά υπάρχει και ο επιπλέον χρόνος αναμονής νημάτων\pause
+	\item Ο περιοδικό έλεγχος για τερματισμό αυξάνει το χρόνο εκτέλεσης
+  \end{itemize}
+
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
-\end{frame}
-
-\begin{frame}
-  \frametitle{}
+  \frametitle{Απορίες}
+  \pause
+\begin{center}
+\huge Ευχαριστώ για την προσοχή σας!\footnotemark 
+\end{center}
+  \only<2->\footnotetext[1]{Hope you slept well!}
 \end{frame}
 
 \end{document}

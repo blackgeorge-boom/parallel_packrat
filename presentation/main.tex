@@ -11,6 +11,56 @@
 \usepackage{polyglossia}
 \setdefaultlanguage{greek}
 
+\usepackage{color, colortbl}
+%\usepackage[table,xcdraw]{xcolor}
+\usepackage{minted}
+\usepackage{amsmath}
+\usepackage{amssymb,longtable}
+\usepackage{bm}
+\usepackage{changepage}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{url}
+\usepackage{booktabs,makecell}
+\usepackage{diagbox}
+
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+%% I define a "style" for the "cells"
+\tikzset{
+  my cell/.style={
+    draw,
+    minimum size=5ex,
+    node distance=0pt,
+  }}
+%% to make changing appearances for various aspects of
+%% the diagram easier, I define several macros which need
+%% only be changed here.  Even though two of these macros
+%% have the same definition, I use two to allow the possibility
+%% that these styles could be diffferent.
+\newcommand\mynodestyle{\sffamily}
+\newcommand\myrelocatestyle{\sffamily\bfseries}
+\newcommand\mynumberstyle{\sffamily}
+
+\DeclareMathSymbol{\mlq}{\mathord}{operators}{``}
+\DeclareMathSymbol{\mrq}{\mathord}{operators}{`'}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+   \node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
+
+\tikzset{%
+	>={Latex[width=2mm,length=2mm]},
+  	% Specifications for style of nodes:
+	base/.style = {rectangle, rounded corners, draw=black,
+				   minimum width=4cm, minimum height=1cm,
+				   text centered, font=\sffamily},
+	factory/.style = {base, fill=blue!30},
+	parser/.style = {base, fill=red!30},
+	ast/.style = {base, fill=green!30},
+	process/.style = {base, minimum width=2.5cm, fill=orange!15,
+					  font=\ttfamily},
+}
+
 %Information to be included in the title page:
 \title[Βελτιώνοντας την επίδοση του packrat parsing] %optional
 {Βελτιώνοντας την επίδοση του packrat parsing}
@@ -149,7 +199,7 @@
 	 Αλλιώς, προσπάθησε με την $e_2$ και την αρχική είσοδο κ.ό.κ, μέχρις ότου να επιτύχει κάποια από τις υποεκφράσεις.	 Αν καμία από τις $n$ εναλλακτικές δεν πετύχουν, τότε απότυχε χωρίς να καταναλώσεις τίποτα." \pause
   \end{description}
   \begin{example}
-    Έστω ο κανόνας $Number \rightarrow Digit~Number / Digit$. 
+    Έστω ο κανόνας $Number \leftarrow Digit~Number / Digit$. 
 	Η σειρά έχει σημασία, διότι αν ήταν ανάποδα και  θέλαμε να αναλύσουμε τον αριθμό $12$, θα πηγαίναμε πρώτα στην εναλλακτική $Digit$, θα αναγνωρίζαμε το 1 και θα επιστρέφαμε χωρίς να πάμε στο $2$.
   \end{example}
 
@@ -162,68 +212,275 @@
   \begin{itemize}
 	\item Ο απλούστερος και διαισθητικά προφανής τρόπος να σχεδιάσουμε έναν συντακτικό αναλυτή είναι η από πάνω προς τα κάτω ανάλυση ή ανάλυση αναδρομικής κατάβασης. 
 	\item \textit{Προβλέποντες (predictive) συντακτικοί αναλυτές}: επιχειρούν να προβλέψουν ποιο στοιχείο της γλώσσας ακολουθεί, βλέποντας ορισμένα από τα προπορευόμενα σύμβολα στην είσοδο.
-	\item \textit{Συντακτικοί αναλυτές με οπισθαναχώρηση (backtracking)}: παίρνουν αποφάσεις υποθετικά (speculatively) και δοκιμάζουν διαδοχικά διάφορες εναλλακτικές. Aν μία αποτύχει, τότε ο αναλυτής οπισθαναχωρεί στη θέση της εισόδου που ήταν προτού δοκιμάσει την εναλλακτική και μετά εξετάζει την επόμενη εναλλακτική. 
+	\item \textit{Συντακτικοί αναλυτές με οπισθαναχώρηση (backtracking)}: παίρνουν αποφάσεις υποθετικά (speculatively) και δοκιμάζουν διαδοχικά διάφορες εναλλακτικές. Aν μία αποτύχει, τότε ο αναλυτής οπισθαναχωρεί στη θέση της εισόδου που ήταν προτού δοκιμάσει την εναλλακτική και μετά εξετάζει την επόμενη εναλλακτική. \pause
   \end{itemize}
 
+  Ποιο από τα δύο θα επιλέξουμε? \pause Και τα δύο!
 
   \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Θεμέλια}
+  \begin{itemize}
+	\item Αξιοποιούμε τη λογική της αναδρομικής κατάβασης (απλότητα), αποθηκεύοντας τα ενδιάμεσα αποτελέσματα σε έναν πίνακα, ώστε να μη χρειάζεται backtracking \pause
+  \end{itemize}
+  \begin{block}{Πίνακας Packrat}
+	Θεωρούμε έναν πίνακα όπου το κελί $(i, j)$ περιέχει το αποτέλεσμα της συντακτικής ανάλυσης του μη τερματικού $i$, ξεκινώντας από τη θέση $j$.
+\end{block}
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Παράδειγμα}
+\begin{figure}
+	\begin{equation}
+		\begin{array}{l}
+			Additive \; \leftarrow \; Multitive \; \mlq + \mrq \; Additive \; | \; Multitive \\
+			Multitive \; \leftarrow \; Primary \; \mlq * \mrq \; Multitive \; | \; Primary \\
+			Primary \; \leftarrow \; \mlq ( \mrq \; Additive \; \mlq ) \mrq \; | \; Decimal \\
+			Decimal \; \leftarrow \; \mlq 0 \mrq \; | \; ... \; | \; \mlq 9 \mrq \; 
+		\end{array}
+	\end{equation}
+\end{figure}
+\pause
+\begin{longtable}{lllllllll}
+    column & C1 & C2& C3& C4& C5& C6& C7& C8 \\
+    \hline
+	Additive&  & & $\uparrow$& \textcolor<9->{red}{(7,C7)}& X& \textcolor<6->{orange}{(4,C7)}& X& X \\
+	Multitive& &  & \vdots & \textcolor<7->{orange}{(3,C5)}& X& \textcolor<5->{orange}{(4,C7)}& X& X \\
+	Primary &   & $\leftarrow$ \ldots & \circled{?}& (3,C5)& X& \textcolor<4->{orange}{(4,C7)}& X& X \\
+	Decimal &  & & X& (3,C5)& X& \textcolor<3->{orange}{(4,C7)}& X& X\\
+    \hline
+	Input String & '2'& '*' & '('& '3'& '\textcolor<8->{orange}{+}'& '4'& ')'& EOF\\
+	\\
+\end{longtable}
+
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Υπομνηματισμός}
+  \begin{itemize}
+	\item Δεν χρειάζεται να υπολογίζουμε όλα τα ενδιάμεσα αποτελέσματα
+	\item Ξεκινάμε με αναδρομή από το αρχικό σύμβολο στην αρχή της εισόδου και αποθηκεύουμε τα ενδιάμεσα αποτελέσματα που υπολογίζουμε (memoisation) \pause
+  \end{itemize}
+
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=1.00\textwidth]{../transcript/pics/packrat_memo_example}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Υλοποίηση - PEG}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=1.05\textwidth]{../transcript/uml/peg_elements}
+\end{figure} \pause
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.40\textwidth]{../transcript/uml/peg}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Υλοποίηση - Packrat}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.60\textwidth]{../transcript/uml/packrat}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Υλοποίηση - Visit Terminal}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=1.10\textwidth]{pics/terminal}
+\end{figure} 
+\end{frame}
+
+\begin{frame}
+  \frametitle{Υλοποίηση - Visit Non Terminal}
+
+\begin{columns}
+
+\column{0.5\textwidth}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=1.10\textwidth]{pics/nt_1}
+\end{figure} 
+
+\column{0.5\textwidth}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=1.10\textwidth]{pics/nt_2}
+\end{figure} 
+
+\end{columns}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Υλοποίηση - Visit Composite Expression}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.50\textwidth]{pics/ce}
+\end{figure} 
 \end{frame}
 
 \section{Γεννήτορας συντακτικών αναλυτών packrat}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Κίνητρο}
+  \begin{itemize}
+	\item Για να πειραματιστούμε με τις υλοποιήσεις μας χρειαζόμαστε μία γραμματική από τον αληθινό κόσμο (π.χ. Java) \pause
+	\item Θα ήταν πολύ δύσκολο να φτιάξουμε ένα instance της γραμματικής αυτής με το "χέρι"
+	\item Θα έπρεπε να φτιάξουμε τα instances όλων των τερματικών, μη τερματικών, κανόνων κλπ. \pause
+  \end{itemize}
+  Λύση? \pause Parser Generator!
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Pipeline}
+    \centering
+	\includegraphics[width=0.75\textwidth]{pics/pipeline}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Τυπική περιγραφή γραμματικής}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.80\textwidth]{pics/peg_spec}
+\end{figure} 
+
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Instance μίας μετα-γραμματικής}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.95\textwidth]{pics/peg_instance}
+\end{figure} 
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Παράδειγμα: Java}
+\begin{equation}
+	Block \; \leftarrow \; LWING \; BlockStatements \; RWING
+\end{equation}
+
+\begin{figure}[h]
+	\centering
+\begin{tikzpicture}[%
+  sibling distance=.5cm,
+  empty/.style={draw=none},
+  tlabel/.style={font=\footnotesize\color{red!70!black}}]
+\Tree  [.Block
+         [.LWING ]
+         [.BlockStatements ]
+         [.RWING ]
+       ]
+
+\end{tikzpicture}
+\end{figure}
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Διάσχιση - PEG Factory}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.60\textwidth]{pics/traverse}
+\end{figure} 
+\end{frame}
+
+\begin{frame}
+  \frametitle{Instance της γραμματικής-στόχου}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.60\textwidth]{pics/generated_instance}
+\end{figure} 
 \end{frame}
 
 \section{Packrat Parsing με ελαστικό κυλιόμενο παράθυρο}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Κίνητρο}
+  \begin{itemize}
+	\item O αλγόριθμος packrat καταναλώνει χώρο $O(NT * n)$, $NT$ ο αριθμός των μη τερματικών, $n$ το μήκος της εισόδου \pause
+	\item Δεν ενδείκνυται για μεγάλα αρχεία εισόδου, καθώς ο πίνακας ενδιάμεσων αποτελεσμάτων για μεγάλο αρχείο εισόδου μπορεί να γίνει απαγορευτικά μεγάλος \pause
+	\item Χρειάζεται να τα κρατάμε όλα τα ενδιάμεσα αποτελέσματα? \pause
+	\item Θα μπορούσαμε να μειώσουμε τις στήλες του πίνακα? \pause
+	\item Τις γραμμές?
+	\end{itemize}
+  \end{frame}
+
+\begin{frame}
+  \frametitle{Μείωση των στηλών - Κυλιόμενο Παράθυρο}
+
+	\begin{itemize}
+	  \item Το πόσες στήλες πραγματικά χρειαζόμαστε εξαρτάται από το μήκος της μέγιστης οπισθαναχώρησης (έστω $w$)
+	  \item Αν το γνωρίζαμε από πριν θα μπορούσαμε να έχουμε ένα παράθυρο που να "κυλάει" προς τα δεξιά ως προς την είσοδο
+	  \item $w = 1$: αλγόριθμος με backtracking, $w = n$: αλγόριθμος packrat
+	  \item Στην πράξη δεν ξέρουμε πόσο είναι, οπότε πρέπει να πειραματιστούμε
+	\end{itemize}
+
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.60\textwidth]{../transcript/pics/slide_window}
+\end{figure} 
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Μείωση των γραμμών - Απενεργοποίηση μη τερματικών}
+
+	\begin{itemize}
+	  \item Το πόσες γραμμές πραγματικά χρειαζόμαστε εξαρτάται από το πόσο αξιοποιούνται τα αποτελέσματα των μη τερματικών
+	  \item Θέτουμε ένα όριο $limit$
+	  \item Αν μετά τις πρώτες $limit$ προσπελάσεις κελιών που αντιστοιχούν σε ένα μη τερματικό δεν αξιοποιήσουμε ούτε ένα αποτέλεσμα, σταματάμε να κρατάμε το μη τερματικό στον πίνακα
+	\end{itemize}
+
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=0.60\textwidth]{pics/deactivated}
+\end{figure} 
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Συνδυασμός ιδεών: Elastic Packrat}
+	\begin{itemize}
+	  \item Χρησιμοποιούμε έναν μονοδιάστατο πίνακα $W*N$, όπου $W$ είναι το πλάτος του παραθύρου και $N$ ο αριθμός των ενεργών μη τερματικών.
+	  \item Ακολούθως, χρησιμοποιούμε έναν δείκτη κατακερματισμού (hasing-based index) για να εντοπίσουμε σε ποιο σημείο του μονοδιάστατου πίνακα θα αποθηκευτεί το ενδιάμεσο αποτέλεσμα
+	  \item<2-> Σταθερή μνήμη: $O(NT * W)$!
+	\end{itemize}
+
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=1.10\textwidth]{pics/hash}
+\end{figure} 
+
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
-\end{frame}
+  \frametitle{Elastic Packrat}
+\begin{columns}
 
-\begin{frame}
-  \frametitle{}
-\end{frame}
+\column{0.6\textwidth}
+Όταν απενεργοποιούμε ένα μη τερματικό ο χώρος του στον πίνακα μπορεί να αξιοποιηθεί από άλλα διευρύνοντας ουσιαστικά το παράθυρο
 
+\column{0.5\textwidth}
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=1.00\textwidth]{../transcript/pics/elastic_slide_window}
+\end{figure} 
+\pause
+\end{columns}
+
+	\begin{itemize}
+	  \item Το μειονέκτημα του hashing-based index είναι οι πιθανές συγκρούσεις (collisions) μεταξύ διαφορετικών κλειδιών, που όμως αντιστοιχίζονται στο ίδιο index. \pause
+	  \item Στην πράξη δουλεύει καλά και οδηγεί σε απλή υλοποίηση 
+	  \item Όσο προχωράμε στην είσοδο, τα νέα κελιά "εκτοπίζουν" τα παλιά που προσομοιώνοντας απλά την "κύλιση" του παραθύρου
+	\end{itemize}
+\end{frame}
 \section{Παράλληλο Packrat Parsing}
 
 \begin{frame}

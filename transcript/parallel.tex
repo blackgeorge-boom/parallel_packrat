@@ -112,18 +112,16 @@ for (auto& expr : exprs) {
     i++;
 }
 
-auto j = 0;
-for (auto w : workers) {
+for (auto j = 0; j < i; ++j) {
     threads[j].join(); 
     if (results[j]) { 
         finished_rank.store(j);
         pos = positions[j];
-        for (auto k = j + 1; k < workers.size(); ++k) {
+        for (auto k = j + 1; k < i; ++k) {
             threads[k].join();
         }
         return true;
     }
-    j++;
 }
 pos = orig_pos;
 return false;

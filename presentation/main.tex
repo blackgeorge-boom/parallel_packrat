@@ -62,8 +62,8 @@
 }
 
 %Information to be included in the title page:
-\title[Βελτιώνοντας την επίδοση του packrat parsing] %optional
-{Βελτιώνοντας την επίδοση του packrat parsing}
+\title[Παράλληλη υλοποίηση συντακτικού αναλυτή Packrat] %optional
+{Παράλληλη υλοποίηση συντακτικού αναλυτή Packrat}
 
 \author[Νίκος, Μαυρογεώργης] % (optional, for multiple authors)
 {Νίκος Μαυρογεώργης}
@@ -75,7 +75,7 @@
 }
 
 \date[NTUA 2020] % (optional)
-{Παρουσίαση Διπλωματικής \\ Ιούνιος 2020 \\ Επιβλέπων Καθηγητής: Νίκος Παπασπύρου}
+{Παρουσίαση Διπλωματικής \\ Ιούλιος 2020 \\ Επιβλέπων Καθηγητής: Νίκος Παπασπύρου}
 
 \AtBeginSection[]
 {
@@ -94,14 +94,13 @@
 \tableofcontents
 \end{frame}
 
-\iffalse
 \section{Εισαγωγή}
 
 \begin{frame}
   \frametitle{Συντακτική Ανάλυση}
   \begin{itemize}	
 	\item Πρακτικά όλες οι γλώσσες, είτε φυσικές είτε γλώσσες μηχανής, βασίζονται στην έκφραση της πληροφορίας με γραμμικό τρόπο
-	\item Συνήθως η αναπαράστηση γίνεται με τη μορφή μίας \textit{συμβολοσειράς}, που είναι μια ακολουθία χαρακτήρων από ένα τυποποιημένο σύνολο
+	\item Συνήθως η αναπαράσταση γίνεται με τη μορφή μίας \textit{συμβολοσειράς}, που είναι μια ακολουθία χαρακτήρων από ένα τυποποιημένο σύνολο
 	\item Οποιαδήποτε εφαρμογή επεξεργασίας γλώσσας πρέπει να μετατρέψει τις συμβολοσειρές σε πιο αφηρημένες δομές όπως λέξεις, φράσεις, προτάσεις, εκφράσεις ή εντολές \pause
   \end{itemize}
 
@@ -174,7 +173,7 @@
  \begin{description}[font=$\bullet$\scshape\bfseries]
    \item[Κενή συμβολοσειρά `()' :] "Μην προσπαθήσεις να διαβάσεις τίποτα: απλά επίστρεψε επιτυχώς χωρίς να καταναλώσεις τίποτα από την είσοδο." \pause
 
-   \item[Τερματικό `$ \alpha$':] "Αν το επόμενο τερματικό στην είσοδο είναι $ \alpha $ τότε κατανάλωσε ένα τερματικό και επίστρεψε επιτυχώς. αλλιώς, απότυχε και μην καταναλώσεις τίποτα."\pause
+   \item[Τερματικό `$ \alpha$':] "Αν το επόμενο τερματικό στην είσοδο είναι $ \alpha $ τότε κατανάλωσε ένα τερματικό και επίστρεψε επιτυχώς. Αλλιώς, απότυχε και μην καταναλώσεις τίποτα."\pause
 
    \item[Μη Τερματικό `$ A $':] "Προσπάθησε να διαβάσεις την είσοδο με βάση τον κανόνα που αντιστοιχεί στο  $ A $ και επίστρεψε επιτυχώς ή απότυχε αντίστοιχα."
   \end{description}
@@ -235,10 +234,10 @@
 \begin{figure}
 	\begin{equation}
 		\begin{array}{l}
-			Additive \; \leftarrow \; Multitive \; \mlq + \mrq \; Additive \; | \; Multitive \\
-			Multitive \; \leftarrow \; Primary \; \mlq * \mrq \; Multitive \; | \; Primary \\
-			Primary \; \leftarrow \; \mlq ( \mrq \; Additive \; \mlq ) \mrq \; | \; Decimal \\
-			Decimal \; \leftarrow \; \mlq 0 \mrq \; | \; ... \; | \; \mlq 9 \mrq \; 
+		  \textcolor<3, 8, 10->{red}{Additive} \; \leftarrow \; Multitive \; \mlq \textcolor<10->{red}{+} \mrq \; Additive \; | \; Multitive \\
+			\textcolor<9, 7>{red}{Multitive} \; \leftarrow \; Primary \; \mlq * \mrq \; Multitive \; | \; Primary \\
+			\textcolor<6>{red}{Primary} \; \leftarrow \; \mlq ( \mrq \; Additive \; \mlq ) \mrq \; | \; Decimal \\
+			\textcolor<5>{red}{Decimal} \; \leftarrow \; \mlq 0 \mrq \; | \; ... \; | \; \mlq 9 \mrq \; 
 		\end{array}
 	\end{equation}
 \end{figure}
@@ -246,12 +245,12 @@
 \begin{longtable}{lllllllll}
     column & C1 & C2& C3& C4& C5& C6& C7& C8 \\
     \hline
-	Additive&  & & $\uparrow$& \textcolor<9->{red}{(7,C7)}& X& \textcolor<6->{orange}{(4,C7)}& X& X \\
-	Multitive& &  & \vdots & \textcolor<7->{orange}{(3,C5)}& X& \textcolor<5->{orange}{(4,C7)}& X& X \\
-	Primary &   & $\leftarrow$ \ldots & \circled{?}& (3,C5)& X& \textcolor<4->{orange}{(4,C7)}& X& X \\
-	Decimal &  & & X& (3,C5)& X& \textcolor<3->{orange}{(4,C7)}& X& X\\
+	Additive&  & & $\uparrow$& \textcolor<3, 11->{red}{(7,C7)}& \textcolor<9->{orange}{X}& \textcolor<8->{orange}{(4,C7)}& \textcolor<4->{orange}{X}& \textcolor<4->{orange}{X} \\
+	Multitive& &  & \vdots & \textcolor<9->{orange}{(3,C5)}& \textcolor<9->{orange}{X}& \textcolor<7->{orange}{(4,C7)}& \textcolor<4->{orange}{X}& \textcolor<4->{orange}{X} \\
+	Primary &   & $\leftarrow$ \ldots & \circled{?}& \textcolor<9->{orange}{(3,C5)}& \textcolor<9->{orange}{X}& \textcolor<6->{orange}{(4,C7)}& \textcolor<4->{orange}{X}& \textcolor<4->{orange}{X} \\
+	Decimal &  & & Χ& \textcolor<9->{orange}{(3,C5)}& \textcolor<9->{orange}{X}& \textcolor<5->{orange}{(4,C7)}& \textcolor<4->{orange}{X}& \textcolor<4->{orange}{X}\\
     \hline
-	Input String & '2'& '*' & '('& '3'& '\textcolor<8->{orange}{+}'& '4'& ')'& EOF\\
+	Input String & '2'& '*' & '('& '3'& '\textcolor<10->{red}{+}'& '4'& ')'& EOF\\
 	\\
 \end{longtable}
 
@@ -260,13 +259,14 @@
 \begin{frame}
   \frametitle{Υπομνηματισμός}
   \begin{itemize}
-	\item Δεν χρειάζεται να υπολογίζουμε όλα τα ενδιάμεσα αποτελέσματα
+	\item Δεν χρειάζεται να υπολογίσουμε όλα τα ενδιάμεσα κελιά
 	\item Ξεκινάμε με αναδρομή από το αρχικό σύμβολο στην αρχή της εισόδου και αποθηκεύουμε τα ενδιάμεσα αποτελέσματα που υπολογίζουμε (memoisation) \pause
+	\item Ακόμα και backtracking να γίνει κανένα κελί δεν θα χρειαστεί να ξαναυπολογιστεί $\rightarrow$ γραμμικός αλγόριθμος! \pause
   \end{itemize}
 
 \begin{figure}[h]
     \centering
-	\includegraphics[width=1.00\textwidth]{../transcript/pics/packrat_memo_example}
+	\includegraphics[width=0.85\textwidth]{../transcript/pics/packrat_memo_example}
 \end{figure}
 
 \end{frame}
@@ -327,7 +327,7 @@
 	\includegraphics[width=0.50\textwidth]{pics/ce}
 \end{figure} 
 \end{frame}
-
+\iffalse
 \section{Γεννήτορας συντακτικών αναλυτών packrat}
 
 \begin{frame}
@@ -401,14 +401,14 @@
 	\includegraphics[width=0.60\textwidth]{pics/generated_instance}
 \end{figure} 
 \end{frame}
-
+\fi
 \section{Packrat Parsing με ελαστικό κυλιόμενο παράθυρο}
 
 \begin{frame}
   \frametitle{Κίνητρο}
   \begin{itemize}
 	\item O αλγόριθμος packrat καταναλώνει χώρο $O(NT * n)$, $NT$ ο αριθμός των μη τερματικών, $n$ το μήκος της εισόδου \pause
-	\item Δεν ενδείκνυται για μεγάλα αρχεία εισόδου, καθώς ο πίνακας ενδιάμεσων αποτελεσμάτων για μεγάλο αρχείο εισόδου μπορεί να γίνει απαγορευτικά μεγάλος \pause
+	\item Δεν ενδείκνυται για μεγάλα αρχεία εισόδου, καθώς ο πίνακας ενδιάμεσων αποτελεσμάτων μπορεί να γίνει απαγορευτικά μεγάλος \pause
 	\item Χρειάζεται να τα κρατάμε όλα τα ενδιάμεσα αποτελέσματα? \pause
 	\item Θα μπορούσαμε να μειώσουμε τις στήλες του πίνακα? \pause
 	\item Τις γραμμές?
@@ -420,9 +420,9 @@
 
 	\begin{itemize}
 	  \item Το πόσες στήλες πραγματικά χρειαζόμαστε εξαρτάται από το μήκος της μέγιστης οπισθαναχώρησης (έστω $w$)
-	  \item Αν το γνωρίζαμε από πριν θα μπορούσαμε να έχουμε ένα παράθυρο που να "κυλάει" προς τα δεξιά ως προς την είσοδο
-	  \item $w = 1$: αλγόριθμος με backtracking, $w = n$: αλγόριθμος packrat
-	  \item Στην πράξη δεν ξέρουμε πόσο είναι, οπότε πρέπει να πειραματιστούμε
+	  \item Αν το γνωρίζαμε από πριν θα μπορούσαμε να έχουμε ένα παράθυρο που να "κυλάει" προς τα δεξιά ως προς την είσοδο \pause
+	  \item $w = 1$: αλγόριθμος με backtracking, $w = n$: αλγόριθμος packrat \pause
+	  \item Στην πράξη δεν ξέρουμε πόσο είναι, οπότε πρέπει να πειραματιστούμε \pause
 	\end{itemize}
 
 \begin{figure}[h]
@@ -436,7 +436,7 @@
 
 	\begin{itemize}
 	  \item Το πόσες γραμμές πραγματικά χρειαζόμαστε εξαρτάται από το πόσο αξιοποιούνται τα αποτελέσματα των μη τερματικών
-	  \item Θέτουμε ένα όριο $limit$
+	  \item Θέτουμε ένα κατώφλι απενεργοποίησης $limit$
 	  \item Αν μετά τις πρώτες $limit$ προσπελάσεις κελιών που αντιστοιχούν σε ένα μη τερματικό δεν αξιοποιήσουμε ούτε ένα αποτέλεσμα, σταματάμε να κρατάμε το μη τερματικό στον πίνακα
 	\end{itemize}
 
@@ -477,12 +477,13 @@
 \end{columns}
 
 	\begin{itemize}
-	  \item Το μειονέκτημα του hashing-based index είναι οι πιθανές συγκρούσεις (collisions) μεταξύ διαφορετικών κλειδιών, που όμως αντιστοιχίζονται στο ίδιο index \pause
-	  \item Στην πράξη δουλεύει καλά και οδηγεί σε απλή υλοποίηση 
+	  \item Μειονέκτημα του hashing-based index: πιθανές συγκρούσεις (collisions) μεταξύ διαφορετικών κλειδιών, που όμως αντιστοιχίζονται στο ίδιο index \pause 
+	  \item Xάνεται η εγγύηση γραμμικού χρόνου \pause
+	  \item Στην πράξη δουλεύει καλά και οδηγεί σε απλή υλοποίηση  \pause
 	  \item Όσο προχωράμε στην είσοδο, τα νέα κελιά "εκτοπίζουν" τα παλιά που προσομοιώνοντας απλά την "κύλιση" του παραθύρου
 	\end{itemize}
 \end{frame}
-\fi
+
 \section{Παράλληλο Packrat Parsing}
 
 \begin{frame}
@@ -500,7 +501,7 @@
 \begin{frame}
   \frametitle{Λεπτά σημεία}
   \begin{itemize}
-	\item Τα ενδιάμεσα αποτελέσματα πρέπει να προστατεύονται από ταυτόχρονη χρήση\pause
+	\item Τα κελιά με τα ενδιάμεσα αποτελέσματα πρέπει να προστατεύονται από ταυτόχρονη χρήση\pause
 	\item Αν το νήμα που ανέλυσε την $E_2$, επιστρέψει επιτυχώς, πρέπει πάλι να περιμένουμε το νήμα που αναλύει την $E_1$, καθώς η υποέκφραση αυτή έχει προτεραιότητα \pause
 	\item Αν το νήμα που ανέλυσε την $E_i$, επιστρέψει επιτυχώς, πρέπει τερματίσουμε τα νήματα που ανέλαβαν τις $E_{i+1}, \dots, E_n$ \pause
 	\item Aν υπάρχουν πολλές εναλλακτικές στην επιλογή, τότε ίσως να μην αξίζει να καλέσουμε πολλά νήματα, καθώς το overhead του fork-join θα είναι μεγάλο \pause
@@ -532,7 +533,7 @@
 
 \begin{figure}[h]
     \centering
-	\includegraphics[width=0.60\textwidth]{pics/hierarchy}
+	\includegraphics[width=0.75\textwidth]{pics/hierarchy}
 \end{figure} 
   \end{itemize}
 \end{frame}
@@ -585,7 +586,7 @@
 	  \begin{block}{Καλύτερος Συνδυασμός}
 		$w = 256, thres = 32$
 	  \end{block} \pause
-	\item Για τον παράλληλο δοκιμάζουμε όρια μήκους διατεταγμένης επιλογής $2, 4, 6, 8$ και και μέγιστο βάθος δέντρου $0, 1, 2$ \pause
+	\item Για τον παράλληλο δοκιμάζουμε όρια μήκους διατεταγμένης επιλογής $2, 4, 6, 8$ και και μέγιστο βάθος δέντρου $1, 2$ \pause
 	  \begin{block}{Καλύτερος Συνδυασμός}
 		$expr\_limit = 4, max\_depth = 1$. Δηλαδή 5 ενεργά νήματα κατά το μέγιστο.
 	  \end{block} 
@@ -623,7 +624,7 @@
 	\item H πράξη της διατεταγμένης επιλογής, παρόλο που θεωρητικά αφήνει χώρο για παράλληλη εκτέλεση, δεν συμπεριφέρεται τόσο καλά στην πράξη\pause
 	\item Οverhead από fork-join\pause
 	\item Ίσως πετυχαίνουν συχνά στη γραμματική μας οι πρώτες (αν όχι η πρώτη) επιλογή, οπότε μετά υπάρχει και ο επιπλέον χρόνος αναμονής νημάτων\pause
-	\item Ο περιοδικό έλεγχος για τερματισμό αυξάνει το χρόνο εκτέλεσης
+	\item Ο περιοδικός έλεγχος για τερματισμό αυξάνει το χρόνο εκτέλεσης
   \end{itemize}
 
 \end{frame}

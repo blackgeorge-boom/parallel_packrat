@@ -65,6 +65,9 @@
 \newcolumntype{a}{>{\columncolor{Gray}}c}
 \newcolumntype{b}{>{\columncolor{white}}c}
 
+\usepackage{todonotes}
+\newcommand\TODO[1]{\todo[inline, color=yellow]{TODO:\quad#1}}
+
 %%%
 %%%  The document
 %%%
@@ -75,7 +78,7 @@
 
 \frontmatter
 
-\title{Παράλληλη υλοποίηση συντακτικού αναλυτή Packrat}
+\title{Μελέτη και βελτίωση της επίδοσης του \mbox{συντακτικού αναλυτή Packrat}}
 \author{Νίκος Μαυρογεώργης}
 \authoren{Nikos Mavrogeorgis}
 \date{Ιούλιος 2020}
@@ -86,12 +89,12 @@
 
 \committeeone{Νικόλαος Σ. Παπασπύρου}
 \committeeonepos{Καθηγητής Ε.Μ.Π.}
-\committeetwo{Δημήτρη Φωτάκης}
+\committeetwo{Δημήτρης Φωτάκης}
 \committeetwopos{Αν. Καθηγητής Ε.Μ.Π.}
 \committeethree{Γεώργιος Γκούμας}
 \committeethreepos{Επικ. Καθηγητής Ε.Μ.Π.}
 
-\TRnumber{CSD-SW-TR-42-17}  % number-year, ask nickie for the number
+\TRnumber{CSD-SW-TR-1-20}
 \department{Τομέας Τεχνολογίας Πληροφορικής και Υπολογιστών}
 
 \maketitle
@@ -100,6 +103,23 @@
 %%%  Abstract, in Greek
 
 \begin{abstractgr}%
+  Πρακτικά όλες οι γλώσσες, είτε φυσικές είτε γλώσσες μηχανής, 
+  βασίζονται στην έκφραση της πληροφορίας με γραμμικό τρόπο.
+  Συνήθως η αναπαράσταση γίνεται με τη μορφή μίας συμβολοσειράς, 
+  που είναι μια ακολουθία χαρακτήρων από ένα τυποποιημένο σύνολο.
+  Οποιαδήποτε εφαρμογή επεξεργασίας γλώσσας πρέπει να μετατρέψει τις συμβολοσειρές 
+  σε πιο αφηρημένες δομές όπως λέξεις, φράσεις, προτάσεις, εκφράσεις ή εντολές.
+  Συντακτική ανάλυση (parsing) είναι η διαδικασία που εξάγει χρήσιμη δομημένη 
+  πληροφορία από γραμμικό κείμενο.
+
+  Το packrat parsing είναι μία τεχνική συντακτικής ανάλυσης 
+  που βασίζεται στις \emph{parsing expression grammars (PEGs)}, μία παραλλαγή των γραμματικών χωρίς συμφραζόμενα.
+  Ένας packrat parser παρέχει την ισχύ και την απλότητα των καθοδικών συντακτικών αναλυτών, 
+  ωστόσο εγγυάται γραμμικό χρόνο εκτέλεσης.
+  Οποιαδήποτε γλώσσα που ορίζεται από μία $LL(k)$ ή $LR(k)$ γραμματική μπορεί να αναγνωριστεί 
+  από έναν packrat parser, καθώς και πολλές άλλες γλώσσες που οι συμβατικοί 
+  αλγόριθμοι γραμμικού χρόνου δεν υποστηρίζουν.
+
   Σκοπός της παρούσας εργασίας είναι αφενός η υλοποίηση ενός συντακτικού αναλυτή
   packrat στη κλασική του μορφή, αφετέρου η βελτίωση της επίδοσής του είτε
   τροποποιώντας τον αρχικό αλγόριθμο, είτε παραλληλοποιώντας τον ώστε να τρέξει
@@ -116,6 +136,20 @@
 %%%  Abstract, in English
 
 \begin{abstracten}%
+  Practically all languages, either natural or artificial languages, are based on expressing
+  information in a linear way.
+  Usually, this representation is a string, which is a sequence of characters from a fixed set.
+  Every language processing application must convert these strings into more abstract structures
+  like words, phrases, sentences, expressions or instructions.
+  Parsing is the process of extracting useful structured information from linear text.
+
+  Packrat parsing is a parsing technique based on \emph{parsing expression grammars (PEGs)},
+  a variation of context-free grammars. 
+  A packrat parser provides the power and flexibility of top-down parsing with backtracking 
+  and unlimited lookahead, but nevertheless guarantees linear parse time. 
+  Any language defined by an $LL(k)$ or $LR(k)$ grammar can be recognized by a packrat parser, 
+  in addition to many languages that conventional linear-time algorithms do not support.
+
   The purpose of this diploma dissertation is on one hand the implementation
   of a packrat parser in its original version, and on the other hand to improve
   its performance, either through modifications to the standard version of the algorithm,
@@ -139,7 +173,7 @@
 
 \begin{acknowledgementsen}
   I would like to thank all the people who supported my work and helped me get
-  results of better quality.  
+  results of better quality.
 \end{acknowledgementsen}
 
 
@@ -206,19 +240,19 @@ Primary    <- Identifier !LEFTARROW                             # Type 6
 # Lexical syntax
 
 Identifier <- IdentifierStart IdentifierRest* Spacing
-IdentifierStart <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 'g' / 'h' / 
-		   'i' / 'j' / 'k' / 'l' / 'm' / 'n' / 'o' / 'p' / 
-		   'q' / 'r' / 's' / 't' / 'u' / 'v' / 'w' / 'x' / 'y' / 'z' / 
-		   ᾽A' / 'B' / 'C' / 'D' / 'E' / 'F' / 'G' / 'H' / 
-		   'I' / 'J' / 'K' / 'L' / 'M' / 'N' / 'O' / 'P' / 
+IdentifierStart <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 'g' / 'h' /
+		   'i' / 'j' / 'k' / 'l' / 'm' / 'n' / 'o' / 'p' /
+		   'q' / 'r' / 's' / 't' / 'u' / 'v' / 'w' / 'x' / 'y' / 'z' /
+		   ᾽A' / 'B' / 'C' / 'D' / 'E' / 'F' / 'G' / 'H' /
+		   'I' / 'J' / 'K' / 'L' / 'M' / 'N' / 'O' / 'P' /
 		   'Q' / 'R' / 'S' / 'T' / 'U' / 'V' / 'W' / 'X' / 'Y' / 'Z' / '_'
 
-IdentifierRest <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 'g' / 'h' / 
-		  'i' / 'j' / 'k' / 'l' / 'm' / 'n' / 'o' / 'p' / 
-		  'q' / 'r' / 's' / 't' / 'u' / 'v' / 'w' / 'x' / 'y' / 'z' / 
-		  'A' / 'B' / 'C' / 'D' / 'E' / 'F' / 'G' / 'H' / 
-		  'I' / 'J' / 'K' / 'L' / 'M' / 'N' / 'O' / 'P' / 
-		  'Q' / 'R' / 'S' / 'T' / 'U' / 'V' / 'W' / 'X' / 'Y' / 'Z' / '_' / 
+IdentifierRest <- 'a' / 'b' / 'c' / 'd' / 'e' / 'f' / 'g' / 'h' /
+		  'i' / 'j' / 'k' / 'l' / 'm' / 'n' / 'o' / 'p' /
+		  'q' / 'r' / 's' / 't' / 'u' / 'v' / 'w' / 'x' / 'y' / 'z' /
+		  'A' / 'B' / 'C' / 'D' / 'E' / 'F' / 'G' / 'H' /
+		  'I' / 'J' / 'K' / 'L' / 'M' / 'N' / 'O' / 'P' /
+		  'Q' / 'R' / 'S' / 'T' / 'U' / 'V' / 'W' / 'X' / 'Y' / 'Z' / '_' /
 		  '0' / '1' / '2' / '3' / '4' / '5' / '6' / '7' / '8' / '9'
 
 Literal    <- "'" (!"'" Character)* "'" Spacing                 # Type 8
@@ -228,7 +262,7 @@ Character  <- ('\\' ('n' / 'r' / 't' / '\\' / "'" / '"' / UnicodeEscape)) / (!'\
 
 UnicodeEscape <- 'u' UnicodeElement UnicodeElement UnicodeElement UnicodeElement
 
-UnicodeElement <- '0' / '1' / '2'/ '3' / '4' / '5' / '6' / '7' / '8' / '9' / 
+UnicodeElement <- '0' / '1' / '2'/ '3' / '4' / '5' / '6' / '7' / '8' / '9' /
 		  'A' / 'B' / 'C' / 'D'/ 'E' / 'F' / 'a' / 'b' / 'c' / 'd'/ 'e' / 'f'
 
 
